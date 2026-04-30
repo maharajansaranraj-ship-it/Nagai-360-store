@@ -26,9 +26,7 @@
                 <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">Nagai 360</p>
                 <h1 class="text-2xl font-black">Admin Panel</h1>
             </div>
-            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                👑
-            </div>
+            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md text-xl">👑</div>
         </div>
         
         <div class="flex border-t border-white/10 pt-4">
@@ -40,28 +38,29 @@
     <main class="p-6">
 
         <div id="orders-section" class="space-y-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Recent Orders</h2>
-                <span id="order-count" class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[10px] font-bold">0</span>
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Incoming Orders</h2>
+                <span id="order-count" class="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black">0</span>
             </div>
+            
             <div id="admin-orders-list">
                 </div>
         </div>
 
         <div id="inventory-section" class="hidden">
-            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Create New Listing</h2>
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 px-2">Create New Listing</h2>
             
             <div class="glass-card">
                 <input type="text" id="p-name" placeholder="Product Name (e.g. Silk Saree)">
                 <input type="number" id="p-price" placeholder="Price (₹)">
                 <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
                 
-                <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-tighter">Multi-Image Links (Enter 3 links)</p>
-                <input type="text" id="img1" placeholder="Image URL 1 (Main)">
-                <input type="text" id="img2" placeholder="Image URL 2">
-                <input type="text" id="img3" placeholder="Image URL 3">
+                <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest ml-1">Image Links</p>
+                <input type="text" id="img1" placeholder="Main Image URL">
+                <input type="text" id="img2" placeholder="Image URL 2 (Optional)">
+                <input type="text" id="img3" placeholder="Image URL 3 (Optional)">
 
-                <button onclick="uploadProduct()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-[2rem] shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs">
+                <button onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs mt-4">
                     Publish Product
                 </button>
             </div>
@@ -70,7 +69,7 @@
     </main>
 
     <script>
-        // ✅ 1. Firebase Setup
+        // ✅ 1. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -83,7 +82,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ✅ 2. Tab Switching Logic
+        // ✅ 2. Tab Logic
         function showTab(tab) {
             if(tab === 'orders') {
                 document.getElementById('orders-section').classList.remove('hidden');
@@ -98,7 +97,7 @@
             }
         }
 
-        // ✅ 3. Fetch Orders Real-time
+        // ✅ 3. Fetch Orders WITH Image
         db.ref('orders').on('value', (snapshot) => {
             const list = document.getElementById('admin-orders-list');
             const data = snapshot.val();
@@ -113,37 +112,49 @@
                     list.innerHTML += `
                         <div class="glass-card">
                             <div class="flex justify-between items-center mb-4">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: #${order.orderID}</span>
-                                <select onchange="updateStatus('${id}', this.value)" class="text-[10px] font-bold bg-orange-50 text-orange-600 px-3 py-1 rounded-full outline-none">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">#${order.orderID}</span>
+                                <select onchange="updateStatus('${id}', this.value)" class="text-[10px] font-bold bg-orange-50 text-orange-600 px-3 py-1 rounded-full outline-none border-none">
                                     <option ${order.status === 'Ordered' ? 'selected' : ''}>Ordered</option>
                                     <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
                                     <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                                     <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                                 </select>
                             </div>
-                            <h3 class="font-bold text-slate-800">${order.customerName}</h3>
-                            <p class="text-xs text-slate-500 mb-4">${order.fullAddress} - ${order.pincode}</p>
+
+                            <div class="flex gap-4 mb-4 bg-slate-50 p-3 rounded-[1.5rem]">
+                                <img src="${order.productImg || 'https://via.placeholder.com/100'}" class="w-20 h-24 object-cover rounded-xl shadow-sm bg-white">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-slate-800 text-sm">${order.customerName}</h3>
+                                    <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${order.paymentMode || 'COD'}</p>
+                                    <p class="text-[10px] text-slate-400 mt-2 line-clamp-2">${order.fullAddress}</p>
+                                </div>
+                            </div>
+
                             <div class="flex justify-between items-center border-t border-slate-50 pt-4">
-                                <p class="font-black text-slate-900 text-lg">₹${order.totalBill}</p>
-                                <a href="tel:${order.primaryPhone}" class="p-3 bg-slate-100 rounded-2xl text-slate-600 active:scale-90 transition-all">📞</a>
+                                <div>
+                                    <p class="text-[9px] text-slate-400 uppercase font-bold">Payable</p>
+                                    <p class="font-black text-slate-900 text-lg">₹${order.totalBill}</p>
+                                </div>
+                                <a href="tel:${order.primaryPhone}" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all text-sm shadow-lg">📞</a>
                             </div>
                         </div>
                     `;
                 });
+            } else {
+                list.innerHTML = "<div class='text-center py-20 text-slate-400 font-bold'>No orders yet!</div>";
             }
         });
 
-        // ✅ 4. Update Status Logic
+        // ✅ 4. Status Update
         function updateStatus(id, status) {
             db.ref('orders/' + id).update({ status: status });
-            // User-oda specific history-layum update pannanum (Checkout-la phone store panni irukkom)
             db.ref('orders/' + id).once('value', s => {
                 const phone = s.val().primaryPhone;
                 db.ref('users/' + phone + '/myOrders/' + id).update({ status: status });
             });
         }
 
-        // ✅ 5. Add Product Logic
+        // ✅ 5. Product Upload Logic
         function uploadProduct() {
             const name = document.getElementById('p-name').value;
             const price = document.getElementById('p-price').value;
@@ -152,9 +163,9 @@
                 document.getElementById('img1').value,
                 document.getElementById('img2').value,
                 document.getElementById('img3').value
-            ];
+            ].filter(url => url !== "");
 
-            if(!name || !price || !imgs[0]) return alert("Name, Price, and Main Image required!");
+            if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and Main Image!");
 
             const newPid = "P" + Date.now();
             db.ref('products/' + newPid).set({
