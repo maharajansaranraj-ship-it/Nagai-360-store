@@ -78,6 +78,11 @@
                     <span class="text-slate-400">Delivery & Tax</span>
                     <span class="text-orange-400 font-bold">+₹80</span>
                 </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Selected Size</span>
+                    <span id="bill-size" class="text-orange-500 font-black uppercase tracking-widest italic">---</span>
+                </div>
+
                 <div class="h-px bg-white/10 my-4"></div>
                 <div class="flex justify-between items-center">
                     <p class="text-[10px] font-bold text-slate-500 uppercase">Total Amount</p>
@@ -117,34 +122,43 @@
             const listDiv = document.getElementById('items-list');
             listDiv.innerHTML = "";
             subtotal = 0;
+            let finalSize = "";
 
             if(cartItems.length > 0) {
                 document.getElementById('product-preview-sec').classList.remove('hidden');
-                cartItems.forEach(item => {
+                cartItems.forEach((item, index) => {
                     subtotal += parseInt(item.price);
+                    const s = item.size || 'M';
+                    
+                    // Bill row-ku size eduthu vachikurom
+                    if(index === 0) finalSize = s;
+
                     listDiv.innerHTML += `
                         <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100">
                             <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
                             <div class="flex-1">
                                 <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${item.size || 'M'}</p>
+                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${s}</p>
                             </div>
                             <p class="text-xs font-black text-slate-800">₹${item.price}</p>
                         </div>`;
                 });
+
                 document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
                 document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
+                
+                // ✅ UPDATE SIZE IN PRICE SECTION
+                document.getElementById('bill-size').innerText = finalSize;
             }
         }
 
-        // 1. First check Cart
+        // Fetch items from Cart or Buy Now
         db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
             const data = snap.val();
             if(data) {
                 cartItems = Object.values(data);
                 updateUI();
             } else {
-                // 2. If cart empty, check "Buy Now" storage
                 const directItem = localStorage.getItem('checkout_item');
                 if(directItem) {
                     cartItems = [JSON.parse(directItem)];
