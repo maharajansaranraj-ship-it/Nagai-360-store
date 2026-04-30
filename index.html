@@ -78,7 +78,6 @@
             window.location.href = 'home.html';
         }
 
-        // Show/Hide Password Logic
         function togglePassword() {
             const passInput = document.getElementById('loginPassword');
             const eyeIcon = document.getElementById('eye-icon');
@@ -97,20 +96,25 @@
             const btn = document.getElementById('loginBtn');
 
             if(phone.length < 10 || pass.length < 4) {
-                alert("Please enter a valid 10-digit number and password (min 4 chars)!");
+                alert("Valid number (10 digits) & password (min 4) podunga bro!");
                 return;
             }
 
             btn.innerText = "PROCESSING...";
             btn.disabled = true;
 
-            db.ref('users/' + phone).once('value', (snap) => {
+            // Direct-ah node-ah check pannuvom
+            const userRef = db.ref('users/' + phone);
+
+            userRef.once('value', (snap) => {
                 const userData = snap.val();
 
                 if(userData) {
-                    // Password update logic for old accounts (fixes "Wrong Password" error)
+                    // Password update fix (Oru vela munnadi password save aagala-na, ippo update pannum)
                     if (!userData.password) {
-                        db.ref('users/' + phone).update({ password: pass }).then(() => success(phone));
+                        userRef.update({ password: pass })
+                            .then(() => success(phone))
+                            .catch(e => alert("Error: " + e.message));
                     } 
                     else if(userData.password === pass) {
                         success(phone);
@@ -120,16 +124,16 @@
                         btn.disabled = false;
                     }
                 } else {
-                    // Create new account
-                    db.ref('users/' + phone).set({
+                    // New user creation with password field
+                    userRef.set({
                         phone: phone,
-                        password: pass,
+                        password: pass, // <-- Inga thaan password save aagudhu
                         username: "Nagai User",
                         coins: 0,
                         joined: new Date().toLocaleString()
                     }).then(() => {
                         success(phone);
-                    });
+                    }).catch(e => alert("Database Error: " + e.message));
                 }
             });
         }
