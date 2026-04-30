@@ -20,8 +20,10 @@
 <body class="pb-40">
 
     <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-md z-[200] hidden flex flex-col items-center justify-center">
-        <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-slate-800 uppercase tracking-widest text-xs">Verifying Details...</p>
+        <div id="loader-content" class="flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="font-black text-slate-800 uppercase tracking-widest text-xs">Verifying Details...</p>
+        </div>
     </div>
 
     <header class="p-6 flex items-center gap-4 bg-white sticky top-0 z-50 shadow-sm">
@@ -104,14 +106,22 @@
         
         let selectedMethod = "UPI";
         let subtotal = 0;
+        let firstItemImg = ""; // To store the image for admin
         const rechargeFee = 80;
 
-        // Fetch Cart
+        // ✅ Fetch Cart and get Image
         db.ref('users/' + userPhone + '/cart').on('value', (snap) => {
             subtotal = 0;
             const data = snap.val();
             if(data) {
-                Object.values(data).forEach(item => subtotal += parseInt(item.price));
+                const items = Object.values(data);
+                items.forEach(item => subtotal += parseInt(item.price));
+                
+                // Get the image of the first item in cart
+                if(items.length > 0) {
+                    firstItemImg = items[0].img || items[0].image || "";
+                }
+
                 document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
                 document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
             }
@@ -136,10 +146,11 @@
 
             if(!name || !addr || !pin) return alert("Please fill all details!");
 
-            // Show Loading Animation
             document.getElementById('loading-overlay').classList.remove('hidden');
 
             const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
+            
+            // ✅ Added productImg here so Admin can see it
             const orderData = {
                 orderID: orderID,
                 customerName: name,
@@ -148,20 +159,20 @@
                 pincode: pin,
                 totalBill: (subtotal + rechargeFee),
                 paymentMode: selectedMethod,
+                productImg: firstItemImg, 
                 status: "Ordered",
                 orderDate: new Date().toLocaleString()
             };
 
-            // Simulate Network delay for loading feel
             setTimeout(() => {
                 db.ref('orders/' + orderID).set(orderData).then(() => {
                     db.ref('users/' + userPhone + '/myOrders/' + orderID).set(orderData);
                     db.ref('users/' + userPhone + '/cart').remove();
                     
-                    document.getElementById('loading-overlay').innerHTML = `
+                    document.getElementById('loader-content').innerHTML = `
                         <div class="text-6xl mb-4 animate-bounce">✅</div>
-                        <h2 class="text-xl font-black text-slate-800">ORDERED!</h2>
-                        <p class="text-slate-400 text-xs font-bold mt-2">Redirecting to profile...</p>
+                        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Ordered Successfully!</h2>
+                        <p class="text-slate-400 text-[10px] font-bold mt-2 uppercase tracking-widest">Checking your profile...</p>
                     `;
                     
                     setTimeout(() => {
