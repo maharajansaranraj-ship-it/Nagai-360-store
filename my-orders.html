@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nagai 360 | My Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #fdfdfd; }
+        .order-card { transition: all 0.3s ease; }
+        .status-badge { @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <header class="p-6 flex items-center gap-4 bg-white sticky top-0 z-50 shadow-sm">
+        <button onclick="window.location.href='profile.html'" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <h1 class="text-xl font-bold text-slate-800">My Orders</h1>
+    </header>
+
+    <main id="orders-container" class="p-6 space-y-6">
+        <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 opacity-50">
+            <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs font-bold mt-4 tracking-widest text-slate-400">FETCHING YOUR ORDERS...</p>
+        </div>
+    </main>
+
+    <script>
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+            authDomain: "ff-id-store-dab0f.firebaseapp.com",
+            projectId: "ff-id-store-dab0f",
+            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+            messagingSenderId: "655049193530",
+            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const userPhone = localStorage.getItem('user_phone');
+
+        if(userPhone) {
+            // ✅ Fetch orders from User's specific node
+            db.ref('users/' + userPhone + '/myOrders').on('value', (snapshot) => {
+                const container = document.getElementById('orders-container');
+                container.innerHTML = ""; // Clear loader
+                const orders = snapshot.val();
+
+                if(orders) {
+                    // Orders-a reverse order-la kaata (Newest first)
+                    const orderKeys = Object.keys(orders).reverse();
+                    
+                    orderKeys.forEach(id => {
+                        const order = orders[id];
+                        const statusClass = getStatusStyle(order.status);
+                        
+                        container.innerHTML += `
+                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
+                                        <h3 class="font-black text-slate-800">#${order.orderID}</h3>
+                                    </div>
+                                    <span class="status-badge ${statusClass}">${order.status || 'Processing'}</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-4 py-4 border-y border-slate-50">
+                                    <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 font-bold">
+                                        📦
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-600">${order.customerName}</p>
+                                        <p class="text-[10px] text-slate-400 font-medium">${order.orderDate}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex justify-between items-center">
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">COD Payment</p>
+                                    <button onclick="alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-20">
+                            <p class="text-slate-300 font-bold text-sm">No orders found yet!</p>
+                            <button onclick="window.location.href='home.html'" class="mt-4 text-orange-500 font-bold text-xs uppercase tracking-widest">Start Shopping</button>
+                        </div>
+                    `;
+                }
+            });
+        } else {
+            window.location.href = 'index.html';
+        }
+
+        // Status-ku thagundha maadhiri color change panna logic
+        function getStatusStyle(status) {
+            switch(status?.toLowerCase()) {
+                case 'delivered': return 'bg-green-100 text-green-600';
+                case 'shipped': return 'bg-blue-100 text-blue-600';
+                case 'order placed': return 'bg-orange-100 text-orange-600';
+                default: return 'bg-slate-100 text-slate-600';
+            }
+        }
+    </script>
+</body>
+</html>
