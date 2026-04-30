@@ -19,6 +19,15 @@
         .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3rem; border-bottom-right-radius: 3rem; }
         .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
         .slider-item { min-width: 100%; height: 50vh; object-fit: cover; }
+        /* Horizontal scrollbar-ah hide panna */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
     </style>
 </head>
 <body class="pb-32">
@@ -79,6 +88,12 @@
             Buy Now
         </button>
     </div>
+    <div class="mt-10 mb-10">
+    <h3 class="text-lg font-bold px-6 mb-4 text-slate-800">Related Products</h3>
+    <div id="related-list" class="flex overflow-x-auto gap-4 px-6 no-scrollbar pb-4">
+        </div>
+</div>
+
 
     <script>
         const firebaseConfig = {
@@ -110,6 +125,36 @@
                     document.getElementById('product-name').innerText = data.name;
                     document.getElementById('product-price').innerText = "₹" + data.price;
                     document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
+                    // Step 2 logic:
+const currentCategory = data.category; // Main product-oda category
+const currentProductId = productId; // Current page-la ulla product ID
+
+db.ref('products')
+  .orderByChild('category')
+  .equalTo(currentCategory)
+  .once('value', (relatedSnap) => {
+      const items = relatedSnap.val();
+      let listHtml = "";
+
+      if(items) {
+          Object.keys(items).forEach(id => {
+              // Current product-e list-la thirumba vara koodadhu
+              if (id !== currentProductId) {
+                  const p = items[id];
+                  listHtml += `
+                    <div class="min-w-[160px] bg-white rounded-[2rem] p-3 shadow-sm border border-slate-50 flex-shrink-0" onclick="location.href='product-details.html?id=${id}'">
+                        <img src="${p.images[0]}" class="w-full h-32 object-cover rounded-2xl mb-3 shadow-inner">
+                        <h4 class="text-[11px] font-bold text-slate-700 truncate px-1">${p.name}</h4>
+                        <div class="flex justify-between items-center mt-1 px-1">
+                            <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
+                        </div>
+                    </div>`;
+              }
+          });
+          document.getElementById('related-list').innerHTML = listHtml;
+      }
+  });
+
                     
                     // ✅ LOAD SIZES FROM FIREBASE
                     const sizeCont = document.getElementById('size-container');
