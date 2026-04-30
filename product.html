@@ -14,46 +14,46 @@
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; overflow-x: hidden; }
         .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
         
-        /* Slider Logic */
-        .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3.5rem; border-bottom-right-radius: 3.5rem; }
-        .slider-container { display: flex; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: grab; }
-        .slider-item { min-width: 100%; height: 55vh; object-fit: cover; pointer-events: none; }
+        /* Header Gradient for Visibility */
+        .header-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%); }
+        
+        /* Smooth Slider */
+        .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3rem; border-bottom-right-radius: 3rem; }
+        .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
+        .slider-item { min-width: 100%; height: 50vh; object-fit: cover; }
     </style>
 </head>
 <body class="pb-32">
 
-    <header class="p-5 flex justify-between items-center fixed top-0 w-full z-50">
-        <button onclick="history.back()" class="bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-white/20 active:scale-90 transition-all">
+    <header class="p-5 flex justify-between items-center fixed top-0 w-full z-50 header-overlay">
+        <button onclick="history.back()" class="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-lg active:scale-90 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <button id="wishlist-btn" onclick="toggleWishlist()" class="bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-white/20 active:scale-90 transition-all">
+        <button id="wishlist-btn" onclick="toggleWishlist()" class="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-lg active:scale-90 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" id="heart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
         </button>
     </header>
 
-    <div class="slider-wrapper shadow-xl bg-slate-100">
+    <div class="slider-wrapper shadow-2xl bg-slate-100">
         <div id="imageSlider" class="slider-container">
             </div>
         <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"></div>
     </div>
 
-    <div class="px-8 pt-8">
+    <div class="px-8 pt-6">
         <div class="flex justify-between items-start mb-2">
             <div>
-                <h1 id="product-name" class="text-2xl font-bold text-slate-800 tracking-tight">Loading...</h1>
+                <h1 id="product-name" class="text-2xl font-bold text-slate-800 tracking-tight leading-tight">Loading...</h1>
                 <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-[0.2em] font-black">Nagai 360 Premium</p>
             </div>
             <div class="text-right">
                 <span id="product-price" class="text-2xl font-black text-orange-500">₹...</span>
-                <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md mt-1">Free Delivery</p>
+                <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md mt-1 italic">Free Delivery</p>
             </div>
         </div>
 
         <div class="mt-8">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Select Size</h3>
-                <button class="text-[10px] font-bold text-slate-400 underline uppercase">Size Guide</button>
-            </div>
+            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Select Size</h3>
             <div class="flex gap-4">
                 <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
                 <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
@@ -79,11 +79,11 @@
         </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl p-6 border-t border-slate-100 flex gap-4 z-[100]">
-        <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] flex items-center justify-center gap-3 transition-all active:scale-95 text-xs tracking-widest">
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl p-6 border-t border-slate-100 flex gap-4 z-[100]">
+        <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] transition-all active:scale-95 text-xs tracking-widest">
             ADD TO CART
         </button>
-        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl transition-all active:scale-95 text-xs tracking-widest uppercase">
+        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-200 transition-all active:scale-95 text-xs tracking-widest uppercase">
             Buy Now
         </button>
     </div>
@@ -136,37 +136,36 @@
             });
         }
 
-        // ✅ Swipe Logic
+        // ✅ CONTINUOUS SWIPE LOGIC
         function setupTouchSlider(imgCount) {
             const slider = document.getElementById('imageSlider');
             const dots = document.getElementById('sliderDots').children;
 
-            slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; });
+            slider.addEventListener('touchstart', (e) => { 
+                startX = e.touches[0].clientX; 
+            }, {passive: true});
 
             slider.addEventListener('touchend', (e) => {
                 const endX = e.changedTouches[0].clientX;
                 const diff = startX - endX;
 
-                if (Math.abs(diff) > 50) { // Swipe sensitivity
+                if (Math.abs(diff) > 40) { 
                     if (diff > 0 && currentIdx < imgCount - 1) {
-                        currentIdx++; // Swipe Left -> Next
+                        currentIdx++; 
                     } else if (diff < 0 && currentIdx > 0) {
-                        currentIdx--; // Swipe Right -> Prev
+                        currentIdx--; 
                     }
-                    updateSliderUI(slider, dots);
+                    // Update UI
+                    slider.style.transform = `translateX(-${currentIdx * 100}%)`;
+                    for (let i = 0; i < dots.length; i++) {
+                        dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+                    }
                 }
-            });
-        }
-
-        function updateSliderUI(slider, dots) {
-            slider.style.transform = `translateX(-${currentIdx * 100}%)`;
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-            }
+            }, {passive: true});
         }
 
         function selectSize(btn) {
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active-size'));
+            document.querySelectorAll('.w-14').forEach(b => b.classList.remove('active-size'));
             btn.classList.add('active-size');
             selectedSize = btn.innerText;
         }
@@ -180,6 +179,7 @@
         }
 
         function buyNow() {
+            if(!productData) return;
             localStorage.setItem('checkout_item', JSON.stringify({
                 pid: productId, name: productData.name, price: productData.price,
                 img: productData.images[0], size: selectedSize
