@@ -11,10 +11,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #ffffff; }
+        body { font-family: 'Outfit', sans-serif; background-color: #ffffff; overflow-x: hidden; }
         .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
-        .slider-container { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .slider-item { min-width: 100%; height: 55vh; object-fit: cover; }
+        
+        /* Slider Logic */
+        .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3.5rem; border-bottom-right-radius: 3.5rem; }
+        .slider-container { display: flex; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: grab; }
+        .slider-item { min-width: 100%; height: 55vh; object-fit: cover; pointer-events: none; }
     </style>
 </head>
 <body class="pb-32">
@@ -28,7 +31,7 @@
         </button>
     </header>
 
-    <div class="relative overflow-hidden rounded-b-[3.5rem] shadow-xl bg-slate-100">
+    <div class="slider-wrapper shadow-xl bg-slate-100">
         <div id="imageSlider" class="slider-container">
             </div>
         <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"></div>
@@ -49,7 +52,7 @@
         <div class="mt-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Select Size</h3>
-                <button class="text-[10px] font-bold text-slate-400 underline">SIZE GUIDE</button>
+                <button class="text-[10px] font-bold text-slate-400 underline uppercase">Size Guide</button>
             </div>
             <div class="flex gap-4">
                 <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
@@ -104,8 +107,9 @@
         
         let selectedSize = "M";
         let productData = null;
+        let currentIdx = 0;
+        let startX = 0;
 
-        // ✅ FETCH PRODUCT DATA DYNAMICALLY
         if(productId) {
             db.ref('products/' + productId).once('value', (snapshot) => {
                 const data = snapshot.val();
@@ -115,7 +119,6 @@
                     document.getElementById('product-price').innerText = "₹" + data.price;
                     document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
                     
-                    // Setup Images
                     const slider = document.getElementById('imageSlider');
                     const dotsCont = document.getElementById('sliderDots');
                     slider.innerHTML = ""; 
@@ -128,24 +131,38 @@
                         dotsCont.appendChild(dot);
                     });
                     
-                    startSlider(data.images.length);
+                    setupTouchSlider(data.images.length);
                 }
             });
         }
 
-        // ✅ Slider Function
-        function startSlider(count) {
-            let current = 0;
+        // ✅ Swipe Logic
+        function setupTouchSlider(imgCount) {
             const slider = document.getElementById('imageSlider');
             const dots = document.getElementById('sliderDots').children;
-            
-            setInterval(() => {
-                current = (current + 1) % count;
-                slider.style.transform = `translateX(-${current * 100}%)`;
-                for (let i = 0; i < dots.length; i++) {
-                    dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === current ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+
+            slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; });
+
+            slider.addEventListener('touchend', (e) => {
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+
+                if (Math.abs(diff) > 50) { // Swipe sensitivity
+                    if (diff > 0 && currentIdx < imgCount - 1) {
+                        currentIdx++; // Swipe Left -> Next
+                    } else if (diff < 0 && currentIdx > 0) {
+                        currentIdx--; // Swipe Right -> Prev
+                    }
+                    updateSliderUI(slider, dots);
                 }
-            }, 3500);
+            });
+        }
+
+        function updateSliderUI(slider, dots) {
+            slider.style.transform = `translateX(-${currentIdx * 100}%)`;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+            }
         }
 
         function selectSize(btn) {
@@ -156,26 +173,16 @@
 
         function addToCart() {
             if(!userPhone) return alert("Please Login!");
-            if(!productData) return;
-
             db.ref('users/' + userPhone + '/cart/' + productId).set({
-                pid: productId,
-                name: productData.name,
-                price: productData.price,
-                img: productData.images[0],
-                size: selectedSize,
-                qty: 1
+                pid: productId, name: productData.name, price: productData.price,
+                img: productData.images[0], size: selectedSize, qty: 1
             }).then(() => alert("Added to bag! 🛍️"));
         }
 
         function buyNow() {
-            if(!productData) return;
             localStorage.setItem('checkout_item', JSON.stringify({
-                pid: productId,
-                name: productData.name,
-                price: productData.price,
-                img: productData.images[0],
-                size: selectedSize
+                pid: productId, name: productData.name, price: productData.price,
+                img: productData.images[0], size: selectedSize
             }));
             window.location.href = 'checkout.html';
         }
