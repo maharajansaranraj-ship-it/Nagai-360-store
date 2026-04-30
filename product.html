@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,75 +6,153 @@
     <title>Nagai 360 | Product Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; }
-        .active-size { border-color: #ff8c00; background-color: #fff7ed; color: #ff8c00; }
+        .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-32">
 
-    <header class="p-5 flex justify-between items-center absolute top-0 w-full z-10">
-        <button onclick="history.back()" class="bg-white/90 p-2 rounded-full shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    <header class="p-5 flex justify-between items-center fixed top-0 w-full z-50">
+        <button onclick="history.back()" class="bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-white/20 active:scale-90 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <button class="bg-white/90 p-2 rounded-full shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+        <button id="wishlist-btn" onclick="toggleWishlist()" class="bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-white/20 active:scale-90 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" id="heart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
         </button>
     </header>
 
-    <div class="h-[50vh] w-full relative">
-        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000" class="w-full h-full object-cover rounded-b-[3rem]">
+    <div class="h-[55vh] w-full relative">
+        <img id="product-img" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000" class="w-full h-full object-cover rounded-b-[3.5rem] shadow-xl">
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            <div class="w-2 h-2 bg-white rounded-full"></div>
+            <div class="w-2 h-2 bg-white/40 rounded-full"></div>
+            <div class="w-2 h-2 bg-white/40 rounded-full"></div>
+        </div>
     </div>
 
-    <div class="px-6 pt-8">
+    <div class="px-8 pt-8">
         <div class="flex justify-between items-start mb-2">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Summer Floral Dress</h1>
-                <p class="text-sm text-slate-400 mt-1 uppercase tracking-widest font-semibold">Nagai 360 Exclusive</p>
+                <h1 id="product-name" class="text-2xl font-bold text-slate-800 tracking-tight">Summer Floral Dress</h1>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-[0.2em] font-black">Nagai 360 Premium</p>
             </div>
             <div class="text-right">
-                <span class="text-2xl font-bold text-orange-500">₹899</span>
-                <p class="text-[10px] text-green-600 font-bold">FREE DELIVERY</p>
+                <span id="product-price" class="text-2xl font-black text-orange-500">₹899</span>
+                <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md">Free Delivery</p>
             </div>
         </div>
 
         <div class="mt-8">
-            <h3 class="font-bold text-slate-800 mb-4">Select Size</h3>
-            <div class="flex gap-3">
-                <button class="w-12 h-12 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all hover:border-orange-500">S</button>
-                <button class="w-12 h-12 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
-                <button class="w-12 h-12 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-600 hover:border-orange-500">L</button>
-                <button class="w-12 h-12 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-600 hover:border-orange-500">XL</button>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Select Size</h3>
+                <button class="text-[10px] font-bold text-slate-400 underline">SIZE GUIDE</button>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
+                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
+                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">L</button>
+                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">XL</button>
             </div>
         </div>
 
-        <div class="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-            <h3 class="text-sm font-bold text-blue-900 mb-2">Available Offers</h3>
-            <ul class="text-xs text-blue-700 space-y-2">
-                <li class="flex items-center gap-2">✅ GPay/PhonePe Available</li>
-                <li class="flex items-center gap-2">✅ Cash on Delivery (COD)</li>
-                <li class="flex items-center gap-2">✅ 7-Days Easy Exchange</li>
-            </ul>
+        <div class="mt-10">
+            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-3">Product Info</h3>
+            <p class="text-slate-500 text-sm leading-relaxed font-medium">
+                Our signature Summer Floral Dress features a breathable cotton blend, meticulously crafted for maximum comfort and style. Hand-picked patterns for the Nagai 360 summer collection.
+            </p>
         </div>
 
-        <div class="mt-8 mb-10">
-            <h3 class="font-bold text-slate-800 mb-2">About Product</h3>
-            <p class="text-slate-500 text-sm leading-relaxed">
-                Premium cotton fabric with beautiful floral prints. Perfect for summer outings and beach days. Light-weight and breathable material.
-            </p>
+        <div class="mt-8 p-6 bg-slate-900 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
+            <h3 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4">Store Privileges</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
+                    <span class="bg-white/10 p-1 rounded-md">📦</span> COD Available
+                </div>
+                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
+                    <span class="bg-white/10 p-1 rounded-md">🔄</span> 7 Days Return
+                </div>
+                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
+                    <span class="bg-white/10 p-1 rounded-md">✨</span> Premium Quality
+                </div>
+                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
+                    <span class="bg-white/10 p-1 rounded-md">💳</span> Secure Payment
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white p-5 border-t border-gray-100 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        <button class="flex-1 bg-slate-100 text-slate-800 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+    <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl p-6 border-t border-slate-100 flex gap-4 z-[100]">
+        <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] flex items-center justify-center gap-3 transition-all active:scale-95 text-xs tracking-widest">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             ADD TO CART
         </button>
-        <button class="flex-1 bg-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-95">
+        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-100 transition-all active:scale-95 text-xs tracking-widest">
             BUY NOW
         </button>
     </div>
 
+    <script>
+        // ✅ Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+            authDomain: "ff-id-store-dab0f.firebaseapp.com",
+            projectId: "ff-id-store-dab0f",
+            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+            messagingSenderId: "655049193530",
+            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const userPhone = localStorage.getItem('user_phone');
+        let selectedSize = "M";
+
+        function selectSize(btn) {
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active-size'));
+            btn.classList.add('active-size');
+            selectedSize = btn.innerText;
+        }
+
+        // ✅ Add to Cart Logic
+        function addToCart() {
+            if(!userPhone) return alert("Please login!");
+
+            const product = {
+                id: "p1", // Neenga URL parameter vechu change pannikalam
+                name: document.getElementById('product-name').innerText,
+                price: 899,
+                img: document.getElementById('product-img').src,
+                size: selectedSize,
+                addedAt: new Date().toISOString()
+            };
+
+            db.ref('users/' + userPhone + '/cart/p1').set(product).then(() => {
+                alert("Added to Cart! 🛒");
+            });
+        }
+
+        // ✅ Buy Now - Redirect to Checkout
+        function buyNow() {
+            // Price-a local storage-la save panni checkout-la display panna
+            localStorage.setItem('cart_total', 899); 
+            window.location.href = 'checkout.html';
+        }
+
+        // Wishlist Toggle
+        function toggleWishlist() {
+            const heart = document.getElementById('heart-icon');
+            heart.classList.toggle('text-red-500');
+            heart.setAttribute('fill', heart.classList.contains('text-red-500') ? 'currentColor' : 'none');
+        }
+    </script>
+
 </body>
 </html>
-
