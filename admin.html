@@ -12,64 +12,57 @@
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; }
-        .glass-card { @apply bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm mb-6; }
-        .tab-btn { @apply flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all; }
-        .active-tab { @apply text-orange-500 border-b-2 border-orange-500; }
-        input, textarea { @apply w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-sm; }
+        .glass-card { @apply bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm mb-4; }
+        .tab-btn { @apply flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 border-transparent text-slate-400; }
+        .active-tab { @apply text-orange-500 border-orange-500 bg-orange-50/50; }
+        input, textarea { @apply w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 mb-3 text-sm; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24">
 
-    <header class="p-8 bg-slate-900 text-white rounded-b-[3rem] shadow-2xl sticky top-0 z-50">
-        <div class="flex justify-between items-center mb-6">
+    <header class="bg-slate-900 text-white pt-8 shadow-2xl sticky top-0 z-50">
+        <div class="px-8 flex justify-between items-center mb-6">
             <div>
                 <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">Nagai 360</p>
-                <h1 class="text-2xl font-black">Admin Panel</h1>
+                <h1 class="text-2xl font-black">Control Room</h1>
             </div>
             <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md text-xl">👑</div>
         </div>
         
-        <div class="flex border-t border-white/10 pt-4">
+        <div class="flex">
             <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
-            <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Add Product</button>
+            <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Inventory</button>
+            <button onclick="showTab('add')" id="add-tab" class="tab-btn">Add New</button>
         </div>
     </header>
 
     <main class="p-6">
+        <div id="orders-section" class="space-y-4">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Orders</h2>
+            <div id="admin-orders-list"></div>
+        </div>
 
-        <div id="orders-section" class="space-y-6">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Incoming Orders</h2>
-                <span id="order-count" class="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black">0</span>
-            </div>
-            
-            <div id="admin-orders-list">
+        <div id="inventory-section" class="hidden space-y-4">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
+            <div id="admin-product-list" class="grid grid-cols-1 gap-4">
                 </div>
         </div>
 
-        <div id="inventory-section" class="hidden">
-            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 px-2">Create New Listing</h2>
-            
+        <div id="add-section" class="hidden">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 px-2">New Listing</h2>
             <div class="glass-card">
-                <input type="text" id="p-name" placeholder="Product Name (e.g. Silk Saree)">
+                <input type="text" id="p-name" placeholder="Product Name">
                 <input type="number" id="p-price" placeholder="Price (₹)">
                 <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
-                
-                <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest ml-1">Image Links</p>
                 <input type="text" id="img1" placeholder="Main Image URL">
-                <input type="text" id="img2" placeholder="Image URL 2 (Optional)">
-                <input type="text" id="img3" placeholder="Image URL 3 (Optional)">
-
-                <button onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs mt-4">
-                    Publish Product
+                <button onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 transition-all uppercase tracking-widest text-xs mt-2">
+                    Publish to Website
                 </button>
             </div>
         </div>
-
     </main>
 
     <script>
-        // ✅ 1. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -82,103 +75,96 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ✅ 2. Tab Logic
         function showTab(tab) {
-            if(tab === 'orders') {
-                document.getElementById('orders-section').classList.remove('hidden');
-                document.getElementById('inventory-section').classList.add('hidden');
-                document.getElementById('orders-tab').classList.add('active-tab');
-                document.getElementById('inventory-tab').classList.remove('active-tab');
-            } else {
-                document.getElementById('orders-section').classList.add('hidden');
-                document.getElementById('inventory-section').classList.remove('hidden');
-                document.getElementById('inventory-tab').classList.add('active-tab');
-                document.getElementById('orders-tab').classList.remove('active-tab');
-            }
+            ['orders', 'inventory', 'add'].forEach(t => {
+                document.getElementById(t + '-section').classList.add('hidden');
+                document.getElementById(t + '-tab').classList.remove('active-tab');
+            });
+            document.getElementById(tab + '-section').classList.remove('hidden');
+            document.getElementById(tab + '-tab').classList.add('active-tab');
         }
 
-        // ✅ 3. Fetch Orders WITH Image
-        db.ref('orders').on('value', (snapshot) => {
+        // ✅ FETCH ORDERS
+        db.ref('orders').on('value', (snap) => {
             const list = document.getElementById('admin-orders-list');
-            const data = snapshot.val();
             list.innerHTML = "";
-            
-            if(data) {
-                const keys = Object.keys(data).reverse();
-                document.getElementById('order-count').innerText = keys.length;
-
-                keys.forEach(id => {
-                    const order = data[id];
+            if(snap.val()) {
+                Object.keys(snap.val()).reverse().forEach(id => {
+                    const order = snap.val()[id];
                     list.innerHTML += `
                         <div class="glass-card">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">#${order.orderID}</span>
-                                <select onchange="updateStatus('${id}', this.value)" class="text-[10px] font-bold bg-orange-50 text-orange-600 px-3 py-1 rounded-full outline-none border-none">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-[9px] font-bold text-slate-400">#${order.orderID}</p>
+                                    <h3 class="font-bold text-slate-800">${order.customerName}</h3>
+                                </div>
+                                <select onchange="updateStatus('${id}', this.value)" class="text-[9px] font-bold bg-orange-50 text-orange-600 p-2 rounded-xl border-none">
                                     <option ${order.status === 'Ordered' ? 'selected' : ''}>Ordered</option>
-                                    <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                    <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                                     <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                                 </select>
                             </div>
-
-                            <div class="flex gap-4 mb-4 bg-slate-50 p-3 rounded-[1.5rem]">
-                                <img src="${order.productImg || 'https://via.placeholder.com/100'}" class="w-20 h-24 object-cover rounded-xl shadow-sm bg-white">
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-slate-800 text-sm">${order.customerName}</h3>
-                                    <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${order.paymentMode || 'COD'}</p>
-                                    <p class="text-[10px] text-slate-400 mt-2 line-clamp-2">${order.fullAddress}</p>
-                                </div>
+                            <div class="flex gap-3 bg-slate-50 p-2 rounded-2xl mb-3">
+                                <img src="${order.productImg}" class="w-12 h-12 object-cover rounded-lg">
+                                <p class="text-[10px] text-slate-500">${order.fullAddress}</p>
                             </div>
-
-                            <div class="flex justify-between items-center border-t border-slate-50 pt-4">
-                                <div>
-                                    <p class="text-[9px] text-slate-400 uppercase font-bold">Payable</p>
-                                    <p class="font-black text-slate-900 text-lg">₹${order.totalBill}</p>
-                                </div>
-                                <a href="tel:${order.primaryPhone}" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all text-sm shadow-lg">📞</a>
+                            <div class="flex justify-between items-center">
+                                <span class="font-black text-lg">₹${order.totalBill}</span>
+                                <a href="tel:${order.primaryPhone}" class="p-2 bg-slate-900 text-white rounded-xl text-xs">Call Now</a>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-            } else {
-                list.innerHTML = "<div class='text-center py-20 text-slate-400 font-bold'>No orders yet!</div>";
             }
         });
 
-        // ✅ 4. Status Update
-        function updateStatus(id, status) {
-            db.ref('orders/' + id).update({ status: status });
-            db.ref('orders/' + id).once('value', s => {
-                const phone = s.val().primaryPhone;
-                db.ref('users/' + phone + '/myOrders/' + id).update({ status: status });
-            });
+        // ✅ FETCH PRODUCTS (Inventory Management)
+        db.ref('products').on('value', (snap) => {
+            const list = document.getElementById('admin-product-list');
+            list.innerHTML = "";
+            const data = snap.val();
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    const p = data[id];
+                    list.innerHTML += `
+                        <div class="glass-card flex gap-4 items-center">
+                            <img src="${p.images[0]}" class="w-16 h-16 object-cover rounded-2xl">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-slate-800 text-sm">${p.name}</h4>
+                                <p class="text-orange-500 font-black text-xs">₹${p.price}</p>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="toggleSoldOut('${id}', ${p.isSoldOut || false})" class="text-[8px] font-bold px-3 py-2 rounded-lg ${p.isSoldOut ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+                                    ${p.isSoldOut ? 'SOLD OUT' : 'IN STOCK'}
+                                </button>
+                                <button onclick="deleteProduct('${id}')" class="text-[8px] font-bold bg-slate-100 text-slate-400 px-3 py-2 rounded-lg">DELETE</button>
+                            </div>
+                        </div>`;
+                });
+            }
+        });
+
+        function updateStatus(id, s) { db.ref('orders/'+id).update({status: s}); }
+
+        function toggleSoldOut(id, currentStatus) {
+            db.ref('products/' + id).update({ isSoldOut: !currentStatus });
         }
 
-        // ✅ 5. Product Upload Logic
+        function deleteProduct(id) {
+            if(confirm("Are you sure you want to remove this product?")) {
+                db.ref('products/' + id).remove();
+            }
+        }
+
         function uploadProduct() {
             const name = document.getElementById('p-name').value;
             const price = document.getElementById('p-price').value;
-            const desc = document.getElementById('p-desc').value;
-            const imgs = [
-                document.getElementById('img1').value,
-                document.getElementById('img2').value,
-                document.getElementById('img3').value
-            ].filter(url => url !== "");
+            const img = document.getElementById('img1').value;
+            if(!name || !price || !img) return alert("Details missing!");
 
-            if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and Main Image!");
-
-            const newPid = "P" + Date.now();
-            db.ref('products/' + newPid).set({
-                pid: newPid,
-                name: name,
-                price: price,
-                desc: desc,
-                images: imgs,
-                category: "General"
-            }).then(() => {
-                alert("Product Published! 🚀");
-                location.reload();
-            });
+            const pid = "P" + Date.now();
+            db.ref('products/' + pid).set({
+                pid: pid, name: name, price: price, 
+                images: [img], isSoldOut: false
+            }).then(() => { alert("Published!"); showTab('inventory'); });
         }
     </script>
 </body>
