@@ -12,12 +12,10 @@
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; overflow-x: hidden; }
-        .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
+        .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; transform: scale(1.05); }
         
-        /* Header Gradient for Visibility */
         .header-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%); }
         
-        /* Smooth Slider */
         .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3rem; border-bottom-right-radius: 3rem; }
         .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
         .slider-item { min-width: 100%; height: 50vh; object-fit: cover; }
@@ -35,8 +33,7 @@
     </header>
 
     <div class="slider-wrapper shadow-2xl bg-slate-100">
-        <div id="imageSlider" class="slider-container">
-            </div>
+        <div id="imageSlider" class="slider-container"></div>
         <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"></div>
     </div>
 
@@ -54,11 +51,11 @@
 
         <div class="mt-8">
             <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Select Size</h3>
-            <div class="flex gap-4">
-                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
-                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
-                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">L</button>
-                <button onclick="selectSize(this)" class="w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">XL</button>
+            <div class="flex gap-4" id="size-container">
+                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
+                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
+                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">L</button>
+                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">XL</button>
             </div>
         </div>
 
@@ -105,7 +102,7 @@
         const productId = urlParams.get('id');
         const userPhone = localStorage.getItem('user_phone');
         
-        let selectedSize = "M";
+        let selectedSize = "M"; // Default Size
         let productData = null;
         let currentIdx = 0;
         let startX = 0;
@@ -122,12 +119,11 @@
                     const slider = document.getElementById('imageSlider');
                     const dotsCont = document.getElementById('sliderDots');
                     slider.innerHTML = ""; 
-                    dotsCont.innerHTML = "";
 
                     data.images.forEach((imgUrl, index) => {
                         slider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
                         const dot = document.createElement('div');
-                        dot.className = `w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40'}`;
+                        dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
                         dotsCont.appendChild(dot);
                     });
                     
@@ -136,26 +132,18 @@
             });
         }
 
-        // ✅ CONTINUOUS SWIPE LOGIC
         function setupTouchSlider(imgCount) {
             const slider = document.getElementById('imageSlider');
             const dots = document.getElementById('sliderDots').children;
 
-            slider.addEventListener('touchstart', (e) => { 
-                startX = e.touches[0].clientX; 
-            }, {passive: true});
-
+            slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive: true});
             slider.addEventListener('touchend', (e) => {
                 const endX = e.changedTouches[0].clientX;
                 const diff = startX - endX;
-
                 if (Math.abs(diff) > 40) { 
-                    if (diff > 0 && currentIdx < imgCount - 1) {
-                        currentIdx++; 
-                    } else if (diff < 0 && currentIdx > 0) {
-                        currentIdx--; 
-                    }
-                    // Update UI
+                    if (diff > 0 && currentIdx < imgCount - 1) currentIdx++; 
+                    else if (diff < 0 && currentIdx > 0) currentIdx--; 
+                    
                     slider.style.transform = `translateX(-${currentIdx * 100}%)`;
                     for (let i = 0; i < dots.length; i++) {
                         dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
@@ -164,25 +152,40 @@
             }, {passive: true});
         }
 
+        // ✅ FIXED SIZE SELECTION
         function selectSize(btn) {
-            document.querySelectorAll('.w-14').forEach(b => b.classList.remove('active-size'));
+            // Remove active class from all size buttons
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.remove('active-size');
+            });
+            // Add active class to clicked button
             btn.classList.add('active-size');
-            selectedSize = btn.innerText;
+            // Update the variable
+            selectedSize = btn.innerText.trim();
         }
 
         function addToCart() {
             if(!userPhone) return alert("Please Login!");
+            if(!productData) return;
+
             db.ref('users/' + userPhone + '/cart/' + productId).set({
-                pid: productId, name: productData.name, price: productData.price,
-                img: productData.images[0], size: selectedSize, qty: 1
+                pid: productId, 
+                name: productData.name, 
+                price: productData.price,
+                img: productData.images[0], 
+                size: selectedSize, 
+                qty: 1
             }).then(() => alert("Added to bag! 🛍️"));
         }
 
         function buyNow() {
             if(!productData) return;
             localStorage.setItem('checkout_item', JSON.stringify({
-                pid: productId, name: productData.name, price: productData.price,
-                img: productData.images[0], size: selectedSize
+                pid: productId, 
+                name: productData.name, 
+                price: productData.price,
+                img: productData.images[0], 
+                size: selectedSize
             }));
             window.location.href = 'checkout.html';
         }
