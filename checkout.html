@@ -34,7 +34,6 @@
     </header>
 
     <main class="p-6 space-y-8">
-        
         <section>
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Shipping Details</h2>
             <input type="text" id="cust-name" placeholder="Full Name" class="input-box">
@@ -55,29 +54,28 @@
             <div class="space-y-3">
                 <div onclick="selectPayment('UPI', this)" class="pay-card selected-pay">
                     <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">📱</div>
-                    <div class="flex-1"><p class="font-bold text-slate-800 text-sm">GPay / PhonePe / UPI</p></div>
+                    <div class="flex-1 text-sm font-bold text-slate-800">GPay / PhonePe / UPI</div>
                     <div class="radio-circle w-5 h-5 border-2 border-orange-500 rounded-full flex items-center justify-center">
                         <div class="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>
                     </div>
                 </div>
                 <div onclick="selectPayment('COD', this)" class="pay-card">
                     <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">💵</div>
-                    <div class="flex-1"><p class="font-bold text-slate-800 text-sm">Cash on Delivery</p></div>
+                    <div class="flex-1 text-sm font-bold text-slate-800">Cash on Delivery</div>
                     <div class="radio-circle w-5 h-5 border-2 border-slate-200 rounded-full"></div>
                 </div>
             </div>
         </section>
 
         <section class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
             <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Price Details</h2>
             <div class="space-y-4">
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-400 font-medium">Items Total</span>
+                    <span class="text-slate-400">Items Total</span>
                     <span id="bill-subtotal" class="font-bold">₹0</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-400 font-medium">Delivery & Tax</span>
+                    <span class="text-slate-400">Delivery & Tax</span>
                     <span class="text-orange-400 font-bold">+₹80</span>
                 </div>
                 <div class="h-px bg-white/10 my-4"></div>
@@ -115,47 +113,50 @@
         let cartItems = []; 
         const rechargeFee = 80;
 
-        // ✅ FETCH CART DATA
-        db.ref('users/' + userPhone + '/cart').on('value', (snap) => {
-            const data = snap.val();
+        function updateUI() {
             const listDiv = document.getElementById('items-list');
             listDiv.innerHTML = "";
             subtotal = 0;
-            cartItems = [];
 
-            if(data) {
+            if(cartItems.length > 0) {
                 document.getElementById('product-preview-sec').classList.remove('hidden');
-                Object.keys(data).forEach(id => {
-                    const item = data[id];
-                    cartItems.push(item);
+                cartItems.forEach(item => {
                     subtotal += parseInt(item.price);
-
                     listDiv.innerHTML += `
                         <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100">
-                            <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl shadow-sm">
+                            <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
                             <div class="flex-1">
                                 <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                                <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest">Size: ${item.size || 'N/A'}</p>
+                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${item.size || 'M'}</p>
                             </div>
                             <p class="text-xs font-black text-slate-800">₹${item.price}</p>
                         </div>`;
                 });
-
                 document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
                 document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
+            }
+        }
+
+        // 1. First check Cart
+        db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
+            const data = snap.val();
+            if(data) {
+                cartItems = Object.values(data);
+                updateUI();
+            } else {
+                // 2. If cart empty, check "Buy Now" storage
+                const directItem = localStorage.getItem('checkout_item');
+                if(directItem) {
+                    cartItems = [JSON.parse(directItem)];
+                    updateUI();
+                }
             }
         });
 
         function selectPayment(method, el) {
             selectedMethod = method;
-            document.querySelectorAll('.pay-card').forEach(c => {
-                c.classList.remove('selected-pay');
-                c.querySelector('.radio-circle').innerHTML = "";
-                c.querySelector('.radio-circle').className = "radio-circle w-5 h-5 border-2 border-slate-200 rounded-full";
-            });
+            document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected-pay'));
             el.classList.add('selected-pay');
-            el.querySelector('.radio-circle').className = "radio-circle w-5 h-5 border-2 border-orange-500 rounded-full flex items-center justify-center";
-            el.querySelector('.radio-circle').innerHTML = '<div class="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>';
         }
 
         function placeOrder() {
@@ -164,51 +165,32 @@
             const pin = document.getElementById('cust-pincode').value;
 
             if(!name || !addr || !pin) return alert("Please fill shipping details!");
-            if(cartItems.length === 0) return alert("Your cart is empty!");
+            if(cartItems.length === 0) return alert("Cart is empty!");
 
             document.getElementById('loading-overlay').classList.remove('hidden');
-
             const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
             
-            // ✅ Fix: First item details extracted properly for Admin
             const firstItem = cartItems[0];
-
             const orderData = {
-                orderID: orderID,
-                customerName: name,
-                primaryPhone: userPhone,
-                fullAddress: `${addr}, Pincode: ${pin}`,
+                orderID, customerName: name, primaryPhone: userPhone,
+                fullAddress: `${addr}, Pin: ${pin}`,
                 totalBill: (subtotal + rechargeFee),
                 paymentMode: selectedMethod,
-                
-                // ADMIN DETAILS
                 productImg: firstItem.img || firstItem.image,
                 productName: firstItem.name,
                 productSize: firstItem.size || "M",
-                
                 status: "Ordered",
                 orderDate: new Date().toLocaleString(),
                 timestamp: Date.now()
             };
 
-            setTimeout(() => {
-                db.ref('orders/' + orderID).set(orderData).then(() => {
-                    // Update User Profile Orders
-                    db.ref('users/' + userPhone + '/myOrders/' + orderID).set(orderData);
-                    // Clear Cart
-                    db.ref('users/' + userPhone + '/cart').remove();
-                    
-                    document.getElementById('loader-content').innerHTML = `
-                        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg">✓</div>
-                        <h2 class="text-xl font-black text-slate-800">Order Placed!</h2>
-                        <p class="text-slate-400 text-[10px] font-bold mt-2 uppercase">Redirecting to Profile...</p>
-                    `;
-                    
-                    setTimeout(() => {
-                        window.location.href = 'profile.html';
-                    }, 2000);
-                });
-            }, 2000);
+            db.ref('orders/' + orderID).set(orderData).then(() => {
+                db.ref('users/' + userPhone + '/myOrders/' + orderID).set(orderData);
+                db.ref('users/' + userPhone + '/cart').remove();
+                localStorage.removeItem('checkout_item');
+                
+                setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
+            });
         }
     </script>
 </body>
