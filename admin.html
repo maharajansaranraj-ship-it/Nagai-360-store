@@ -44,8 +44,7 @@
 
         <div id="inventory-section" class="hidden space-y-4">
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
-            <div id="admin-product-list" class="grid grid-cols-1 gap-4">
-                </div>
+            <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
         </div>
 
         <div id="add-section" class="hidden">
@@ -54,7 +53,10 @@
                 <input type="text" id="p-name" placeholder="Product Name">
                 <input type="number" id="p-price" placeholder="Price (₹)">
                 <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
+                <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest ml-1">Images (Min 1)</p>
                 <input type="text" id="img1" placeholder="Main Image URL">
+                <input type="text" id="img2" placeholder="Image URL 2 (Optional)">
+                <input type="text" id="img3" placeholder="Image URL 3 (Optional)">
                 <button onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 transition-all uppercase tracking-widest text-xs mt-2">
                     Publish to Website
                 </button>
@@ -95,7 +97,7 @@
                         <div class="glass-card">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <p class="text-[9px] font-bold text-slate-400">#${order.orderID}</p>
+                                    <p class="text-[9px] font-bold text-slate-400">#${order.orderID || 'N/A'}</p>
                                     <h3 class="font-bold text-slate-800">${order.customerName}</h3>
                                 </div>
                                 <select onchange="updateStatus('${id}', this.value)" class="text-[9px] font-bold bg-orange-50 text-orange-600 p-2 rounded-xl border-none">
@@ -104,19 +106,21 @@
                                 </select>
                             </div>
                             <div class="flex gap-3 bg-slate-50 p-2 rounded-2xl mb-3">
-                                <img src="${order.productImg}" class="w-12 h-12 object-cover rounded-lg">
-                                <p class="text-[10px] text-slate-500">${order.fullAddress}</p>
+                                <img src="${order.productImg || 'https://via.placeholder.com/100'}" class="w-12 h-12 object-cover rounded-lg">
+                                <p class="text-[10px] text-slate-500 flex-1">${order.fullAddress}</p>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="font-black text-lg">₹${order.totalBill}</span>
-                                <a href="tel:${order.primaryPhone}" class="p-2 bg-slate-900 text-white rounded-xl text-xs">Call Now</a>
+                                <a href="tel:${order.primaryPhone}" class="p-2 bg-slate-900 text-white rounded-xl text-xs px-4 font-bold">Call</a>
                             </div>
                         </div>`;
                 });
+            } else {
+                list.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold text-xs">NO ORDERS YET</div>`;
             }
         });
 
-        // ✅ FETCH PRODUCTS (Inventory Management)
+        // ✅ FETCH PRODUCTS
         db.ref('products').on('value', (snap) => {
             const list = document.getElementById('admin-product-list');
             list.innerHTML = "";
@@ -126,9 +130,9 @@
                     const p = data[id];
                     list.innerHTML += `
                         <div class="glass-card flex gap-4 items-center">
-                            <img src="${p.images[0]}" class="w-16 h-16 object-cover rounded-2xl">
+                            <img src="${(p.images && p.images[0]) ? p.images[0] : 'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded-2xl">
                             <div class="flex-1">
-                                <h4 class="font-bold text-slate-800 text-sm">${p.name}</h4>
+                                <h4 class="font-bold text-slate-800 text-sm truncate">${p.name}</h4>
                                 <p class="text-orange-500 font-black text-xs">₹${p.price}</p>
                             </div>
                             <div class="flex flex-col gap-2">
@@ -149,22 +153,39 @@
         }
 
         function deleteProduct(id) {
-            if(confirm("Are you sure you want to remove this product?")) {
-                db.ref('products/' + id).remove();
-            }
+            if(confirm("Confirm Delete?")) { db.ref('products/' + id).remove(); }
         }
 
         function uploadProduct() {
             const name = document.getElementById('p-name').value;
             const price = document.getElementById('p-price').value;
-            const img = document.getElementById('img1').value;
-            if(!name || !price || !img) return alert("Details missing!");
+            const desc = document.getElementById('p-desc').value;
+            
+            // Link logic fix - filter out empty inputs
+            const imgs = [
+                document.getElementById('img1').value,
+                document.getElementById('img2').value,
+                document.getElementById('img3').value
+            ].filter(url => url.trim() !== "");
+
+            if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and at least one image!");
 
             const pid = "P" + Date.now();
             db.ref('products/' + pid).set({
-                pid: pid, name: name, price: price, 
-                images: [img], isSoldOut: false
-            }).then(() => { alert("Published!"); showTab('inventory'); });
+                pid: pid, 
+                name: name, 
+                price: price, 
+                desc: desc || "Premium Collection",
+                images: imgs, 
+                isSoldOut: false
+            }).then(() => { 
+                alert("Published! 🚀"); 
+                document.getElementById('p-name').value = "";
+                document.getElementById('p-price').value = "";
+                document.getElementById('p-desc').value = "";
+                document.getElementById('img1').value = "";
+                showTab('inventory'); 
+            });
         }
     </script>
 </body>
