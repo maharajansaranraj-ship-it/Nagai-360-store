@@ -13,9 +13,7 @@
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; }
         .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
-        
-        /* Slider Smoothness */
-        .slider-container { display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider-container { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .slider-item { min-width: 100%; height: 55vh; object-fit: cover; }
     </style>
 </head>
@@ -32,23 +30,18 @@
 
     <div class="relative overflow-hidden rounded-b-[3.5rem] shadow-xl bg-slate-100">
         <div id="imageSlider" class="slider-container">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000" class="slider-item">
-            <img src="https://images.unsplash.com/photo-1539109132384-362556948215?q=80&w=1000" class="slider-item">
-            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000" class="slider-item">
-        </div>
-        
-        <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
             </div>
+        <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"></div>
     </div>
 
     <div class="px-8 pt-8">
         <div class="flex justify-between items-start mb-2">
             <div>
-                <h1 id="product-name" class="text-2xl font-bold text-slate-800 tracking-tight">Summer Floral Dress</h1>
+                <h1 id="product-name" class="text-2xl font-bold text-slate-800 tracking-tight">Loading...</h1>
                 <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-[0.2em] font-black">Nagai 360 Premium</p>
             </div>
             <div class="text-right">
-                <span id="product-price" class="text-2xl font-black text-orange-500">₹899</span>
+                <span id="product-price" class="text-2xl font-black text-orange-500">₹...</span>
                 <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md mt-1">Free Delivery</p>
             </div>
         </div>
@@ -68,9 +61,7 @@
 
         <div class="mt-10">
             <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-3">Product Info</h3>
-            <p class="text-slate-500 text-sm leading-relaxed font-medium">
-                Our signature Summer Floral Dress features a breathable cotton blend, meticulously crafted for maximum comfort and style. Hand-picked patterns for the Nagai 360 summer collection.
-            </p>
+            <p id="product-desc" class="text-slate-500 text-sm leading-relaxed font-medium">Fetching details...</p>
         </div>
 
         <div class="mt-8 p-6 bg-slate-900 rounded-[2.5rem] shadow-xl relative overflow-hidden">
@@ -87,16 +78,14 @@
 
     <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl p-6 border-t border-slate-100 flex gap-4 z-[100]">
         <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] flex items-center justify-center gap-3 transition-all active:scale-95 text-xs tracking-widest">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             ADD TO CART
         </button>
-        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-100 transition-all active:scale-95 text-xs tracking-widest uppercase">
+        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl transition-all active:scale-95 text-xs tracking-widest uppercase">
             Buy Now
         </button>
     </div>
 
     <script>
-        // ✅ 1. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -108,36 +97,57 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
         const userPhone = localStorage.getItem('user_phone');
+        
         let selectedSize = "M";
+        let productData = null;
 
-        // ✅ 2. Slider Logic
-        let currentSlide = 0;
-        const slider = document.getElementById('imageSlider');
-        const images = slider.getElementsByTagName('img');
-        const dotsContainer = document.getElementById('sliderDots');
+        // ✅ FETCH PRODUCT DATA DYNAMICALLY
+        if(productId) {
+            db.ref('products/' + productId).once('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    productData = data;
+                    document.getElementById('product-name').innerText = data.name;
+                    document.getElementById('product-price').innerText = "₹" + data.price;
+                    document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
+                    
+                    // Setup Images
+                    const slider = document.getElementById('imageSlider');
+                    const dotsCont = document.getElementById('sliderDots');
+                    slider.innerHTML = ""; 
+                    dotsCont.innerHTML = "";
 
-        // Create Indicators
-        for (let i = 0; i < images.length; i++) {
-            const dot = document.createElement('div');
-            dot.className = `w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white w-4' : 'bg-white/40'}`;
-            dotsContainer.appendChild(dot);
+                    data.images.forEach((imgUrl, index) => {
+                        slider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
+                        const dot = document.createElement('div');
+                        dot.className = `w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40'}`;
+                        dotsCont.appendChild(dot);
+                    });
+                    
+                    startSlider(data.images.length);
+                }
+            });
         }
-        const dots = dotsContainer.getElementsByTagName('div');
 
-        function updateSlider() {
-            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-            }
+        // ✅ Slider Function
+        function startSlider(count) {
+            let current = 0;
+            const slider = document.getElementById('imageSlider');
+            const dots = document.getElementById('sliderDots').children;
+            
+            setInterval(() => {
+                current = (current + 1) % count;
+                slider.style.transform = `translateX(-${current * 100}%)`;
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === current ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+                }
+            }, 3500);
         }
 
-        setInterval(() => {
-            currentSlide = (currentSlide + 1) % images.length;
-            updateSlider();
-        }, 3500);
-
-        // ✅ 3. Functionalities
         function selectSize(btn) {
             document.querySelectorAll('button').forEach(b => b.classList.remove('active-size'));
             btn.classList.add('active-size');
@@ -146,20 +156,27 @@
 
         function addToCart() {
             if(!userPhone) return alert("Please Login!");
-            const product = {
-                id: "p1",
-                name: document.getElementById('product-name').innerText,
-                price: 899,
-                img: images[0].src,
-                size: selectedSize
-            };
-            db.ref('users/' + userPhone + '/cart/p1').set(product).then(() => {
-                alert("Product added to cart! 🛒");
-            });
+            if(!productData) return;
+
+            db.ref('users/' + userPhone + '/cart/' + productId).set({
+                pid: productId,
+                name: productData.name,
+                price: productData.price,
+                img: productData.images[0],
+                size: selectedSize,
+                qty: 1
+            }).then(() => alert("Added to bag! 🛍️"));
         }
 
         function buyNow() {
-            localStorage.setItem('cart_total', 899);
+            if(!productData) return;
+            localStorage.setItem('checkout_item', JSON.stringify({
+                pid: productId,
+                name: productData.name,
+                price: productData.price,
+                img: productData.images[0],
+                size: selectedSize
+            }));
             window.location.href = 'checkout.html';
         }
 
