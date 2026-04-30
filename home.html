@@ -18,13 +18,9 @@
             margin-bottom: 16px; 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        /* Touch Animation */
         .masonry-item:active { transform: scale(0.92); opacity: 0.8; }
-        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .active-heart { fill: #ef4444; stroke: #ef4444; }
-        
-        /* Shimmer loading effect */
         .loading-shimmer {
             background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
             background-size: 200% 100%;
@@ -34,6 +30,12 @@
     </style>
 </head>
 <body class="pb-24">
+
+    <script>
+        if(localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html'; // Inga unga login page name kudunga
+        }
+    </script>
 
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
         <div>
@@ -106,19 +108,19 @@
         const db = firebase.database();
         const userPhone = localStorage.getItem('user_phone');
 
-        if(!userPhone) { window.location.href = 'index.html'; }
+        // ✅ User Data & Coins Fetch
+        if(userPhone) {
+            db.ref('users/' + userPhone).on('value', (snap) => {
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('user-coins').innerText = data.coins || 0;
+                    const cartItems = data.cart ? Object.keys(data.cart).length : 0;
+                    document.getElementById('cart-count').innerText = cartItems;
+                }
+            });
+        }
 
-        // ✅ 1. Fetch User Data (Coins & Cart Count)
-        db.ref('users/' + userPhone).on('value', (snap) => {
-            const data = snap.val();
-            if(data) {
-                document.getElementById('user-coins').innerText = data.coins || 0;
-                const cartItems = data.cart ? Object.keys(data.cart).length : 0;
-                document.getElementById('cart-count').innerText = cartItems;
-            }
-        });
-
-        // ✅ 2. DYNAMIC PRODUCT FETCH
+        // ✅ Product Grid Fetch
         db.ref('products').on('value', (snapshot) => {
             const grid = document.getElementById('main-product-grid');
             const data = snapshot.val();
@@ -127,7 +129,6 @@
             if(data) {
                 Object.keys(data).reverse().forEach(key => {
                     const p = data[key];
-                    
                     const soldOutUI = p.isSoldOut ? `
                         <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10 shadow-lg">SOLD OUT</div>
                         <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
@@ -149,8 +150,7 @@
                                     <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             } else {
                 grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400 font-bold'>No Collections Yet!</p>";
@@ -159,6 +159,7 @@
 
         function toggleWishlist(event, id, name, img, price) {
             event.stopPropagation();
+            if(!userPhone) return alert("Login to add wishlist!");
             const heartIcon = document.getElementById('heart-' + id);
             db.ref('users/' + userPhone + '/wishlist/' + id).set({
                 name: name, image: img, price: price
