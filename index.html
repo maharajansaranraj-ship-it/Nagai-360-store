@@ -1,120 +1,115 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Premium Login</title>
+    <title>Nagai 360 | Secure Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <style>
-        body { 
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-            min-height: 100vh;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .nagai-gradient-text {
-            background: linear-gradient(to right, #1e3a8a, #ff8c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .input-focus:focus {
-            box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.15);
-            border-color: #ff8c00;
-        }
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
+        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="flex items-center justify-center p-6">
+<body class="flex items-center justify-center min-h-screen p-6">
 
-    <div class="glass-card w-full max-w-[420px] rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden relative border-t-4 border-orange-400">
+    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500">
         
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-100 rounded-full blur-3xl opacity-50"></div>
-
-        <div class="pt-12 pb-8 flex flex-col items-center">
-            <div class="animate-float relative">
-                <div class="w-28 h-28 rounded-full border-[6px] border-white shadow-2xl overflow-hidden ring-4 ring-orange-50">
-                    <img src="1000871212.jpg" alt="Nagai 360 Logo" class="w-full h-full object-cover">
-                </div>
-                <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 ring-4 ring-orange-50">
+                <img src="1000871212.jpg" alt="Logo" class="w-full h-full object-cover">
             </div>
-            <h1 class="mt-6 text-3xl font-extrabold tracking-tight text-slate-800">
-                NAGAI <span class="text-orange-500">360</span>
-            </h1>
-            <div class="h-1 w-12 bg-orange-400 rounded-full mt-2"></div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
         </div>
 
-        <div class="px-10 pb-12">
+        <div id="phone-container" class="space-y-6">
+            <div class="group">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mobile Number</label>
+                <div class="relative flex items-center">
+                    <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
+                    <input type="tel" id="phoneNumber" placeholder="9876543210" 
+                        class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
+                </div>
+            </div>
+            <div id="recaptcha-container"></div>
             
-            <div id="login-flow">
-                <p class="text-center text-slate-500 text-sm mb-8 font-medium italic">"Styles that define you"</p>
-                
-                <div class="space-y-5">
-                    <div class="group">
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Mobile Access</label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
-                            <input type="tel" id="mobile" placeholder="Enter phone number" 
-                                class="input-focus w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none transition-all text-slate-700 font-semibold tracking-wide">
-                        </div>
-                    </div>
-
-                    <button onclick="showOtp()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-2 group">
-                        GET STARTED
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div id="otp-flow" class="hidden animate-in fade-in zoom-in duration-300">
-                <p class="text-center text-slate-500 text-sm mb-6">Enter the 4-digit code sent to you</p>
-                <div class="flex justify-center gap-3 mb-8">
-                    <input type="text" maxlength="1" class="w-14 h-16 text-center text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-400 outline-none transition-all">
-                    <input type="text" maxlength="1" class="w-14 h-16 text-center text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-400 outline-none transition-all">
-                    <input type="text" maxlength="1" class="w-14 h-16 text-center text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-400 outline-none transition-all">
-                    <input type="text" maxlength="1" class="w-14 h-16 text-center text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-400 outline-none transition-all">
-                </div>
-                <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all">
-                    VERIFY & EXPLORE
-                </button>
-                <button onclick="location.reload()" class="w-full mt-4 text-xs font-bold text-slate-400 hover:text-orange-500 uppercase tracking-widest transition-colors">
-                    Change Number
-                </button>
-            </div>
-
-            <div class="mt-10 pt-8 border-t border-slate-50 text-center">
-                <p class="text-[10px] text-slate-300 uppercase tracking-[0.2em]">Crafted by Nagai 360 Team</p>
-            </div>
+            <button onclick="sendOTP()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all">
+                SEND OTP
+            </button>
         </div>
+
+        <div id="otp-container" class="hidden space-y-6 animate-pulse">
+            <p class="text-center text-slate-500 text-sm">Enter the code sent to your mobile</p>
+            <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" 
+                class="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 text-center text-2xl font-bold tracking-widest">
+            
+            <button onclick="verifyOTP()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all">
+                VERIFY & LOGIN
+            </button>
+        </div>
+
     </div>
 
     <script>
-        function showOtp() {
-            const num = document.getElementById('mobile').value;
-            if(num.length >= 10) {
-                document.getElementById('login-flow').classList.add('hidden');
-                document.getElementById('otp-flow').classList.remove('hidden');
-            } else {
-                alert("Valid mobile number please!");
+        // --- Firebase Configuration (IMPORTANT: UNGA CREDENTIALS REPLACE PANNUNGA) ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Setup Recaptcha
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'invisible'
+        });
+
+        let confirmationResult;
+
+        // 1. SEND OTP FUNCTION
+        async function sendOTP() {
+            const phoneNumber = "+91" + document.getElementById('phoneNumber').value;
+            const appVerifier = window.recaptchaVerifier;
+
+            try {
+                confirmationResult = await auth.signInWithPhoneNumber(phoneNumber, appVerifier);
+                document.getElementById('phone-container').classList.add('hidden');
+                document.getElementById('otp-container').classList.remove('hidden');
+                alert("OTP Sent!");
+            } catch (error) {
+                console.error("Error during sendOTP", error);
+                alert("Error: " + error.message);
+            }
+        }
+
+        // 2. VERIFY OTP & REDIRECT
+        async function verifyOTP() {
+            const code = document.getElementById('otpCode').value;
+
+            try {
+                const result = await confirmationResult.confirm(code);
+                const user = result.user;
+                console.log("User Logged In:", user);
+                
+                // REDIRECT TO HOME PAGE
+                alert("Login Success! Redirecting...");
+                window.location.href = 'home.html'; 
+                
+            } catch (error) {
+                console.error("Error during verifyOTP", error);
+                alert("Invalid OTP. Try again.");
             }
         }
     </script>
 </body>
 </html>
-
