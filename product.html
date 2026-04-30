@@ -51,12 +51,7 @@
 
         <div class="mt-8">
             <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Select Size</h3>
-            <div class="flex gap-4" id="size-container">
-                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all">S</button>
-                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 active-size">M</button>
-                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">L</button>
-                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600">XL</button>
-            </div>
+            <div class="flex gap-4" id="size-container"></div>
         </div>
 
         <div class="mt-10">
@@ -102,7 +97,7 @@
         const productId = urlParams.get('id');
         const userPhone = localStorage.getItem('user_phone');
         
-        let selectedSize = "M"; // Default Size
+        let selectedSize = ""; 
         let productData = null;
         let currentIdx = 0;
         let startX = 0;
@@ -116,6 +111,26 @@
                     document.getElementById('product-price').innerText = "₹" + data.price;
                     document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
                     
+                    // ✅ LOAD SIZES FROM FIREBASE
+                    const sizeCont = document.getElementById('size-container');
+                    sizeCont.innerHTML = "";
+                    if(data.sizes && data.sizes.length > 0) {
+                        data.sizes.forEach((s, idx) => {
+                            const activeClass = idx === 0 ? 'active-size' : '';
+                            if(idx === 0) selectedSize = s; // First size-a default-ah select pannikirom
+                            
+                            sizeCont.innerHTML += `
+                                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">
+                                    ${s}
+                                </button>`;
+                        });
+                    } else {
+                        // Incase size illana oru default message
+                        sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size Available</p>";
+                        selectedSize = "Free Size";
+                    }
+
+                    // Slider logic
                     const slider = document.getElementById('imageSlider');
                     const dotsCont = document.getElementById('sliderDots');
                     slider.innerHTML = ""; 
@@ -154,13 +169,10 @@
 
         // ✅ FIXED SIZE SELECTION
         function selectSize(btn) {
-            // Remove active class from all size buttons
             document.querySelectorAll('.size-btn').forEach(b => {
                 b.classList.remove('active-size');
             });
-            // Add active class to clicked button
             btn.classList.add('active-size');
-            // Update the variable
             selectedSize = btn.innerText.trim();
         }
 
