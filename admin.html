@@ -1,87 +1,174 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Admin Dashboard</title>
+    <title>Nagai 360 Admin | Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #f0f2f5; }
-        .sidebar-link:hover { background-color: rgba(255, 140, 0, 0.1); color: #ff8c00; }
+        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; }
+        .glass-card { @apply bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm mb-6; }
+        .tab-btn { @apply flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all; }
+        .active-tab { @apply text-orange-500 border-b-2 border-orange-500; }
+        input, textarea { @apply w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-sm; }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="pb-20">
 
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div class="p-6 flex items-center gap-3 border-b border-gray-50">
-            <img src="1000871212.jpg" class="w-10 h-10 rounded-full shadow-sm">
-            <span class="font-bold text-xl text-blue-900">NAGAI 360</span>
-        </div>
-        <nav class="flex-1 p-4 space-y-2 mt-4">
-            <a href="#" class="sidebar-link flex items-center gap-3 p-3 rounded-xl text-orange-500 font-bold bg-orange-50 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                Dashboard
-            </a>
-            <a href="#" class="sidebar-link flex items-center gap-3 p-3 rounded-xl text-slate-500 font-semibold transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                Add Dress
-            </a>
-            <a href="#" class="sidebar-link flex items-center gap-3 p-3 rounded-xl text-slate-500 font-semibold transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                Orders List
-            </a>
-        </nav>
-        <div class="p-6 border-t border-gray-50">
-            <button onclick="window.location.href='login.html'" class="text-sm font-bold text-red-500 flex items-center gap-2">Logout</button>
-        </div>
-    </aside>
-
-    <main class="flex-1 p-8 overflow-y-auto">
-        <header class="flex justify-between items-center mb-10">
+    <header class="p-8 bg-slate-900 text-white rounded-b-[3rem] shadow-2xl sticky top-0 z-50">
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-800">Admin Overview</h1>
-                <p class="text-slate-500">Welcome back, Admin! Here is what's happening.</p>
+                <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">Nagai 360</p>
+                <h1 class="text-2xl font-black">Admin Panel</h1>
             </div>
-            <div class="flex gap-4">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div class="bg-green-100 p-2 rounded-lg text-green-600 font-bold">₹24,500</div>
-                    <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Today's Sale</span>
-                </div>
+            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                👑
             </div>
-        </header>
+        </div>
+        
+        <div class="flex border-t border-white/10 pt-4">
+            <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
+            <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Add Product</button>
+        </div>
+    </header>
 
-        <section class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 max-w-4xl">
-            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <span class="w-2 h-8 bg-orange-500 rounded-full"></span>
-                Upload New Collection
-            </h2>
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dress Name</label>
-                    <input type="text" placeholder="e.g. Blue Silk Saree" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-orange-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Price (INR)</label>
-                    <input type="number" placeholder="999" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-orange-500">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
-                    <textarea rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-orange-500"></textarea>
-                </div>
-                <div class="col-span-2">
-                    <div class="border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 transition-all cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                        <p class="font-bold">Drop dress images here or click to upload</p>
-                    </div>
-                </div>
+    <main class="p-6">
+
+        <div id="orders-section" class="space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Recent Orders</h2>
+                <span id="order-count" class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[10px] font-bold">0</span>
             </div>
-            <button class="mt-8 bg-blue-900 text-white font-bold py-4 px-10 rounded-2xl shadow-lg hover:shadow-blue-200 active:scale-95 transition-all">
-                PUBLISH PRODUCT
-            </button>
-        </section>
+            <div id="admin-orders-list">
+                </div>
+        </div>
+
+        <div id="inventory-section" class="hidden">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Create New Listing</h2>
+            
+            <div class="glass-card">
+                <input type="text" id="p-name" placeholder="Product Name (e.g. Silk Saree)">
+                <input type="number" id="p-price" placeholder="Price (₹)">
+                <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
+                
+                <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-tighter">Multi-Image Links (Enter 3 links)</p>
+                <input type="text" id="img1" placeholder="Image URL 1 (Main)">
+                <input type="text" id="img2" placeholder="Image URL 2">
+                <input type="text" id="img3" placeholder="Image URL 3">
+
+                <button onclick="uploadProduct()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-[2rem] shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs">
+                    Publish Product
+                </button>
+            </div>
+        </div>
+
     </main>
 
+    <script>
+        // ✅ 1. Firebase Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+            authDomain: "ff-id-store-dab0f.firebaseapp.com",
+            projectId: "ff-id-store-dab0f",
+            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+            messagingSenderId: "655049193530",
+            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ✅ 2. Tab Switching Logic
+        function showTab(tab) {
+            if(tab === 'orders') {
+                document.getElementById('orders-section').classList.remove('hidden');
+                document.getElementById('inventory-section').classList.add('hidden');
+                document.getElementById('orders-tab').classList.add('active-tab');
+                document.getElementById('inventory-tab').classList.remove('active-tab');
+            } else {
+                document.getElementById('orders-section').classList.add('hidden');
+                document.getElementById('inventory-section').classList.remove('hidden');
+                document.getElementById('inventory-tab').classList.add('active-tab');
+                document.getElementById('orders-tab').classList.remove('active-tab');
+            }
+        }
+
+        // ✅ 3. Fetch Orders Real-time
+        db.ref('orders').on('value', (snapshot) => {
+            const list = document.getElementById('admin-orders-list');
+            const data = snapshot.val();
+            list.innerHTML = "";
+            
+            if(data) {
+                const keys = Object.keys(data).reverse();
+                document.getElementById('order-count').innerText = keys.length;
+
+                keys.forEach(id => {
+                    const order = data[id];
+                    list.innerHTML += `
+                        <div class="glass-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: #${order.orderID}</span>
+                                <select onchange="updateStatus('${id}', this.value)" class="text-[10px] font-bold bg-orange-50 text-orange-600 px-3 py-1 rounded-full outline-none">
+                                    <option ${order.status === 'Ordered' ? 'selected' : ''}>Ordered</option>
+                                    <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                    <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                </select>
+                            </div>
+                            <h3 class="font-bold text-slate-800">${order.customerName}</h3>
+                            <p class="text-xs text-slate-500 mb-4">${order.fullAddress} - ${order.pincode}</p>
+                            <div class="flex justify-between items-center border-t border-slate-50 pt-4">
+                                <p class="font-black text-slate-900 text-lg">₹${order.totalBill}</p>
+                                <a href="tel:${order.primaryPhone}" class="p-3 bg-slate-100 rounded-2xl text-slate-600 active:scale-90 transition-all">📞</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        });
+
+        // ✅ 4. Update Status Logic
+        function updateStatus(id, status) {
+            db.ref('orders/' + id).update({ status: status });
+            // User-oda specific history-layum update pannanum (Checkout-la phone store panni irukkom)
+            db.ref('orders/' + id).once('value', s => {
+                const phone = s.val().primaryPhone;
+                db.ref('users/' + phone + '/myOrders/' + id).update({ status: status });
+            });
+        }
+
+        // ✅ 5. Add Product Logic
+        function uploadProduct() {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const desc = document.getElementById('p-desc').value;
+            const imgs = [
+                document.getElementById('img1').value,
+                document.getElementById('img2').value,
+                document.getElementById('img3').value
+            ];
+
+            if(!name || !price || !imgs[0]) return alert("Name, Price, and Main Image required!");
+
+            const newPid = "P" + Date.now();
+            db.ref('products/' + newPid).set({
+                pid: newPid,
+                name: name,
+                price: price,
+                desc: desc,
+                images: imgs,
+                category: "General"
+            }).then(() => {
+                alert("Product Published! 🚀");
+                location.reload();
+            });
+        }
+    </script>
 </body>
 </html>
-
