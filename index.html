@@ -32,21 +32,20 @@
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
                 <div class="relative flex items-center">
                     <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
-                    <input type="tel" id="phoneNumber" placeholder="9876543210" 
+                    <input type="tel" id="phoneNumber" placeholder="9876543210" maxlength="10"
                         class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
                 </div>
             </div>
             
-            <button onclick="fastLogin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest">
+            <button id="loginBtn" onclick="fastLogin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest">
                 LOGIN NOW
             </button>
-            <p class="text-[10px] text-slate-400">By logging in, you agree to our terms.</p>
+            <p id="statusMsg" class="text-[10px] text-slate-400">By logging in, you agree to our terms.</p>
         </div>
 
     </div>
 
     <script>
-        // ✅ Real Firebase Config from your source
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -57,35 +56,48 @@
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
 
-        // Initialize
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // **Auto Redirect Logic**
+        // User login-la irundha direct-ah home-ku poyidum
+        window.onload = function() {
+            if(localStorage.getItem('isLoggedIn') === 'true') {
+                window.location.href = 'home.html';
+            }
+        }
+
         function fastLogin() {
             const userPhone = document.getElementById('phoneNumber').value;
+            const btn = document.getElementById('loginBtn');
+            const status = document.getElementById('statusMsg');
 
             if(userPhone.length < 10) {
                 alert("Please enter a valid 10-digit number!");
                 return;
             }
 
-            // Save details locally for Home Page logic
-            localStorage.setItem('user_phone', userPhone);
-            localStorage.setItem('isLoggedIn', 'true');
+            btn.innerText = "CHECKING...";
+            btn.disabled = true;
 
-            // Initialize/Check User in Database
+            // Database-la user check pannunga
             db.ref('users/' + userPhone).once('value', (snapshot) => {
+                // Browser-la user login info save pannikalam
+                localStorage.setItem('user_phone', userPhone);
+                localStorage.setItem('isLoggedIn', 'true');
+
                 if (!snapshot.exists()) {
-                    // Create new profile if they don't exist
+                    // Pudhu user-na create pannunga
                     db.ref('users/' + userPhone).set({
-                        coins: 0,
+                        phone: userPhone,
                         username: "Nagai User",
-                        joined: new Date().toISOString()
+                        joined: new Date().toLocaleString(),
+                        coins: 0
                     }).then(() => {
                         window.location.href = 'home.html';
                     });
                 } else {
-                    // Existing user, just redirect
+                    // Already user irundha direct-ah home-ku ponga
                     window.location.href = 'home.html';
                 }
             });
