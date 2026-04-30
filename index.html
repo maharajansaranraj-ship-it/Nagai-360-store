@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Secure Login</title>
+    <title>Nagai 360 | Fast Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
         body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        #recaptcha-container { margin-bottom: 15px; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
 
-    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500">
+    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
         
         <div class="flex flex-col items-center mb-10">
             <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">
@@ -29,8 +27,8 @@
             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>
         </div>
 
-        <div id="phone-section" class="space-y-6">
-            <div class="group">
+        <div class="space-y-6">
+            <div class="group text-left">
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
                 <div class="relative flex items-center">
                     <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
@@ -38,31 +36,17 @@
                         class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
                 </div>
             </div>
-
-            <div id="recaptcha-container"></div>
             
-            <button onclick="sendOTP()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest">
-                SEND OTP
+            <button onclick="fastLogin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest">
+                LOGIN NOW
             </button>
-        </div>
-
-        <div id="otp-section" class="hidden space-y-6">
-            <div class="text-center">
-                <p class="text-slate-500 text-sm">Verify the 6-digit code</p>
-            </div>
-            <input type="text" id="otpCode" placeholder="000000" 
-                class="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 text-center text-3xl font-extrabold tracking-[0.5em]">
-            
-            <button onclick="verifyOTP()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest">
-                VERIFY & LOGIN
-            </button>
-            <p class="text-center text-xs text-slate-400 cursor-pointer hover:text-orange-500" onclick="location.reload()">Change Number</p>
+            <p class="text-[10px] text-slate-400">By logging in, you agree to our terms.</p>
         </div>
 
     </div>
 
     <script>
-        // ✅ Your Real Firebase Config Added
+        // ✅ Real Firebase Config from your source
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -73,68 +57,38 @@
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
 
-        // Initialize Firebase
+        // Initialize
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.database();
 
-        // Recaptcha setup
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible'
-        });
+        function fastLogin() {
+            const userPhone = document.getElementById('phoneNumber').value;
 
-        let confirmationResult;
-
-        // 1. Function to Send OTP
-        async function sendOTP() {
-            const num = document.getElementById('phoneNumber').value;
-            if(num.length < 10) { alert("Invalid number!"); return; }
-
-            const phoneNumber = "+91" + num;
-            const appVerifier = window.recaptchaVerifier;
-
-            try {
-                confirmationResult = await auth.signInWithPhoneNumber(phoneNumber, appVerifier);
-                document.getElementById('phone-section').classList.add('hidden');
-                document.getElementById('otp-section').classList.remove('hidden');
-                // Save phone temporarily
-                localStorage.setItem('temp_phone', num);
-            } catch (error) {
-                console.error(error);
-                alert("Error sending OTP: " + error.message);
+            if(userPhone.length < 10) {
+                alert("Please enter a valid 10-digit number!");
+                return;
             }
-        }
 
-        // 2. Function to Verify OTP & Redirect
-        async function verifyOTP() {
-            const code = document.getElementById('otpCode').value;
-            if(code.length < 6) { alert("Enter 6 digits!"); return; }
+            // Save details locally for Home Page logic
+            localStorage.setItem('user_phone', userPhone);
+            localStorage.setItem('isLoggedIn', 'true');
 
-            try {
-                const result = await confirmationResult.confirm(code);
-                const user = result.user;
-                
-                // Save user phone to localStorage for your other logic
-                const userPhone = localStorage.getItem('temp_phone');
-                localStorage.setItem('user_phone', userPhone);
-                localStorage.setItem('isLoggedIn', 'true');
-
-                // Optional: Initialize user in database if they are new
-                db.ref('users/' + userPhone).once('value', (snapshot) => {
-                    if (!snapshot.exists()) {
-                        db.ref('users/' + userPhone).set({
-                            coins: 0,
-                            username: "Nagai User"
-                        });
-                    }
-                });
-
-                alert("Login Successful!");
-                window.location.href = 'home.html'; // ✅ AUTO REDIRECT
-            } catch (error) {
-                console.error(error);
-                alert("Invalid OTP! Try again.");
-            }
+            // Initialize/Check User in Database
+            db.ref('users/' + userPhone).once('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    // Create new profile if they don't exist
+                    db.ref('users/' + userPhone).set({
+                        coins: 0,
+                        username: "Nagai User",
+                        joined: new Date().toISOString()
+                    }).then(() => {
+                        window.location.href = 'home.html';
+                    });
+                } else {
+                    // Existing user, just redirect
+                    window.location.href = 'home.html';
+                }
+            });
         }
     </script>
 </body>
