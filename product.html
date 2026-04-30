@@ -13,7 +13,10 @@
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; }
         .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Slider Smoothness */
+        .slider-container { display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider-item { min-width: 100%; height: 55vh; object-fit: cover; }
     </style>
 </head>
 <body class="pb-32">
@@ -27,13 +30,15 @@
         </button>
     </header>
 
-    <div class="h-[55vh] w-full relative">
-        <img id="product-img" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000" class="w-full h-full object-cover rounded-b-[3.5rem] shadow-xl">
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            <div class="w-2 h-2 bg-white rounded-full"></div>
-            <div class="w-2 h-2 bg-white/40 rounded-full"></div>
-            <div class="w-2 h-2 bg-white/40 rounded-full"></div>
+    <div class="relative overflow-hidden rounded-b-[3.5rem] shadow-xl bg-slate-100">
+        <div id="imageSlider" class="slider-container">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000" class="slider-item">
+            <img src="https://images.unsplash.com/photo-1539109132384-362556948215?q=80&w=1000" class="slider-item">
+            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000" class="slider-item">
         </div>
+        
+        <div id="sliderDots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            </div>
     </div>
 
     <div class="px-8 pt-8">
@@ -44,7 +49,7 @@
             </div>
             <div class="text-right">
                 <span id="product-price" class="text-2xl font-black text-orange-500">₹899</span>
-                <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md">Free Delivery</p>
+                <p class="text-[9px] text-green-600 font-bold uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md mt-1">Free Delivery</p>
             </div>
         </div>
 
@@ -71,19 +76,11 @@
         <div class="mt-8 p-6 bg-slate-900 rounded-[2.5rem] shadow-xl relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
             <h3 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4">Store Privileges</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
-                    <span class="bg-white/10 p-1 rounded-md">📦</span> COD Available
-                </div>
-                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
-                    <span class="bg-white/10 p-1 rounded-md">🔄</span> 7 Days Return
-                </div>
-                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
-                    <span class="bg-white/10 p-1 rounded-md">✨</span> Premium Quality
-                </div>
-                <div class="flex items-center gap-2 text-white text-[10px] font-medium">
-                    <span class="bg-white/10 p-1 rounded-md">💳</span> Secure Payment
-                </div>
+            <div class="grid grid-cols-2 gap-4 text-white text-[10px] font-medium">
+                <div class="flex items-center gap-2"><span class="bg-white/10 p-1 rounded-md">📦</span> COD Available</div>
+                <div class="flex items-center gap-2"><span class="bg-white/10 p-1 rounded-md">🔄</span> 7 Days Return</div>
+                <div class="flex items-center gap-2"><span class="bg-white/10 p-1 rounded-md">✨</span> Premium Quality</div>
+                <div class="flex items-center gap-2"><span class="bg-white/10 p-1 rounded-md">💳</span> Secure Payment</div>
             </div>
         </div>
     </div>
@@ -93,13 +90,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             ADD TO CART
         </button>
-        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-100 transition-all active:scale-95 text-xs tracking-widest">
-            BUY NOW
+        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-100 transition-all active:scale-95 text-xs tracking-widest uppercase">
+            Buy Now
         </button>
     </div>
 
     <script>
-        // ✅ Firebase Initialization
+        // ✅ 1. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -109,50 +106,68 @@
             appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const userPhone = localStorage.getItem('user_phone');
         let selectedSize = "M";
 
+        // ✅ 2. Slider Logic
+        let currentSlide = 0;
+        const slider = document.getElementById('imageSlider');
+        const images = slider.getElementsByTagName('img');
+        const dotsContainer = document.getElementById('sliderDots');
+
+        // Create Indicators
+        for (let i = 0; i < images.length; i++) {
+            const dot = document.createElement('div');
+            dot.className = `w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white w-4' : 'bg-white/40'}`;
+            dotsContainer.appendChild(dot);
+        }
+        const dots = dotsContainer.getElementsByTagName('div');
+
+        function updateSlider() {
+            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+            }
+        }
+
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % images.length;
+            updateSlider();
+        }, 3500);
+
+        // ✅ 3. Functionalities
         function selectSize(btn) {
             document.querySelectorAll('button').forEach(b => b.classList.remove('active-size'));
             btn.classList.add('active-size');
             selectedSize = btn.innerText;
         }
 
-        // ✅ Add to Cart Logic
         function addToCart() {
-            if(!userPhone) return alert("Please login!");
-
+            if(!userPhone) return alert("Please Login!");
             const product = {
-                id: "p1", // Neenga URL parameter vechu change pannikalam
+                id: "p1",
                 name: document.getElementById('product-name').innerText,
                 price: 899,
-                img: document.getElementById('product-img').src,
-                size: selectedSize,
-                addedAt: new Date().toISOString()
+                img: images[0].src,
+                size: selectedSize
             };
-
             db.ref('users/' + userPhone + '/cart/p1').set(product).then(() => {
-                alert("Added to Cart! 🛒");
+                alert("Product added to cart! 🛒");
             });
         }
 
-        // ✅ Buy Now - Redirect to Checkout
         function buyNow() {
-            // Price-a local storage-la save panni checkout-la display panna
-            localStorage.setItem('cart_total', 899); 
+            localStorage.setItem('cart_total', 899);
             window.location.href = 'checkout.html';
         }
 
-        // Wishlist Toggle
         function toggleWishlist() {
             const heart = document.getElementById('heart-icon');
             heart.classList.toggle('text-red-500');
             heart.setAttribute('fill', heart.classList.contains('text-red-500') ? 'currentColor' : 'none');
         }
     </script>
-
 </body>
 </html>
