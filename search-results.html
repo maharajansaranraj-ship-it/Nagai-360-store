@@ -75,7 +75,7 @@
                     if (name.includes(query) || category.includes(query)) {
                         count++;
                         container.innerHTML += `
-                            <div class="product-card" onclick="location.href='product-details.html?id=${id}'">
+                            <div class="product-card" onclick="location.href='product.html?id=${id}'">
                                 <div class="relative">
                                     <img src="${p.images[0]}" class="w-full h-44 object-cover">
                                     ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-bold text-red-600 text-[10px] uppercase">Sold Out</div>' : ''}
