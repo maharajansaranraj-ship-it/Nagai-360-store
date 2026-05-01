@@ -13,7 +13,9 @@
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #fdfdfd; }
         .order-card { transition: all 0.3s ease; }
-        .status-badge { @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider; }
+        /* Image hover effect */
+        .order-card:active { transform: scale(0.98); }
+        .status-badge { px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider; }
     </style>
 </head>
 <body class="pb-10">
@@ -33,7 +35,6 @@
     </main>
 
     <script>
-        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -49,36 +50,37 @@
         const userPhone = localStorage.getItem('user_phone');
 
         if(userPhone) {
-            // ✅ Fetch orders from User's specific node
             db.ref('users/' + userPhone + '/myOrders').on('value', (snapshot) => {
                 const container = document.getElementById('orders-container');
-                container.innerHTML = ""; // Clear loader
+                container.innerHTML = ""; 
                 const orders = snapshot.val();
 
                 if(orders) {
-                    // Orders-a reverse order-la kaata (Newest first)
                     const orderKeys = Object.keys(orders).reverse();
                     
                     orderKeys.forEach(id => {
                         const order = orders[id];
                         const statusClass = getStatusStyle(order.status);
                         
+                        // Default image if productImg is missing in old orders
+                        const displayImg = order.productImg || "https://via.placeholder.com/150?text=Nagai+360";
+                        
                         container.innerHTML += `
-                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card">
+                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card" 
+                                 onclick="goToProduct('${order.productID}')" style="cursor: pointer;">
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
                                         <h3 class="font-black text-slate-800">#${order.orderID}</h3>
                                     </div>
-                                    <span class="status-badge ${statusClass}">${order.status || 'Processing'}</span>
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
                                 </div>
                                 
                                 <div class="flex items-center gap-4 py-4 border-y border-slate-50">
-                                    <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 font-bold">
-                                        📦
-                                    </div>
+                                    <img src="${displayImg}" class="w-14 h-14 object-cover rounded-2xl shadow-inner bg-slate-50">
+                                    
                                     <div class="flex-1">
-                                        <p class="text-xs font-bold text-slate-600">${order.customerName}</p>
+                                        <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || order.customerName}</p>
                                         <p class="text-[10px] text-slate-400 font-medium">${order.orderDate}</p>
                                     </div>
                                     <div class="text-right">
@@ -88,7 +90,7 @@
 
                                 <div class="mt-4 flex justify-between items-center">
                                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">COD Payment</p>
-                                    <button onclick="alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
+                                    <button onclick="event.stopPropagation(); alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
                                 </div>
                             </div>
                         `;
@@ -106,7 +108,15 @@
             window.location.href = 'index.html';
         }
 
-        // Status-ku thagundha maadhiri color change panna logic
+        // Product page-ku redirect panna function
+        function goToProduct(pid) {
+            if(pid && pid !== "undefined") {
+                window.location.href = 'product-details.html?id=' + pid;
+            } else {
+                console.log("Product ID missing for this order.");
+            }
+        }
+
         function getStatusStyle(status) {
             switch(status?.toLowerCase()) {
                 case 'delivered': return 'bg-green-100 text-green-600';
