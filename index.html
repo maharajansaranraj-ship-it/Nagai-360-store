@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nagai 360 | Login</title>
+<title>Nagai 360 | Fast Login</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -14,33 +14,38 @@
 
 <style>
 body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
-.glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
+.glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
 </style>
 </head>
 
 <body class="flex items-center justify-center min-h-screen p-6">
 
-<div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 text-center">
+<div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
 
-<h2 class="text-xl font-bold mb-6">Login / Sign Up</h2>
+<div class="flex flex-col items-center mb-10">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-4">
+<img src="nagai.jpg" class="w-full h-full object-contain">
+</div>
+<h1 class="text-2xl font-bold">NAGAI 360</h1>
+</div>
 
 <input type="tel" id="phoneNumber" placeholder="Enter Mobile Number"
-class="w-full p-4 mb-4 border rounded-xl">
+class="w-full p-4 mb-4 rounded-xl border">
 
 <input type="password" id="loginPassword" placeholder="Enter Password"
-class="w-full p-4 mb-4 border rounded-xl">
+class="w-full p-4 mb-4 rounded-xl border">
 
-<button onclick="handleAuth()" id="loginBtn"
+<button id="loginBtn" onclick="handleAuth()"
 class="w-full bg-black text-white p-4 rounded-xl mb-3">
 Login / Sign Up
 </button>
 
 <button onclick="googleLogin()"
 class="w-full bg-red-500 text-white p-4 rounded-xl">
-Login with Google
+Continue with Google
 </button>
 
-<p id="msg" class="text-xs mt-3 text-gray-400"></p>
+<p class="text-xs mt-3 text-gray-400">Secure login powered by Firebase</p>
 
 </div>
 
@@ -52,36 +57,43 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
-
 function handleAuth() {
   const phone = document.getElementById('phoneNumber').value;
   const pass = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
 
   if(phone.length < 10 || pass.length < 4){
-    alert("Enter valid details!");
+    alert("Valid number & password podu!");
     return;
   }
 
+  btn.innerText = "PROCESSING...";
+  btn.disabled = true;
+
   const email = phone + "@nagai.com";
 
-  auth.signInWithEmailAndPassword(email, pass)
+  firebase.auth().signInWithEmailAndPassword(email, pass)
   .then(() => success(phone))
   .catch(err => {
     if(err.code === "auth/user-not-found"){
-      auth.createUserWithEmailAndPassword(email, pass)
+      firebase.auth().createUserWithEmailAndPassword(email, pass)
       .then(() => success(phone))
-      .catch(e => alert(e.message));
+      .catch(e => {
+        alert(e.message);
+        resetBtn();
+      });
     } else {
       alert(err.message);
+      resetBtn();
     }
   });
 }
 
 function googleLogin(){
-  auth.signInWithPopup(provider)
-  .then((result)=>{
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  firebase.auth().signInWithPopup(provider)
+  .then(() => {
     localStorage.setItem('isLoggedIn','true');
     window.location.href = "home.html";
   })
@@ -92,6 +104,12 @@ function success(phone){
   localStorage.setItem('user_phone', phone);
   localStorage.setItem('isLoggedIn','true');
   window.location.href = "home.html";
+}
+
+function resetBtn(){
+  const btn = document.getElementById('loginBtn');
+  btn.innerText = "LOGIN / SIGN UP";
+  btn.disabled = false;
 }
 </script>
 
