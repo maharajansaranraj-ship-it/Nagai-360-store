@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,18 +9,23 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .wish-card { transition: all 0.3s ease; }
+        .wish-card:active { transform: scale(0.97); }
+    </style>
 </head>
 <body class="bg-[#fcfcfc] pb-24">
 
     <header class="p-6 flex items-center gap-4 bg-white sticky top-0 z-50 shadow-sm">
-        <button onclick="window.location.href='home.html'" class="p-2 bg-slate-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        <button onclick="window.location.href='home.html'" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
         <h1 class="text-xl font-bold text-slate-800">My Wishlist</h1>
     </header>
 
     <main id="wishlist-container" class="p-6 grid grid-cols-2 gap-4">
-        <p id="loading-msg" class="col-span-2 text-center text-slate-400 mt-10">Loading your favorites...</p>
+        <p id="loading-msg" class="col-span-2 text-center text-slate-400 mt-10 font-bold text-xs tracking-widest uppercase">Loading your favorites...</p>
     </main>
 
     <script>
@@ -41,33 +46,48 @@
         if(userPhone) {
             db.ref('users/' + userPhone + '/wishlist').on('value', (snapshot) => {
                 const container = document.getElementById('wishlist-container');
-                container.innerHTML = ""; // Clear message
+                container.innerHTML = ""; 
                 const data = snapshot.val();
 
                 if(data) {
                     Object.keys(data).forEach(id => {
                         const item = data[id];
+                        // Note: Some places use 'item.image' and some use 'item.img', checking both
+                        const displayImg = item.image || item.img || "https://via.placeholder.com/150";
+                        
                         container.innerHTML += `
-                            <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
-                                <img src="${item.image}" class="w-full h-48 object-cover">
+                            <div onclick="window.location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 wish-card cursor-pointer relative">
+                                <img src="${displayImg}" class="w-full h-44 object-cover">
                                 <div class="p-4">
-                                    <h3 class="text-xs font-bold text-slate-800 truncate">${item.name}</h3>
-                                    <p class="text-orange-500 font-extrabold text-sm mt-1">₹${item.price}</p>
-                                    <button onclick="removeFromWishlist('${id}')" class="text-[10px] text-red-500 font-bold mt-2 uppercase">Remove</button>
+                                    <h3 class="text-[11px] font-bold text-slate-700 truncate">${item.name}</h3>
+                                    <p class="text-orange-500 font-black text-sm mt-1">₹${item.price}</p>
+                                    
+                                    <button onclick="event.stopPropagation(); removeFromWishlist('${id}')" 
+                                            class="w-full mt-3 py-2 bg-red-50 text-red-500 rounded-xl text-[9px] font-black uppercase tracking-widest active:bg-red-100 transition-all">
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    container.innerHTML = "<p class='col-span-2 text-center text-slate-400 mt-10'>Your wishlist is empty!</p>";
+                    container.innerHTML = `
+                        <div class="col-span-2 text-center py-20">
+                            <div class="text-4xl mb-4">🤍</div>
+                            <p class='text-slate-400 font-bold text-sm'>Your wishlist is empty!</p>
+                            <button onclick="window.location.href='home.html'" class="mt-4 text-orange-500 font-black text-[10px] uppercase tracking-widest">Start Shopping</button>
+                        </div>`;
                 }
             });
+        } else {
+            window.location.href = 'index.html';
         }
 
         function removeFromWishlist(id) {
-            db.ref('users/' + userPhone + '/wishlist/' + id).remove();
+            if(confirm("Remove from wishlist?")) {
+                db.ref('users/' + userPhone + '/wishlist/' + id).remove();
+            }
         }
     </script>
 </body>
 </html>
-
