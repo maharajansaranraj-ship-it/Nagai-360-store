@@ -93,7 +93,9 @@
             Confirm Order
         </button>
     </div>
-<script>
+
+
+    <script>
     // 1. Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
@@ -123,15 +125,12 @@
         let finalSize = "N/A";
 
         if(cartItems.length > 0) {
-            // First item-ah check panrom (Main validation)
             const firstItem = cartItems[0];
             const pId = firstItem.pid || firstItem.productID;
 
-            // ✅ SOLD OUT CHECK LOGIC
             db.ref('products/' + pId).on('value', (snap) => {
                 const p = snap.val();
                 if (!p || p.isSoldOut) {
-                    // Block checkout if product is sold out or deleted
                     document.querySelector('main').innerHTML = `
                         <div class="flex flex-col items-center justify-center py-24 text-center">
                             <div class="text-6xl mb-4">🚫</div>
@@ -148,6 +147,9 @@
             cartItems.forEach((item, index) => {
                 subtotal += parseInt(item.price);
                 const itemSize = item.size || item.selectedSize || 'M';
+                // ✅ GET COLOR DATA
+                const itemColor = item.selectedColor || 'Default'; 
+
                 if(index === 0) finalSize = itemSize;
 
                 listDiv.innerHTML += `
@@ -155,7 +157,7 @@
                         <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
                         <div class="flex-1">
                             <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${itemSize}</p>
+                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${itemSize} | Color: ${itemColor}</p>
                         </div>
                         <p class="text-xs font-black text-slate-800">₹${item.price}</p>
                     </div>`;
@@ -197,9 +199,8 @@
         if(cartItems.length === 0) return alert("Cart is empty!");
 
         const totalAmount = subtotal + rechargeFee;
-
-        // ✅ FINAL CHECK BEFORE PAYMENT
         const pId = cartItems[0].pid || cartItems[0].productID;
+
         db.ref('products/' + pId + '/isSoldOut').once('value', (snap) => {
             if(snap.val() === true) {
                 alert("Sorry! This product just sold out.");
@@ -210,6 +211,7 @@
             if(selectedMethod === "UPI") {
                 const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
                 window.location.href = upiUrl;
+                // Wait and place order
                 setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
             } else {
                 placeOrder(name, addr, pin, totalAmount);
@@ -222,6 +224,7 @@
         const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
         const firstItem = cartItems[0];
         
+        // ✅ CONSTRUCT ORDER DATA WITH COLOR
         const orderData = {
             orderID: orderID, 
             customerName: name, 
@@ -232,10 +235,11 @@
             productImg: firstItem.img || firstItem.image,
             productName: firstItem.name,
             productID: firstItem.pid || firstItem.productID || "", 
-            size: firstItem.size || firstItem.selectedSize || "M",
+            size: firstItem.size || firstItem.selectedSize || "N/A",
+            selectedColor: firstItem.selectedColor || "Default", // 👈 INDHA LINE DHAN ADMIN-KU COLOR ANUPPUM
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
-            timestamp: Date.now()
+            timestamp: Date.now() // 👈 CANCELLATION LOGIC-KU IDHU MUST!
         };
 
         const updates = {};
@@ -254,7 +258,6 @@
     }
 </script>
 
-                
 
 
 </body>
