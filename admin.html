@@ -15,6 +15,13 @@
         input, textarea, select { @apply w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 mb-3 text-sm shadow-sm; }
     </style>
 </head>
+    <div class="flex">
+    <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
+    <button onclick="showTab('users')" id="users-tab" class="tab-btn">Users</button> <button onclick="showTab('delivered')" id="delivered-tab" class="tab-btn">Delivered</button>
+    <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Inventory</button>
+    <button onclick="showTab('add')" id="add-tab" class="tab-btn">Add New</button>
+</div>
+
 <body class="pb-24">
 
     <header class="bg-slate-900 text-white pt-8 shadow-2xl sticky top-0 z-50">
@@ -38,6 +45,19 @@
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Orders</h2>
             <div id="admin-orders-list"></div>
         </div>
+        <main class="p-6">
+    <div id="users-section" class="hidden space-y-4">
+        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">New User Requests</h2>
+        <div id="admin-users-list" class="space-y-4"></div>
+    </div>
+
+    <div id="orders-section" class="space-y-4">
+        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Orders</h2>
+        <div id="admin-orders-list"></div>
+    </div>
+    
+    </main>
+
 
         <div id="delivered-section" class="hidden space-y-4">
             <h2 class="text-[10px] font-black text-green-500 uppercase tracking-widest px-2">Completed Deliveries</h2>
