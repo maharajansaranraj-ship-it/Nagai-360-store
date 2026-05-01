@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | OTP Login</title>
+    <title>Nagai 360 | Login</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -16,32 +16,26 @@
 
 <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
 
-    <!-- 🔥 LOGO ADDED -->
-    <div class="flex flex-col items-center mb-4">
+    <!-- LOGO -->
+    <div class="flex flex-col items-center mb-5">
         <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-400 shadow">
-            <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-cover">
+            <img src="nagai.jpg" class="w-full h-full object-cover">
         </div>
         <h1 class="text-lg font-bold mt-2">Nagai 360</h1>
     </div>
 
     <!-- Phone -->
     <input id="phoneNumber" type="tel" maxlength="10"
-        placeholder="Enter Mobile Number"
+        placeholder="Mobile Number"
         class="w-full p-3 border rounded-lg mb-3">
 
-    <!-- OTP -->
-    <input id="otp" type="text"
-        placeholder="Enter OTP"
+    <!-- Password -->
+    <input id="password" type="password"
+        placeholder="Password"
         class="w-full p-3 border rounded-lg mb-3">
 
-    <div id="recaptcha-container"></div>
-
-    <button onclick="sendOTP()" class="w-full bg-blue-600 text-white p-3 rounded-lg mb-2">
-        Send OTP
-    </button>
-
-    <button onclick="verifyOTP()" class="w-full bg-green-600 text-white p-3 rounded-lg">
-        Verify OTP
+    <button onclick="login()" class="w-full bg-black text-white p-3 rounded-lg">
+        Login
     </button>
 
 </div>
@@ -55,48 +49,42 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-let confirmationResult;
-
-// Send OTP
-function sendOTP(){
+// LOGIN FUNCTION
+function login(){
 
     const phone = document.getElementById('phoneNumber').value.trim();
+    const pass = document.getElementById('password').value;
 
     if(!/^[0-9]{10}$/.test(phone)){
-        alert("10 digit correct number podu");
+        alert("10 digit number podu");
         return;
     }
 
-    const number = "+91" + phone;
+    if(pass.length < 4){
+        alert("Password minimum 4 characters");
+        return;
+    }
 
-    const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+    const email = phone + "@nagai.com";
 
-    auth.signInWithPhoneNumber(number, appVerifier)
-    .then((result) => {
-        confirmationResult = result;
-        alert("OTP sent!");
-    })
-    .catch((error) => {
-        alert(error.message);
-    });
-}
-
-// Verify OTP
-function verifyOTP(){
-
-    const code = document.getElementById('otp').value;
-
-    confirmationResult.confirm(code)
-    .then((result) => {
-        alert("Login Success!");
-        localStorage.setItem('user', result.user.phoneNumber);
+    auth.signInWithEmailAndPassword(email, pass)
+    .then(() => {
+        alert("Login Success");
         window.location.href = "home.html";
     })
-    .catch((error) => {
-        alert("Wrong OTP");
+    .catch(err => {
+        if(err.code === "auth/user-not-found"){
+            auth.createUserWithEmailAndPassword(email, pass)
+            .then(() => {
+                alert("Account Created & Login Success");
+                window.location.href = "home.html";
+            })
+            .catch(e => alert(e.message));
+        } else {
+            alert(err.message);
+        }
     });
 }
-
 </script>
 
 </body>
