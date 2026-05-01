@@ -69,7 +69,6 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 🔥 attempt limit
 let attempts = 0;
 
 if(localStorage.getItem('isLoggedIn') === 'true') {
@@ -92,7 +91,6 @@ function handleAuth() {
     const pass = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
 
-    // 🔐 strong validation
     if(!/^[0-9]{10}$/.test(phone)){
         alert("10 digit valid number podu");
         return;
@@ -108,13 +106,16 @@ function handleAuth() {
 
     const userRef = db.ref('users/' + phone);
 
+    // 🔐 encode password
+    const safePass = btoa(pass);
+
     userRef.once('value', (snap) => {
         const userData = snap.val();
 
         if(userData) {
 
-            // 🔥 password check only (no auto overwrite)
-            if(userData.password === pass) {
+            // 🔐 compare encoded password
+            if(userData.password === safePass) {
                 success(phone);
             } else {
                 attempts++;
@@ -125,10 +126,10 @@ function handleAuth() {
 
         } else {
 
-            // 🔥 new user create
+            // 🔐 save encoded password
             userRef.set({
                 phone: phone,
-                password: pass,
+                password: safePass,
                 username: "Nagai User",
                 coins: 0,
                 joined: new Date().toLocaleString()
@@ -149,7 +150,7 @@ function success(phone) {
     localStorage.setItem('isLoggedIn', 'true');
     window.location.href = 'home.html';
 }
-</script>
-        
-</body>  
-</html>   
+                                         </script>
+</body>
+</html>
+    
