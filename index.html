@@ -55,91 +55,101 @@
     </div>  
 
 </div>  
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+    authDomain: "ff-id-store-dab0f.firebaseapp.com",
+    projectId: "ff-id-store-dab0f",
+    storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+    messagingSenderId: "655049193530",
+    appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+};
 
-<script>  
-    const firebaseConfig = {  
-        apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",  
-        authDomain: "ff-id-store-dab0f.firebaseapp.com",  
-        projectId: "ff-id-store-dab0f",  
-        storageBucket: "ff-id-store-dab0f.firebasestorage.app",  
-        messagingSenderId: "655049193530",  
-        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",  
-        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"  
-    };  
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);  
-    const db = firebase.database();  
+// 🔥 attempt limit
+let attempts = 0;
 
-    if(localStorage.getItem('isLoggedIn') === 'true') {  
-        window.location.href = 'home.html';  
-    }  
+if(localStorage.getItem('isLoggedIn') === 'true') {
+    window.location.href = 'home.html';
+}
 
-    function togglePassword() {  
-        const passInput = document.getElementById('loginPassword');  
-        const eyeIcon = document.getElementById('eye-icon');  
-        if (passInput.type === 'password') {  
-            passInput.type = 'text';  
-            eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;  
-        } else {  
-            passInput.type = 'password';  
-            eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;  
-        }  
-    }  
+function togglePassword() {
+    const passInput = document.getElementById('loginPassword');
+    passInput.type = passInput.type === 'password' ? 'text' : 'password';
+}
 
-    function handleAuth() {  
-        const phone = document.getElementById('phoneNumber').value;  
-        const pass = document.getElementById('loginPassword').value;  
-        const btn = document.getElementById('loginBtn');  
+function handleAuth() {
 
-        if(phone.length < 10 || pass.length < 4) {  
-            alert("Valid number (10 digits) & password (min 4) podunga bro!");  
-            return;  
-        }  
+    if(attempts >= 5){
+        alert("Too many attempts! Try later.");
+        return;
+    }
 
-        btn.innerText = "PROCESSING...";  
-        btn.disabled = true;  
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
 
-        // Direct-ah node-ah check pannuvom  
-        const userRef = db.ref('users/' + phone);  
+    // 🔐 strong validation
+    if(!/^[0-9]{10}$/.test(phone)){
+        alert("10 digit valid number podu");
+        return;
+    }
 
-        userRef.once('value', (snap) => {  
-            const userData = snap.val();  
+    if(pass.length < 6){
+        alert("Password minimum 6 characters!");
+        return;
+    }
 
-            if(userData) {  
-                // Password update fix (Oru vela munnadi password save aagala-na, ippo update pannum)  
-                if (!userData.password) {  
-                    userRef.update({ password: pass })  
-                        .then(() => success(phone))  
-                        .catch(e => alert("Error: " + e.message));  
-                }   
-                else if(userData.password === pass) {  
-                    success(phone);  
-                } else {  
-                    alert("Wrong password! Please try again.");  
-                    btn.innerText = "LOGIN / SIGN UP";  
-                    btn.disabled = false;  
-                }  
-            } else {  
-                // New user creation with password field  
-                userRef.set({  
-                    phone: phone,  
-                    password: pass, // <-- Inga thaan password save aagudhu  
-                    username: "Nagai User",  
-                    coins: 0,  
-                    joined: new Date().toLocaleString()  
-                }).then(() => {  
-                    success(phone);  
-                }).catch(e => alert("Database Error: " + e.message));  
-            }  
-        });  
-    }  
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
 
-    function success(phone) {  
-        localStorage.setItem('user_phone', phone);  
-        localStorage.setItem('isLoggedIn', 'true');  
-        window.location.href = 'home.html';  
-    }  
+    const userRef = db.ref('users/' + phone);
+
+    userRef.once('value', (snap) => {
+        const userData = snap.val();
+
+        if(userData) {
+
+            // 🔥 password check only (no auto overwrite)
+            if(userData.password === pass) {
+                success(phone);
+            } else {
+                attempts++;
+                alert("Wrong password!");
+                btn.innerText = "LOGIN / SIGN UP";
+                btn.disabled = false;
+            }
+
+        } else {
+
+            // 🔥 new user create
+            userRef.set({
+                phone: phone,
+                password: pass,
+                username: "Nagai User",
+                coins: 0,
+                joined: new Date().toLocaleString()
+            }).then(() => {
+                success(phone);
+            }).catch(e => {
+                alert("Database Error: " + e.message);
+                btn.innerText = "LOGIN / SIGN UP";
+                btn.disabled = false;
+            });
+
+        }
+    });
+}
+
+function success(phone) {
+    localStorage.setItem('user_phone', phone);
+    localStorage.setItem('isLoggedIn', 'true');
+    window.location.href = 'home.html';
+}
 </script>
-
+        
 </body>  
 </html>   
