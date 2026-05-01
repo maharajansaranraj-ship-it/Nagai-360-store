@@ -40,90 +40,85 @@
     </main>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
-            authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
-            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+        authDomain: "ff-id-store-dab0f.firebaseapp.com",
+        projectId: "ff-id-store-dab0f",
+        storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+        messagingSenderId: "655049193530",
+        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+    };
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const userPhone = localStorage.getItem('user_phone');
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const userPhone = localStorage.getItem('user_phone');
 
-        if(userPhone) {
-            db.ref('users/' + userPhone + '/myOrders').on('value', (snapshot) => {
-                const container = document.getElementById('orders-container');
-                container.innerHTML = ""; 
-                const orders = snapshot.val();
+    if(userPhone) {
+        db.ref('users/' + userPhone + '/myOrders').on('value', (snapshot) => {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = ""; 
+            const orders = snapshot.val();
 
-                if(orders) {
-                    const orderKeys = Object.keys(orders).reverse();
+            if(orders) {
+                const orderKeys = Object.keys(orders).reverse();
+                
+                orderKeys.forEach(id => {
+                    const order = orders[id];
+                    const statusClass = getStatusStyle(order.status);
+                    const displayImg = order.productImg || "https://via.placeholder.com/150?text=Nagai+360";
                     
-                    orderKeys.forEach(id => {
-                        const order = orders[id];
-                        const statusClass = getStatusStyle(order.status);
-                        const displayImg = order.productImg || "https://via.placeholder.com/150?text=Nagai+360";
-                        
-                        // ✅ Fixing the ID Logic
-                        const targetID = order.productID || order.pid || ""; 
+                    // ✅ Logical Fix: First priority to productID, then pid
+                    const finalPID = order.productID || order.pid || ""; 
 
-                        container.innerHTML += `
-                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer" 
-                                 onclick="goToProduct('${targetID}')">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
-                                        <h3 class="font-black text-slate-800">#${order.orderID}</h3>
-                                    </div>
-                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+                    container.innerHTML += `
+                        <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer" 
+                             onclick="if('${finalPID}' !== ''){ window.location.href='product-details.html?id=${finalPID}'; } else { alert('Product ID missing in this order!'); }">
+                            
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
+                                    <h3 class="font-black text-slate-800">#${order.orderID}</h3>
                                 </div>
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 py-4 border-y border-slate-50">
+                                <img src="${displayImg}" class="w-14 h-14 object-cover rounded-2xl shadow-inner bg-slate-50" onerror="this.src='https://via.placeholder.com/150'">
                                 
-                                <div class="flex items-center gap-4 py-4 border-y border-slate-50">
-                                    <img src="${displayImg}" class="w-14 h-14 object-cover rounded-2xl shadow-inner bg-slate-50" onerror="this.src='https://via.placeholder.com/150'">
-                                    
-                                    <div class="flex-1">
-                                        <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
-                                        <p class="text-[10px] text-slate-400 font-medium">${order.orderDate}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
-                                    </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium">${order.orderDate}</p>
                                 </div>
-
-                                <div class="mt-4 flex justify-between items-center">
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${order.paymentMode || 'COD Payment'}</p>
-                                    <button onclick="event.stopPropagation(); alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
+                                <div class="text-right">
+                                    <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
                                 </div>
                             </div>
-                        `;
-                    });
-                } else {
-                    container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
-                }
-            });
-        }
 
-        function goToProduct(pid) {
-            console.log("Navigating to Product ID:", pid); // Debugging
-            if(pid && pid !== "" && pid !== "undefined") {
-                window.location.href = 'product-details.html?id=' + pid;
+                            <div class="mt-4 flex justify-between items-center">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${order.paymentMode || 'COD Payment'}</p>
+                                <button onclick="event.stopPropagation(); alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
+                            </div>
+                        </div>
+                    `;
+                });
             } else {
-                alert("Product ID mismatch! Check if this order has a product ID.");
+                container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
             }
-        }
+        });
+    } else {
+        window.location.href = 'index.html';
+    }
 
-        function getStatusStyle(status) {
-            switch(status?.toLowerCase()) {
-                case 'delivered': return 'bg-green-100 text-green-600';
-                case 'shipped': return 'bg-blue-100 text-blue-600';
-                case 'order placed': return 'bg-orange-100 text-orange-600';
-                default: return 'bg-slate-100 text-slate-600';
-            }
+    function getStatusStyle(status) {
+        switch(status?.toLowerCase()) {
+            case 'delivered': return 'bg-green-100 text-green-600';
+            case 'shipped': return 'bg-blue-100 text-blue-600';
+            case 'order placed': return 'bg-orange-100 text-orange-600';
+            default: return 'bg-slate-100 text-slate-600';
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
