@@ -54,8 +54,8 @@
         <p id="msg" class="text-[10px] text-slate-400">Enter your number and password to continue.</p>  
     </div>  
 
-</div>  
-<script>
+</div> 
+    <script>
 const firebaseConfig = {
     apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
     authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -79,28 +79,26 @@ function togglePassword() {
     const passInput = document.getElementById('loginPassword');
     passInput.type = passInput.type === 'password' ? 'text' : 'password';
 }
-    function handleAuth() {
+
+function handleAuth() {
 
     const phone = document.getElementById('phoneNumber').value.trim();
     const pass = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
 
-    // 🔥 ADMIN CHECK FIRST
+    // 🔥 ADMIN LOGIN
     if(phone === "9999999999" && pass === "admin123"){
         window.location.href = "admin.html";
         return;
     }
 
+    // 🔥 attempt limit
     if(attempts >= 5){
         alert("Too many attempts! Try later.");
         return;
     }
 
-
-    const phone = document.getElementById('phoneNumber').value.trim();
-    const pass = document.getElementById('loginPassword').value;
-    const btn = document.getElementById('loginBtn');
-
+    // 🔐 validation
     if(!/^[0-9]{10}$/.test(phone)){
         alert("10 digit valid number podu");
         return;
@@ -124,7 +122,6 @@ function togglePassword() {
 
         if(userData) {
 
-            // 🔐 compare encoded password
             if(userData.password === safePass) {
                 success(phone);
             } else {
@@ -136,7 +133,6 @@ function togglePassword() {
 
         } else {
 
-            // 🔐 save encoded password
             userRef.set({
                 phone: phone,
                 password: safePass,
@@ -160,7 +156,8 @@ function success(phone) {
     localStorage.setItem('isLoggedIn', 'true');
     window.location.href = 'home.html';
 }
-                                         </script>
+    </script>
+                
 </body>
 </html>
     
