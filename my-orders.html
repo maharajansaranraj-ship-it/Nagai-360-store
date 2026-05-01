@@ -12,10 +12,8 @@
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #fdfdfd; }
-        .order-card { transition: all 0.3s ease; }
-        .order-card:active { transform: scale(0.98); }
-        /* Custom scrollbar hide */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .order-card { transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        .order-card:active { transform: scale(0.97); background-color: #fafafa; }
     </style>
 </head>
 <body class="pb-10">
@@ -52,7 +50,7 @@
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const userPhone = localStorage.getItem('user_phone');
 
@@ -68,16 +66,14 @@
                     orderKeys.forEach(id => {
                         const order = orders[id];
                         const statusClass = getStatusStyle(order.status);
-                        
-                        // Default image if missing
                         const displayImg = order.productImg || "https://via.placeholder.com/150?text=Nagai+360";
                         
-                        // ✅ Fixing the Click Issue: Make sure ID is valid
-                        const targetID = order.productID || order.pid; 
+                        // ✅ Fixing the ID Logic
+                        const targetID = order.productID || order.pid || ""; 
 
                         container.innerHTML += `
-                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card" 
-                                 onclick="goToProduct('${targetID}')" style="cursor: pointer;">
+                            <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer" 
+                                 onclick="goToProduct('${targetID}')">
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
@@ -100,30 +96,23 @@
 
                                 <div class="mt-4 flex justify-between items-center">
                                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${order.paymentMode || 'COD Payment'}</p>
-                                    <button onclick="event.stopPropagation(); alert('Help center coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
+                                    <button onclick="event.stopPropagation(); alert('Help center feature coming soon!')" class="text-[10px] font-bold text-orange-500 hover:underline">NEED HELP?</button>
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    container.innerHTML = `
-                        <div class="text-center py-20">
-                            <p class="text-slate-300 font-bold text-sm">No orders found yet!</p>
-                            <button onclick="window.location.href='home.html'" class="mt-4 text-orange-500 font-bold text-xs uppercase tracking-widest">Start Shopping</button>
-                        </div>
-                    `;
+                    container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
                 }
             });
-        } else {
-            window.location.href = 'index.html';
         }
 
-        // ✅ Function updated to handle missing IDs
         function goToProduct(pid) {
-            if(pid && pid !== "undefined" && pid !== "null") {
+            console.log("Navigating to Product ID:", pid); // Debugging
+            if(pid && pid !== "" && pid !== "undefined") {
                 window.location.href = 'product-details.html?id=' + pid;
             } else {
-                alert("Sorry! Product details not found for this old order.");
+                alert("Product ID mismatch! Check if this order has a product ID.");
             }
         }
 
