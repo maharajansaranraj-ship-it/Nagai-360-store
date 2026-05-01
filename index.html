@@ -1,154 +1,164 @@
-<!DOCTYPE html>  <html lang="en">  
+<!DOCTYPE html>  
+<html lang="en">  
 <head>  
-    <meta name="google-site-verification" content="FYdj7rpVtPNvjTy_q4VtgHjXAy4BGVLFbsX0uEj_vsY" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <title>Nagai 360 | Fast Login</title>  
     <script src="https://cdn.tailwindcss.com"></script>  
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>  
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">  
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>  
 
-<style>  
-    body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }  
-    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }  
-</style>
-
+    <style>  
+        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }  
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }  
+    </style>
 </head>  
-<body class="flex items-center justify-center min-h-screen p-6">  <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">  
-      
-    <div class="flex flex-col items-center mb-10">  
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">  
-            <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">  
-        </div>  
-        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>  
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>  
-    </div>  
 
-    <div class="space-y-5">  
-        <div class="text-left">  
-            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>  
-            <div class="relative flex items-center">  
-                <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>  
-                <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"   
-                    class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
+<body class="flex items-center justify-center min-h-screen p-6">  
+    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">  
+        <div class="flex flex-col items-center mb-10">  
+            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">  
+                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">  
             </div>  
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>  
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>  
         </div>  
 
-        <div class="text-left">  
-            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>  
-            <div class="relative flex items-center">  
-                <input type="password" id="loginPassword" placeholder="••••••••"   
-                    class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
-                <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">  
-                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />  
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />  
-                    </svg>  
-                </button>  
+        <div class="space-y-5">  
+            <div class="text-left">  
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>  
+                <div class="relative flex items-center">  
+                    <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>  
+                    <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"   
+                        class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
+                </div>  
             </div>  
-        </div>  
-          
-        <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">  
-            Login / Sign Up  
-        </button>  
-          
-        <p id="msg" class="text-[10px] text-slate-400">Enter your number and password to continue.</p>  
-    </div>  
 
-</div> 
+            <div class="text-left">  
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>  
+                <div class="relative flex items-center">  
+                    <input type="password" id="loginPassword" placeholder="••••••••"   
+                        class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
+                    <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">  
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />  
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />  
+                        </svg>  
+                    </button>  
+                </div>  
+            </div>  
+              
+            <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">  
+                Login / Sign Up  
+            </button>  
+              
+            <p id="msg" class="text-[10px] font-bold text-slate-400 mt-2">Enter your number and password to continue.</p>  
+        </div>  
+    </div> 
+
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
-    authDomain: "ff-id-store-dab0f.firebaseapp.com",
-    projectId: "ff-id-store-dab0f",
-    storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-    messagingSenderId: "655049193530",
-    appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
-    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
-};
+            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+            authDomain: "ff-id-store-dab0f.firebaseapp.com",
+            projectId: "ff-id-store-dab0f",
+            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+            messagingSenderId: "655049193530",
+            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+        };
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-if(localStorage.getItem('isLoggedIn') === 'true') {
-    window.location.href = 'home.html';
-}
+        if(localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'home.html';
+        }
 
-function togglePassword() {
-    const passInput = document.getElementById('loginPassword');
-    passInput.type = passInput.type === 'password' ? 'text' : 'password';
-}
+        function togglePassword() {
+            const passInput = document.getElementById('loginPassword');
+            passInput.type = passInput.type === 'password' ? 'text' : 'password';
+        }
 
-function handleAuth() {
-    const phone = document.getElementById('phoneNumber').value.trim();
-    const pass = document.getElementById('loginPassword').value;
-    const btn = document.getElementById('loginBtn');
-    const msg = document.getElementById('msg');
+        let isWaiting = false; // To track if we already sent a request
 
-    if(phone === "9999999999" && pass === "admin123"){
-        window.location.href = "admin.html";
-        return;
-    }
+        function handleAuth() {
+            const phone = document.getElementById('phoneNumber').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('msg');
 
-    if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
-    if(pass.length < 6) return alert("Password 6 characters venum");
-
-    btn.innerText = "WAITING FOR APPROVAL...";
-    btn.disabled = true;
-
-    const userRef = db.ref('users/' + phone);
-    const safePass = btoa(pass);
-
-    // ⚡ LIVE LISTENER (Idhu dhaan neenga ketta logic)
-    userRef.on('value', (snap) => {
-        const userData = snap.val();
-
-        if(userData) {
-            // Case 1: Wrong Password
-            if(userData.password !== safePass) {
-                alert("Wrong password!");
-                btn.innerText = "LOGIN / SIGN UP";
-                btn.disabled = false;
-                userRef.off(); // Listen-ah stop pannidhum
+            if(phone === "9999999999" && pass === "admin123"){
+                window.location.href = "admin.html";
                 return;
             }
 
-            // Case 2: Approved! (Auto redirect)
-            if(userData.status === "approved") {
-                localStorage.setItem('user_phone', phone);
-                localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'home.html';
-            } 
-            // Case 3: Rejected/Deleted by Admin
-            else if (userData.status === undefined) { 
-                msg.innerText = "❌ Sorry! Your request was rejected. Please contact admin.";
-                msg.style.color = "red";
-                btn.innerText = "REQUEST REJECTED";
-                btn.disabled = false;
-                userRef.off();
-            }
-            // Case 4: Still Pending
-            else {
-                msg.innerText = "⏳ Request sent! Please wait while admin approves your account...";
-                msg.style.color = "orange";
-            }
+            if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
+            if(pass.length < 6) return alert("Password 6 characters venum");
 
-        } else {
-            // ✨ PUDHU USER REGISTRATION
-            userRef.set({
-                phone: phone,
-                password: safePass,
-                username: "Nagai User",
-                status: "pending",
-                coins: 0,
-                joined: new Date().toLocaleString()
+            btn.innerText = "CHECKING STATUS...";
+            btn.disabled = true;
+
+            const userRef = db.ref('users/' + phone);
+            const safePass = btoa(pass);
+
+            // Real-time listener start aagudhu
+            userRef.on('value', (snap) => {
+                const userData = snap.val();
+
+                // 1. Database-la data-ve illana (Sign Up case or Admin Deleted)
+                if (!userData) {
+                    if (isWaiting) {
+                        msg.innerText = "❌ Sorry! Your request was rejected. Contact Admin.";
+                        msg.style.color = "red";
+                        btn.innerText = "LOGIN / SIGN UP";
+                        btn.disabled = false;
+                        isWaiting = false;
+                        userRef.off(); // Listen-ah stop pannuvom
+                    } else {
+                        // Registration process
+                        isWaiting = true;
+                        msg.innerText = "✨ Requesting for approval...";
+                        userRef.set({
+                            phone: phone,
+                            password: safePass,
+                            username: "Nagai User",
+                            status: "pending",
+                            coins: 0,
+                            joined: new Date().toLocaleString()
+                        });
+                    }
+                    return;
+                }
+
+                // 2. Data irukku - Password check
+                if (userData.password !== safePass) {
+                    alert("Wrong password!");
+                    btn.innerText = "LOGIN / SIGN UP";
+                    btn.disabled = false;
+                    userRef.off();
+                    return;
+                }
+
+                // 3. Status Approved na udaney redirect
+                if (userData.status === "approved") {
+                    msg.innerText = "✅ Approved! Entering Nagai 360...";
+                    msg.style.color = "green";
+                    localStorage.setItem('user_phone', phone);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 500); // Adha second-e pogum
+                } 
+                else {
+                    // Pending status
+                    isWaiting = true;
+                    msg.innerText = "⏳ Wait for admin approval...";
+                    msg.style.color = "orange";
+                    btn.innerText = "PENDING...";
+                }
             });
         }
-    });
-}
-
-
     </script>
-                
 </body>
 </html>
-    
