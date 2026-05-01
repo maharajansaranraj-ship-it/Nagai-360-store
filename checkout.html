@@ -115,7 +115,7 @@
     const rechargeFee = 80;
     const myUpiId = "yourname@okicici"; // 👈 UNGA UPI ID INGA MATHUNGA
 
-    // 2. UI Update Function (Calculates Subtotal and Size)
+    // 2. UI Update & Sold Out Safety Check
     function updateUI() {
         const listDiv = document.getElementById('items-list');
         listDiv.innerHTML = "";
@@ -123,10 +123,30 @@
         let finalSize = "N/A";
 
         if(cartItems.length > 0) {
+            // First item-ah check panrom (Main validation)
+            const firstItem = cartItems[0];
+            const pId = firstItem.pid || firstItem.productID;
+
+            // ✅ SOLD OUT CHECK LOGIC
+            db.ref('products/' + pId).on('value', (snap) => {
+                const p = snap.val();
+                if (!p || p.isSoldOut) {
+                    // Block checkout if product is sold out or deleted
+                    document.querySelector('main').innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-24 text-center">
+                            <div class="text-6xl mb-4">🚫</div>
+                            <h2 class="text-xl font-bold text-slate-800">Item Unavailable</h2>
+                            <p class="text-slate-400 text-sm mt-2 px-10">This product just went out of stock or was removed.</p>
+                            <button onclick="location.href='home.html'" class="mt-8 bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-widest">Back to Home</button>
+                        </div>`;
+                    document.querySelector('.fixed.bottom-0').classList.add('hidden');
+                    return;
+                }
+            });
+
             document.getElementById('product-preview-sec').classList.remove('hidden');
             cartItems.forEach((item, index) => {
                 subtotal += parseInt(item.price);
-                // Item size-ah correct-ah yedukkurom
                 const itemSize = item.size || item.selectedSize || 'M';
                 if(index === 0) finalSize = itemSize;
 
@@ -147,7 +167,7 @@
         }
     }
 
-    // 3. Load Data (From Cart or Direct Buy)
+    // 3. Load Data
     db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
         const data = snap.val();
         if(data) {
@@ -162,14 +182,12 @@
         }
     });
 
-    // 4. Payment Selection
     function selectPayment(method, el) {
         selectedMethod = method;
         document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected-pay'));
         el.classList.add('selected-pay');
     }
 
-    // 5. Handle Place Order (UPI Logic Included)
     function handlePlaceOrder() {
         const name = document.getElementById('cust-name').value;
         const addr = document.getElementById('cust-address').value;
@@ -180,53 +198,57 @@
 
         const totalAmount = subtotal + rechargeFee;
 
-        if(selectedMethod === "UPI") {
-            const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
-            window.location.href = upiUrl;
-            // Payment screen redirect aaga 4 sec wait panni appuram order save aagum
-            setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
-        } else {
-            placeOrder(name, addr, pin, totalAmount);
-        }
+        // ✅ FINAL CHECK BEFORE PAYMENT
+        const pId = cartItems[0].pid || cartItems[0].productID;
+        db.ref('products/' + pId + '/isSoldOut').once('value', (snap) => {
+            if(snap.val() === true) {
+                alert("Sorry! This product just sold out.");
+                window.location.href = 'home.html';
+                return;
+            }
+
+            if(selectedMethod === "UPI") {
+                const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
+                window.location.href = upiUrl;
+                setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
+            } else {
+                placeOrder(name, addr, pin, totalAmount);
+            }
+        });
     }
 
-    // 6. Final Order Save to Firebase
     function placeOrder(name, addr, pin, totalAmount) {
         document.getElementById('loading-overlay').classList.remove('hidden');
         const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
-        
         const firstItem = cartItems[0];
         
-        // ✅ ADMIN LOGIC MATCHING KEYS
         const orderData = {
             orderID: orderID, 
             customerName: name, 
             primaryPhone: userPhone,
             fullAddress: `${addr}, Pin: ${pin}`,
-            totalBill: totalAmount, // <--- Amount for Admin
+            totalBill: totalAmount,
             paymentMode: selectedMethod,
             productImg: firstItem.img || firstItem.image,
             productName: firstItem.name,
             productID: firstItem.pid || firstItem.productID || "", 
-            size: firstItem.size || firstItem.selectedSize || "M", // <--- Size for Admin
+            size: firstItem.size || firstItem.selectedSize || "M",
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
             timestamp: Date.now()
         };
 
-        // Save to Main Admin Orders
-        db.ref('orders/' + orderID).set(orderData).then(() => {
-            // Save to User's History
-            db.ref('users/' + userPhone + '/myOrders/' + orderID).set(orderData);
-            
-            // Cleanup
+        const updates = {};
+        updates['/orders/' + orderID] = orderData;
+        updates['/users/' + userPhone + '/myOrders/' + orderID] = orderData;
+
+        db.ref().update(updates).then(() => {
             db.ref('users/' + userPhone + '/cart').remove();
             localStorage.removeItem('checkout_item');
-            
             document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
             setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
         }).catch((err) => {
-            alert("Order Error: " + err.message);
+            alert("Error: " + err.message);
             document.getElementById('loading-overlay').classList.add('hidden');
         });
     }
