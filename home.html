@@ -33,14 +33,22 @@
 
     <script>
         if(localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'index.html'; // Inga unga login page name kudunga
+            window.location.href = 'index.html'; 
         }
     </script>
 
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
-        <div>
-            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
+        <div class="flex items-center gap-3">
+            <img src="logo.png" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-100" onerror="this.src='https://ui-avatars.com/api/?name=N&background=f97316&color=fff'">
+            
+            <div>
+                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                    NAGAI <span class="text-orange-500">360</span>
+                </h1>
+                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">Premium Collections</p>
+            </div>
         </div>
+        
         <div class="flex items-center gap-4">
             <div class="bg-orange-50 px-3 py-1 rounded-full flex items-center gap-1 border border-orange-100">
                 <span class="text-sm">🪙</span>
@@ -67,9 +75,9 @@
 
     <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar">
         <button class="px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-200">All</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Saree</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Chudidhar</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Western</button>
+        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Rings</button>
+        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Chains</button>
+        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Watches</button>
     </div>
 
     <main class="masonry" id="main-product-grid">
@@ -108,19 +116,20 @@
         const db = firebase.database();
         const userPhone = localStorage.getItem('user_phone');
 
-        // ✅ User Data & Coins Fetch
+        // User Data Fetch
         if(userPhone) {
             db.ref('users/' + userPhone).on('value', (snap) => {
                 const data = snap.val();
                 if(data) {
                     document.getElementById('user-coins').innerText = data.coins || 0;
-                    const cartItems = data.cart ? Object.keys(data.cart).length : 0;
-                    document.getElementById('cart-count').innerText = cartItems;
+                    const cartCount = data.cart ? Object.keys(data.cart).length : 0;
+                    document.getElementById('cart-count').innerText = cartCount;
+                    if(data.profileImg) document.getElementById('user-avatar').src = data.profileImg;
                 }
             });
         }
 
-        // ✅ Product Grid Fetch
+        // Product Grid Fetch
         db.ref('products').on('value', (snapshot) => {
             const grid = document.getElementById('main-product-grid');
             const data = snapshot.val();
@@ -130,12 +139,12 @@
                 Object.keys(data).reverse().forEach(key => {
                     const p = data[key];
                     const soldOutUI = p.isSoldOut ? `
-                        <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10 shadow-lg">SOLD OUT</div>
+                        <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
                         <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
                     ` : '';
 
                     grid.innerHTML += `
-                        <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative group">
+                        <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
                             ${soldOutUI}
                             <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" 
                                     class="absolute top-3 right-3 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md active:scale-125 transition-all">
@@ -143,7 +152,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
-                            <div onclick="${p.isSoldOut ? "alert('Currently out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
+                            <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
                                 <img src="${p.images[0]}" class="w-full object-cover min-h-[150px]">
                                 <div class="p-4">
                                     <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
@@ -153,18 +162,19 @@
                         </div>`;
                 });
             } else {
-                grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400 font-bold'>No Collections Yet!</p>";
+                grid.innerHTML = "<p class='text-center py-20 text-slate-400 font-bold'>No items found.</p>";
             }
         });
 
         function toggleWishlist(event, id, name, img, price) {
             event.stopPropagation();
-            if(!userPhone) return alert("Login to add wishlist!");
+            if(!userPhone) return alert("Login first!");
             const heartIcon = document.getElementById('heart-' + id);
             db.ref('users/' + userPhone + '/wishlist/' + id).set({
                 name: name, image: img, price: price
             }).then(() => {
                 heartIcon.classList.add('active-heart');
+                heartIcon.style.color = "#ef4444";
             });
         }
     </script>
