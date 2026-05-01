@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nagai 360 | Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #f8f9fa; }
+        .product-card { @apply bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 active:scale-95 transition-all; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <header class="p-5 bg-white sticky top-0 z-50 flex items-center gap-4 border-b border-slate-50">
+        <button onclick="history.back()" class="p-2 bg-slate-50 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Showing Results for</p>
+            <h1 id="search-title" class="text-lg font-bold text-slate-800">Searching...</h1>
+        </div>
+    </header>
+
+    <main id="product-list" class="grid-container">
+        </main>
+
+    <div id="no-results" class="hidden flex flex-col items-center justify-center py-24 text-center">
+        <div class="text-6xl mb-4">🔍</div>
+        <h2 class="text-lg font-bold text-slate-800">No Products Found</h2>
+        <p class="text-slate-400 text-sm mt-2 px-10">Try searching with other keywords.</p>
+    </div>
+
+<script>
+    // 1. Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+        authDomain: "ff-id-store-dab0f.firebaseapp.com",
+        projectId: "ff-id-store-dab0f",
+        storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+        messagingSenderId: "655049193530",
+        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. Search Query edukkurom (URL-la irundhu)
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q') ? params.get('q').toLowerCase() : "";
+    document.getElementById('search-title').innerText = `"${query}"`;
+
+    // 3. Database-la filter panni products-ah list panrom
+    if (query) {
+        db.ref('products').once('value', (snap) => {
+            const products = snap.val();
+            const container = document.getElementById('product-list');
+            const noResults = document.getElementById('no-results');
+            container.innerHTML = "";
+            let count = 0;
+
+            if (products) {
+                Object.keys(products).forEach(id => {
+                    const p = products[id];
+                    const name = p.name.toLowerCase();
+                    const category = p.category ? p.category.toLowerCase() : "";
+
+                    if (name.includes(query) || category.includes(query)) {
+                        count++;
+                        container.innerHTML += `
+                            <div class="product-card" onclick="location.href='product-details.html?id=${id}'">
+                                <div class="relative">
+                                    <img src="${p.images[0]}" class="w-full h-44 object-cover">
+                                    ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-bold text-red-600 text-[10px] uppercase">Sold Out</div>' : ''}
+                                </div>
+                                <div class="p-3">
+                                    <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
+                                        <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full font-bold">★ 4.2</span>
+                                    </div>
+                                    <p class="text-[8px] text-slate-400 mt-1 uppercase tracking-tighter">Free Delivery</p>
+                                </div>
+                            </div>`;
+                    }
+                });
+            }
+
+            if (count === 0) {
+                noResults.classList.remove('hidden');
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
+
