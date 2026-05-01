@@ -83,7 +83,7 @@
         </div>
     </main>
 
-    <script>
+            <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
         authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -93,7 +93,8 @@
         appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
         databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
     };
-    firebase.initializeApp(firebaseConfig);
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function showTab(tab) {
@@ -105,7 +106,7 @@
         document.getElementById(tab + '-tab').classList.add('active-tab');
     }
 
-    // ✅ FIXED: FETCH & SORT ORDERS (Live and Delivered)
+    // ✅ FIXED: FETCH ORDERS WITH SIZE & CASH
     db.ref('orders').on('value', (snap) => {
         const freshList = document.getElementById('admin-orders-list');
         const deliveredList = document.getElementById('admin-delivered-list');
@@ -118,7 +119,7 @@
             Object.keys(data).reverse().forEach(id => {
                 const order = data[id];
                 
-                // HTML Card Template
+                // ✅ SIZE & CASH Logic applied inside Card HTML
                 const cardHTML = `
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-4">
                         <div class="flex justify-between items-start">
@@ -130,16 +131,22 @@
                         </div>
 
                         <div class="flex items-center gap-4 my-4">
-                            <img src="${order.productImg}" class="w-12 h-12 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                            <img src="${order.productImg || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/150'">
                             <div class="flex-1">
-                                <p class="text-sm font-bold text-slate-700">${order.productName || 'Product Name'}</p>
-                                <p class="text-xs text-slate-400">${order.customerName} - ${order.primaryPhone}</p>
+                                <p class="text-sm font-bold text-slate-700">${order.productName || 'Nagai Product'}</p>
+                                
+                                <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-0.5">SIZE: ${order.size || order.productSize || 'N/A'}</p>
+                                
+                                <p class="text-xs text-slate-400 mt-1">${order.customerName || 'No Name'} - ${order.primaryPhone || 'No Phone'}</p>
                             </div>
-                            <p class="font-black text-slate-800">₹${order.totalBill}</p>
+                            <div class="text-right">
+                                <p class="font-black text-slate-800 text-base">₹${order.totalBill || '0'}</p>
+                                <p class="text-[8px] font-black text-slate-300 uppercase">${order.paymentMode || 'COD'}</p>
+                            </div>
                         </div>
 
                         <div class="bg-slate-50 p-3 rounded-2xl mb-4 text-[10px] text-slate-500">
-                            <p><span class="font-bold">ADDR:</span> ${order.fullAddress}</p>
+                            <p><span class="font-bold text-slate-700">ADDR:</span> ${order.fullAddress || 'No Address'}</p>
                         </div>
 
                         ${order.status !== 'Delivered' ? `
@@ -162,14 +169,14 @@
         }
     });
 
-    // ✅ FIXED: UPDATE STATUS FUNCTION
+    // UPDATE STATUS FUNCTION
     function updateStatus(orderKey, newStatus) {
         db.ref('orders/' + orderKey).update({ status: newStatus })
         .then(() => alert("Order updated to " + newStatus))
         .catch(err => alert("Error: " + err.message));
     }
 
-    // ✅ FIXED: UPLOAD PRODUCT FUNCTION
+    // UPLOAD PRODUCT FUNCTION
     function uploadProduct() {
         const name = document.getElementById('p-name').value;
         const price = document.getElementById('p-price').value;
@@ -192,6 +199,7 @@
         });
     }
 </script>
+
 
 </body>
 </html>
