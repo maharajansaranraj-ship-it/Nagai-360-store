@@ -56,7 +56,7 @@
 
 </div> 
     <script>
-const firebaseConfig = {
+        const firebaseConfig = {
     apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
     authDomain: "ff-id-store-dab0f.firebaseapp.com",
     projectId: "ff-id-store-dab0f",
@@ -81,7 +81,6 @@ function togglePassword() {
 }
 
 function handleAuth() {
-
     const phone = document.getElementById('phoneNumber').value.trim();
     const pass = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
@@ -92,13 +91,11 @@ function handleAuth() {
         return;
     }
 
-    // 🔥 attempt limit
     if(attempts >= 5){
         alert("Too many attempts! Try later.");
         return;
     }
 
-    // 🔐 validation
     if(!/^[0-9]{10}$/.test(phone)){
         alert("10 digit valid number podu");
         return;
@@ -109,20 +106,23 @@ function handleAuth() {
         return;
     }
 
-    btn.innerText = "PROCESSING...";
+    btn.innerText = "VERIFYING...";
     btn.disabled = true;
 
     const userRef = db.ref('users/' + phone);
-
-    // 🔐 encode password
     const safePass = btoa(pass);
 
     userRef.once('value', (snap) => {
         const userData = snap.val();
 
         if(userData) {
-
-            if(userData.password === safePass) {
+            // ✅ USER EXIST CHECK
+            if(userData.status === "pending") {
+                // Innum approve aagala
+                alert("Account Pending! Admin approve pannadhukku aprom login pannunga.");
+                btn.innerText = "WAITING FOR APPROVAL";
+            } else if(userData.password === safePass) {
+                // Success and Approved
                 success(phone);
             } else {
                 attempts++;
@@ -130,23 +130,23 @@ function handleAuth() {
                 btn.innerText = "LOGIN / SIGN UP";
                 btn.disabled = false;
             }
-
         } else {
-
+            // ✨ NEW REGISTRATION (STATUS PENDING)
             userRef.set({
                 phone: phone,
                 password: safePass,
                 username: "Nagai User",
+                status: "pending", // 👈 Admin approval-kaga pending-la vaikkom
                 coins: 0,
                 joined: new Date().toLocaleString()
             }).then(() => {
-                success(phone);
+                alert("Registration Sent! Admin approve pannadhukku aprom login pannunga.");
+                btn.innerText = "SENT TO ADMIN";
             }).catch(e => {
                 alert("Database Error: " + e.message);
                 btn.innerText = "LOGIN / SIGN UP";
                 btn.disabled = false;
             });
-
         }
     });
 }
@@ -156,6 +156,7 @@ function success(phone) {
     localStorage.setItem('isLoggedIn', 'true');
     window.location.href = 'home.html';
 }
+
     </script>
                 
 </body>
