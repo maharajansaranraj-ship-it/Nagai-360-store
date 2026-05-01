@@ -12,7 +12,7 @@
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #ffffff; overflow-x: hidden; }
-        .active-size { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; transform: scale(1.05); }
+        .active-size, .active-color { border-color: #ff8c00 !important; background-color: #fff7ed !important; color: #ff8c00 !important; transform: scale(1.05); }
         .header-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%); }
         .slider-wrapper { overflow: hidden; position: relative; border-bottom-left-radius: 3rem; border-bottom-right-radius: 3rem; }
         .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
@@ -57,7 +57,12 @@
 
             <div class="mt-8" id="size-section">
                 <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Select Size</h3>
-                <div class="flex gap-4" id="size-container"></div>
+                <div class="flex gap-4 no-scrollbar overflow-x-auto pb-2" id="size-container"></div>
+            </div>
+
+            <div class="mt-6" id="color-section">
+                <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Select Color</h3>
+                <div class="flex gap-4 no-scrollbar overflow-x-auto pb-2" id="color-container"></div>
             </div>
 
             <div class="mt-10">
@@ -81,15 +86,14 @@
     <div id="error-content" class="hidden flex flex-col items-center justify-center min-h-screen p-10 text-center">
         <div class="text-6xl mb-4">🔍</div>
         <h2 class="text-xl font-bold text-slate-800">Product Not Found</h2>
-        <p class="text-slate-400 text-sm mt-2">The collection you're looking for might have been removed.</p>
         <button onclick="location.href='home.html'" class="mt-8 bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-xs uppercase tracking-widest">Back to Home</button>
     </div>
 
     <div id="footer-buttons" class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl p-6 border-t border-slate-100 flex gap-4 z-[100] hidden">
-        <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] transition-all active:scale-95 text-xs tracking-widest">
-            ADD TO CART
+        <button onclick="addToCart()" class="flex-1 bg-slate-100 text-slate-800 font-bold py-5 rounded-[2rem] transition-all active:scale-95 text-[10px] tracking-widest uppercase">
+            Add to Bag
         </button>
-        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-200 transition-all active:scale-95 text-xs tracking-widest uppercase">
+        <button onclick="buyNow()" class="flex-1 bg-orange-500 text-white font-bold py-5 rounded-[2rem] shadow-xl shadow-orange-200 transition-all active:scale-95 text-[10px] tracking-widest uppercase">
             Buy Now
         </button>
     </div>
@@ -112,24 +116,22 @@
         const userPhone = localStorage.getItem('user_phone');
         
         let selectedSize = ""; 
+        let selectedColor = ""; 
         let productData = null;
         let currentIdx = 0;
         let startX = 0;
 
         if(productId) {
-            // ✅ REAL-TIME LISTENER: Admin sold out or delete panna udane maarum
             db.ref('products/' + productId).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     productData = data;
                     document.getElementById('product-content').classList.remove('hidden');
                     document.getElementById('error-content').classList.add('hidden');
-                    
                     document.getElementById('product-name').innerText = data.name;
                     document.getElementById('product-price').innerText = "₹" + data.price;
                     document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
                     
-                    // ✅ SOLD OUT LOGIC
                     const footer = document.getElementById('footer-buttons');
                     const badge = document.getElementById('sold-out-badge');
                     const slider = document.getElementById('slider-main');
@@ -144,29 +146,38 @@
                         slider.classList.remove('sold-out-overlay');
                     }
 
-                    // LOAD SIZES
+                    // ✅ SIZES RENDER
                     const sizeCont = document.getElementById('size-container');
                     sizeCont.innerHTML = "";
                     if(data.sizes && data.sizes.length > 0) {
                         data.sizes.forEach((s, idx) => {
                             const activeClass = idx === 0 ? 'active-size' : '';
                             if(idx === 0) selectedSize = s;
-                            sizeCont.innerHTML += `
-                                <button onclick="selectSize(this)" class="size-btn w-14 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">
-                                    ${s}
-                                </button>`;
+                            sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
                         });
                     } else {
-                        sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size Available</p>";
+                        sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size</p>";
                         selectedSize = "Free Size";
                     }
 
-                    // SLIDER LOGIC
+                    // ✅ COLORS RENDER
+                    const colorCont = document.getElementById('color-container');
+                    colorCont.innerHTML = "";
+                    if(data.colors && data.colors.length > 0) {
+                        data.colors.forEach((c, idx) => {
+                            const activeClass = idx === 0 ? 'active-color' : '';
+                            if(idx === 0) selectedColor = c;
+                            colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
+                        });
+                    } else {
+                        colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
+                        selectedColor = "Default";
+                    }
+
+                    // SLIDER
                     const imageSlider = document.getElementById('imageSlider');
                     const dotsCont = document.getElementById('sliderDots');
-                    imageSlider.innerHTML = ""; 
-                    dotsCont.innerHTML = "";
-
+                    imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
                     if(data.images && data.images.length > 0) {
                         data.images.forEach((imgUrl, index) => {
                             imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
@@ -177,7 +188,6 @@
                         setupTouchSlider(data.images.length);
                     }
                 } else {
-                    // ✅ DELETE LOGIC
                     document.getElementById('product-content').classList.add('hidden');
                     document.getElementById('footer-buttons').classList.add('hidden');
                     document.getElementById('error-content').classList.remove('hidden');
@@ -209,12 +219,18 @@
             selectedSize = btn.innerText.trim();
         }
 
+        function selectColor(btn) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active-color'));
+            btn.classList.add('active-color');
+            selectedColor = btn.innerText.trim();
+        }
+
         function addToCart() {
             if(!userPhone) return alert("Please Login!");
             if(!productData) return;
             db.ref('users/' + userPhone + '/cart/' + productId).set({
                 pid: productId, name: productData.name, price: productData.price,
-                img: productData.images[0], size: selectedSize, qty: 1
+                img: productData.images[0], size: selectedSize, selectedColor: selectedColor, qty: 1
             }).then(() => alert("Added to bag! 🛍️"));
         }
 
@@ -222,7 +238,7 @@
             if(!productData) return;
             localStorage.setItem('checkout_item', JSON.stringify({
                 pid: productId, name: productData.name, price: productData.price,
-                img: productData.images[0], size: selectedSize
+                img: productData.images[0], size: selectedSize, selectedColor: selectedColor
             }));
             window.location.href = 'checkout.html';
         }
