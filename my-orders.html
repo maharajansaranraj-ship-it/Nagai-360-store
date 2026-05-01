@@ -62,6 +62,9 @@
                     const order = orders[id];
                     const statusClass = getStatusStyle(order.status);
                     
+                    // ✅ PRODUCT ID AH EDUTHTHU PRODUCT PAGE-KU ANUPPURA LOGIC
+                    const pId = order.productID || order.pid || "";
+
                     // ✅ 1-DAY CANCELLATION LOGIC
                     const orderTime = order.timestamp || 0; 
                     const currentTime = Date.now();
@@ -69,7 +72,9 @@
                     const canCancel = (currentTime - orderTime < oneDayMs) && (order.status !== 'Cancelled' && order.status !== 'Delivered');
 
                     container.innerHTML += `
-                        <div class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card">
+                        <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
+                             class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer">
+                            
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
@@ -97,7 +102,7 @@
                                 <p class="text-[9px] text-slate-400 font-bold uppercase">${order.orderDate || ''}</p>
                                 
                                 ${canCancel ? `
-                                    <button onclick="cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                                    <button onclick="event.stopPropagation(); cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
                                         Cancel Order
                                     </button>
                                 ` : ''}
@@ -117,13 +122,10 @@
         window.location.href = 'index.html';
     }
 
-    // ✅ CANCEL ACTION
     function cancelMyOrder(orderKey) {
         if(confirm("Are you sure you want to cancel this order?")) {
             const updates = {};
-            // User Side
             updates['users/' + userPhone + '/myOrders/' + orderKey + '/status'] = 'Cancelled';
-            // Admin Side
             updates['orders/' + orderKey + '/status'] = 'Cancelled';
 
             db.ref().update(updates).then(() => {
@@ -142,5 +144,6 @@
         }
     }
 </script>
+
 </body>
 </html>
