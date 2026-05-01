@@ -93,8 +93,8 @@
             Confirm Order
         </button>
     </div>
-
-    <script>
+<script>
+    // 1. Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
         authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -113,8 +113,9 @@
     let subtotal = 0;
     let cartItems = []; 
     const rechargeFee = 80;
-    const myUpiId = "yourname@okicici"; // 👈 UNGA UPI ID-AH INGA KATAYAM MATHUNGA!
+    const myUpiId = "yourname@okicici"; // 👈 UNGA UPI ID INGA MATHUNGA
 
+    // 2. UI Update Function (Calculates Subtotal and Size)
     function updateUI() {
         const listDiv = document.getElementById('items-list');
         listDiv.innerHTML = "";
@@ -125,14 +126,16 @@
             document.getElementById('product-preview-sec').classList.remove('hidden');
             cartItems.forEach((item, index) => {
                 subtotal += parseInt(item.price);
-                if(index === 0) finalSize = item.size || item.selectedSize || 'M';
+                // Item size-ah correct-ah yedukkurom
+                const itemSize = item.size || item.selectedSize || 'M';
+                if(index === 0) finalSize = itemSize;
 
                 listDiv.innerHTML += `
                     <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100">
                         <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
                         <div class="flex-1">
                             <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${item.size || item.selectedSize || 'M'}</p>
+                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${itemSize}</p>
                         </div>
                         <p class="text-xs font-black text-slate-800">₹${item.price}</p>
                     </div>`;
@@ -144,7 +147,7 @@
         }
     }
 
-    // Load Items from Cart or Direct Checkout
+    // 3. Load Data (From Cart or Direct Buy)
     db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
         const data = snap.val();
         if(data) {
@@ -159,12 +162,14 @@
         }
     });
 
+    // 4. Payment Selection
     function selectPayment(method, el) {
         selectedMethod = method;
         document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected-pay'));
         el.classList.add('selected-pay');
     }
 
+    // 5. Handle Place Order (UPI Logic Included)
     function handlePlaceOrder() {
         const name = document.getElementById('cust-name').value;
         const addr = document.getElementById('cust-address').value;
@@ -178,50 +183,56 @@
         if(selectedMethod === "UPI") {
             const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
             window.location.href = upiUrl;
-            // Payment screen poyitu vantha udane order place aagum
+            // Payment screen redirect aaga 4 sec wait panni appuram order save aagum
             setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
         } else {
             placeOrder(name, addr, pin, totalAmount);
         }
     }
 
+    // 6. Final Order Save to Firebase
     function placeOrder(name, addr, pin, totalAmount) {
         document.getElementById('loading-overlay').classList.remove('hidden');
         const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
         
         const firstItem = cartItems[0];
         
-        // ✅ ADMIN LOGIC KU ETHA MAATHIRI KEYS FIX PANNIYACHU
+        // ✅ ADMIN LOGIC MATCHING KEYS
         const orderData = {
             orderID: orderID, 
             customerName: name, 
             primaryPhone: userPhone,
             fullAddress: `${addr}, Pin: ${pin}`,
-            totalBill: totalAmount,
+            totalBill: totalAmount, // <--- Amount for Admin
             paymentMode: selectedMethod,
             productImg: firstItem.img || firstItem.image,
             productName: firstItem.name,
             productID: firstItem.pid || firstItem.productID || "", 
-            size: firstItem.size || firstItem.selectedSize || "M", // ✅ Admin logic match
+            size: firstItem.size || firstItem.selectedSize || "M", // <--- Size for Admin
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
             timestamp: Date.now()
         };
 
-        // Save to Global Orders (Admin side)
+        // Save to Main Admin Orders
         db.ref('orders/' + orderID).set(orderData).then(() => {
-            // Save to User's Personal Orders
+            // Save to User's History
             db.ref('users/' + userPhone + '/myOrders/' + orderID).set(orderData);
             
-            // Clear Cart
+            // Cleanup
             db.ref('users/' + userPhone + '/cart').remove();
             localStorage.removeItem('checkout_item');
             
             document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
             setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
+        }).catch((err) => {
+            alert("Order Error: " + err.message);
+            document.getElementById('loading-overlay').classList.add('hidden');
         });
     }
 </script>
+
+                
 
 
 </body>
