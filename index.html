@@ -69,8 +69,6 @@
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let attempts = 0;
-
 if(localStorage.getItem('isLoggedIn') === 'true') {
     window.location.href = 'home.html';
 }
@@ -84,78 +82,70 @@ function handleAuth() {
     const phone = document.getElementById('phoneNumber').value.trim();
     const pass = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
 
-    // 🔥 ADMIN LOGIN
     if(phone === "9999999999" && pass === "admin123"){
         window.location.href = "admin.html";
         return;
     }
 
-    if(attempts >= 5){
-        alert("Too many attempts! Try later.");
-        return;
-    }
+    if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
+    if(pass.length < 6) return alert("Password 6 characters venum");
 
-    if(!/^[0-9]{10}$/.test(phone)){
-        alert("10 digit valid number podu");
-        return;
-    }
-
-    if(pass.length < 6){
-        alert("Password minimum 6 characters!");
-        return;
-    }
-
-    btn.innerText = "VERIFYING...";
+    btn.innerText = "WAITING FOR APPROVAL...";
     btn.disabled = true;
 
     const userRef = db.ref('users/' + phone);
     const safePass = btoa(pass);
 
-    userRef.once('value', (snap) => {
+    // ⚡ LIVE LISTENER (Idhu dhaan neenga ketta logic)
+    userRef.on('value', (snap) => {
         const userData = snap.val();
 
         if(userData) {
-            // ✅ USER EXIST CHECK
-            if(userData.status === "pending") {
-                // Innum approve aagala
-                alert("Account Pending! Admin approve pannadhukku aprom login pannunga.");
-                btn.innerText = "WAITING FOR APPROVAL";
-            } else if(userData.password === safePass) {
-                // Success and Approved
-                success(phone);
-            } else {
-                attempts++;
+            // Case 1: Wrong Password
+            if(userData.password !== safePass) {
                 alert("Wrong password!");
                 btn.innerText = "LOGIN / SIGN UP";
                 btn.disabled = false;
+                userRef.off(); // Listen-ah stop pannidhum
+                return;
             }
+
+            // Case 2: Approved! (Auto redirect)
+            if(userData.status === "approved") {
+                localStorage.setItem('user_phone', phone);
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'home.html';
+            } 
+            // Case 3: Rejected/Deleted by Admin
+            else if (userData.status === undefined) { 
+                msg.innerText = "❌ Sorry! Your request was rejected. Please contact admin.";
+                msg.style.color = "red";
+                btn.innerText = "REQUEST REJECTED";
+                btn.disabled = false;
+                userRef.off();
+            }
+            // Case 4: Still Pending
+            else {
+                msg.innerText = "⏳ Request sent! Please wait while admin approves your account...";
+                msg.style.color = "orange";
+            }
+
         } else {
-            // ✨ NEW REGISTRATION (STATUS PENDING)
+            // ✨ PUDHU USER REGISTRATION
             userRef.set({
                 phone: phone,
                 password: safePass,
                 username: "Nagai User",
-                status: "pending", // 👈 Admin approval-kaga pending-la vaikkom
+                status: "pending",
                 coins: 0,
                 joined: new Date().toLocaleString()
-            }).then(() => {
-                alert("Registration Sent! Admin approve pannadhukku aprom login pannunga.");
-                btn.innerText = "SENT TO ADMIN";
-            }).catch(e => {
-                alert("Database Error: " + e.message);
-                btn.innerText = "LOGIN / SIGN UP";
-                btn.disabled = false;
             });
         }
     });
 }
 
-function success(phone) {
-    localStorage.setItem('user_phone', phone);
-    localStorage.setItem('isLoggedIn', 'true');
-    window.location.href = 'home.html';
-}
 
     </script>
                 
