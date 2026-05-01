@@ -79,17 +79,23 @@ function togglePassword() {
     const passInput = document.getElementById('loginPassword');
     passInput.type = passInput.type === 'password' ? 'text' : 'password';
 }
+    function handleAuth() {
 
-function handleAuth() {
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+
+    // 🔥 ADMIN CHECK FIRST
     if(phone === "9999999999" && pass === "admin123"){
-    window.location.href = "admin.html";
-    return;
+        window.location.href = "admin.html";
+        return;
     }
 
     if(attempts >= 5){
         alert("Too many attempts! Try later.");
         return;
     }
+
 
     const phone = document.getElementById('phoneNumber').value.trim();
     const pass = document.getElementById('loginPassword').value;
