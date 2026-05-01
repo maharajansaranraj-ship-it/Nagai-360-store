@@ -16,62 +16,66 @@
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-
 <body class="flex items-center justify-center min-h-screen p-6">
 
-    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
-        
-        <div class="flex flex-col items-center mb-10">
-            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">
-                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">
-            </div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>
+<div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
+    
+    <div class="flex flex-col items-center mb-10">
+        <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">
+            <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">
         </div>
-
-        <div class="space-y-5">
-            <div class="text-left">
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
-                <div class="relative flex items-center">
-                    <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
-                    <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210" 
-                        class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-                </div>
-            </div>
-
-            <div class="text-left">
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>
-                <div class="relative flex items-center">
-                    <input type="password" id="loginPassword" placeholder="••••••••" 
-                        class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-                    <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">
-                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">
-                Login / Sign Up
-            </button>
-            
-            <p id="msg" class="text-[10px] text-slate-400">Enter your number and password to continue.</p>
-        </div>
-
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>
     </div>
+
+    <div class="space-y-5">
+        <div class="text-left">
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
+            <div class="relative flex items-center">
+                <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
+                <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"
+                    class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
+            </div>
+        </div>
+
+        <div class="text-left">
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>
+            <div class="relative flex items-center">
+                <input type="password" id="loginPassword" placeholder="••••••••"
+                    class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
+                <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">
+            Login / Sign Up
+        </button>
+
+        <!-- Google Login (small add only) -->
+        <button onclick="googleLogin()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl mt-2">
+            Continue with Google
+        </button>
+
+        <p id="msg" class="text-[10px] text-slate-400">Enter your number and password to continue.</p>
+    </div>
+
+</div>
 
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
-    authDomain: "ff-id-store-dab0f.firebaseapp.com",
+    authDomain: "ff-id-store-dab0f.firebaseapp.com"
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-// already loginனா redirect
-firebase.auth().onAuthStateChanged(user => {
+auth.onAuthStateChanged(user => {
     if(user){
         window.location.href = 'home.html';
     }
@@ -87,8 +91,13 @@ function handleAuth() {
     const pass = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
 
-    if(phone.length < 10 || pass.length < 4) {
-        alert("Valid number & password podu!");
+    if(!/^[0-9]{10}$/.test(phone)){
+        alert("Correct 10 digit number podu!");
+        return;
+    }
+
+    if(pass.length < 4){
+        alert("Password minimum 4 characters!");
         return;
     }
 
@@ -97,11 +106,11 @@ function handleAuth() {
 
     const email = phone + "@nagai.com";
 
-    firebase.auth().signInWithEmailAndPassword(email, pass)
+    auth.signInWithEmailAndPassword(email, pass)
     .then(() => success(phone))
     .catch(err => {
         if(err.code === "auth/user-not-found"){
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
+            auth.createUserWithEmailAndPassword(email, pass)
             .then(() => success(phone))
             .catch(e => fail(e.message));
         } else {
@@ -110,9 +119,19 @@ function handleAuth() {
     });
 }
 
+function googleLogin(){
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    auth.signInWithPopup(provider)
+    .then(result => {
+        localStorage.setItem('user_phone', result.user.email);
+        window.location.href = "home.html";
+    })
+    .catch(err => alert(err.message));
+}
+
 function success(phone){
     localStorage.setItem('user_phone', phone);
-    localStorage.setItem('isLoggedIn', 'true');
     window.location.href = 'home.html';
 }
 
