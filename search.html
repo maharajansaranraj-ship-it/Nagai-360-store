@@ -32,8 +32,7 @@
         </div>
     </header>
 
-    <main id="search-results" class="px-6 mt-4">
-        </main>
+    <main id="search-results" class="px-6 mt-4"></main>
 
     <div id="default-view">
         <section id="recent-section" class="px-8 mt-4">
@@ -78,7 +77,6 @@
 
         let allProducts = [];
 
-        // 1. Fetch all products once to make search fast
         db.ref('products').on('value', (snap) => {
             const data = snap.val();
             if(data) {
@@ -86,6 +84,16 @@
                     id: key,
                     ...data[key]
                 }));
+            }
+        });
+
+        // ✅ REDIRECT LOGIC: User Enter click panna search-results.html-ku pogum
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                }
             }
         });
 
@@ -103,7 +111,6 @@
                 defaultView.style.display = "none";
                 resultsDiv.innerHTML = "";
 
-                // Filter products from your database
                 const filtered = allProducts.filter(p => 
                     p.name.toLowerCase().includes(query) || 
                     (p.category && p.category.toLowerCase().includes(query)) ||
