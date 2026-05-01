@@ -84,102 +84,114 @@
     </main>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
-            authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
-            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+        authDomain: "ff-id-store-dab0f.firebaseapp.com",
+        projectId: "ff-id-store-dab0f",
+        storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+        messagingSenderId: "655049193530",
+        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        function showTab(tab) {
-            ['orders', 'delivered', 'inventory', 'add'].forEach(t => {
-                document.getElementById(t + '-section').classList.add('hidden');
-                document.getElementById(t + '-tab').classList.remove('active-tab');
-            });
-            document.getElementById(tab + '-section').classList.remove('hidden');
-            document.getElementById(tab + '-tab').classList.add('active-tab');
-        }
-
-        // FETCH ORDERS
-        db.ref('orders').on('value', (snap) => {
-            const freshList = document.getElementById('admin-orders-list');
-            const deliveredList = document.getElementById('admin-delivered-list');
-            freshList.innerHTML = "";
-            deliveredList.innerHTML = "";
-            const data = snap.val();
-            if(data) {
-                Object.keys(data).reverse().forEach(id => {
-                    const order = data[id];
-                    const cardHTML = `<div class="glass-card">... (Your Order Card HTML) ...</div>`; // Shortened for display
-                    if(order.status === 'Delivered') deliveredList.innerHTML += cardHTML;
-                    else freshList.innerHTML += cardHTML;
-                });
-            }
+    function showTab(tab) {
+        ['orders', 'delivered', 'inventory', 'add'].forEach(t => {
+            document.getElementById(t + '-section').classList.add('hidden');
+            document.getElementById(t + '-tab').classList.remove('active-tab');
         });
+        document.getElementById(tab + '-section').classList.remove('hidden');
+        document.getElementById(tab + '-tab').classList.add('active-tab');
+    }
 
-        // FETCH PRODUCTS
-        db.ref('products').on('value', (snap) => {
-            const list = document.getElementById('admin-product-list');
-            list.innerHTML = "";
-            const data = snap.val();
-            if(data) {
-                Object.keys(data).forEach(id => {
-                    const p = data[id];
-                    list.innerHTML += `
-                        <div class="glass-card flex gap-4 items-center">
-                            <img src="${p.images ? p.images[0] : ''}" class="w-16 h-16 object-cover rounded-2xl">
+    // ✅ FIXED: FETCH & SORT ORDERS (Live and Delivered)
+    db.ref('orders').on('value', (snap) => {
+        const freshList = document.getElementById('admin-orders-list');
+        const deliveredList = document.getElementById('admin-delivered-list');
+        
+        freshList.innerHTML = "";
+        deliveredList.innerHTML = "";
+        
+        const data = snap.val();
+        if(data) {
+            Object.keys(data).reverse().forEach(id => {
+                const order = data[id];
+                
+                // HTML Card Template
+                const cardHTML = `
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-slate-800">#${order.orderID}</h4>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${order.orderDate}</p>
+                            </div>
+                            <span class="px-3 py-1 ${order.status === 'Delivered' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'} rounded-full text-[10px] font-black uppercase">${order.status || 'Ordered'}</span>
+                        </div>
+
+                        <div class="flex items-center gap-4 my-4">
+                            <img src="${order.productImg}" class="w-12 h-12 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/150'">
                             <div class="flex-1">
-                                <h4 class="font-bold text-slate-800 text-sm truncate">${p.name}</h4>
-                                <p class="text-slate-400 text-[10px] font-bold">Category: ${p.category || 'N/A'}</p>
-                                <p class="text-orange-500 font-black text-xs">₹${p.price}</p>
+                                <p class="text-sm font-bold text-slate-700">${order.productName || 'Product Name'}</p>
+                                <p class="text-xs text-slate-400">${order.customerName} - ${order.primaryPhone}</p>
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <button onclick="toggleSoldOut('${id}', ${p.isSoldOut || false})" class="text-[8px] font-bold px-3 py-2 rounded-lg ${p.isSoldOut ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${p.isSoldOut ? 'SOLD OUT' : 'IN STOCK'}</button>
-                                <button onclick="deleteProduct('${id}')" class="text-[8px] font-bold bg-slate-100 text-slate-400 px-3 py-2 rounded-lg">DELETE</button>
-                            </div>
-                        </div>`;
-                });
-            }
-        });
+                            <p class="font-black text-slate-800">₹${order.totalBill}</p>
+                        </div>
 
-        function updateStatus(id, s) { db.ref('orders/'+id).update({status: s}); }
-        function toggleSoldOut(id, currentStatus) { db.ref('products/' + id).update({ isSoldOut: !currentStatus }); }
-        function deleteProduct(id) { if(confirm("Confirm Delete?")) { db.ref('products/' + id).remove(); } }
+                        <div class="bg-slate-50 p-3 rounded-2xl mb-4 text-[10px] text-slate-500">
+                            <p><span class="font-bold">ADDR:</span> ${order.fullAddress}</p>
+                        </div>
 
-        // ✅ FIXED UPLOAD FUNCTION
-        function uploadProduct() {
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const category = document.getElementById('p-category').value; // Get Category
-            const sizeInput = document.getElementById('p-sizes').value;
-            const desc = document.getElementById('p-desc').value;
-            const imgs = [document.getElementById('img1').value, document.getElementById('img2').value, document.getElementById('img3').value].filter(u => u.trim() !== "");
+                        ${order.status !== 'Delivered' ? `
+                        <div class="flex gap-2">
+                            <button onclick="updateStatus('${id}', 'Shipped')" class="flex-1 bg-blue-500 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all">Mark Shipped</button>
+                            <button onclick="updateStatus('${id}', 'Delivered')" class="flex-1 bg-green-500 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all">Mark Delivered</button>
+                        </div>` : ''}
+                    </div>
+                `;
 
-            if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and Image!");
-
-            const sizesArray = sizeInput ? sizeInput.split(',').map(s => s.trim().toUpperCase()) : ["S", "M", "L", "XL"];
-            const pid = "P" + Date.now();
-
-            db.ref('products/' + pid).set({
-                pid, 
-                name, 
-                price, 
-                category, // ✅ Category is now properly saved
-                desc, 
-                images: imgs, 
-                sizes: sizesArray, 
-                isSoldOut: false
-            }).then(() => { 
-                alert("Published Successfully! 🚀"); 
-                document.querySelectorAll('input, textarea, select').forEach(i => i.value = "");
-                showTab('inventory'); 
+                if(order.status === 'Delivered') {
+                    deliveredList.innerHTML += cardHTML;
+                } else {
+                    freshList.innerHTML += cardHTML;
+                }
             });
+        } else {
+            freshList.innerHTML = "<p class='text-center text-slate-400 py-10'>No live orders!</p>";
+            deliveredList.innerHTML = "<p class='text-center text-slate-400 py-10'>No deliveries yet!</p>";
         }
-    </script>
+    });
+
+    // ✅ FIXED: UPDATE STATUS FUNCTION
+    function updateStatus(orderKey, newStatus) {
+        db.ref('orders/' + orderKey).update({ status: newStatus })
+        .then(() => alert("Order updated to " + newStatus))
+        .catch(err => alert("Error: " + err.message));
+    }
+
+    // ✅ FIXED: UPLOAD PRODUCT FUNCTION
+    function uploadProduct() {
+        const name = document.getElementById('p-name').value;
+        const price = document.getElementById('p-price').value;
+        const category = document.getElementById('p-category').value;
+        const sizeInput = document.getElementById('p-sizes').value;
+        const desc = document.getElementById('p-desc').value;
+        const imgs = [document.getElementById('img1').value, document.getElementById('img2').value, document.getElementById('img3').value].filter(u => u.trim() !== "");
+
+        if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and Image!");
+
+        const pid = "P" + Date.now();
+        const sizesArray = sizeInput ? sizeInput.split(',').map(s => s.trim().toUpperCase()) : ["S", "M", "L", "XL"];
+
+        db.ref('products/' + pid).set({
+            pid, name, price, category, desc, images: imgs, sizes: sizesArray, isSoldOut: false
+        }).then(() => { 
+            alert("Published Successfully! 🚀"); 
+            document.querySelectorAll('input, textarea').forEach(i => i.value = "");
+            showTab('inventory'); 
+        });
+    }
+</script>
+
 </body>
 </html>
