@@ -3,63 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Fast Login</title>
+    <title>Nagai 360 | OTP Login</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-    <style>
-        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
 
-<div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
+<body class="flex items-center justify-center min-h-screen bg-gray-100 p-6">
 
-    <div class="flex flex-col items-center mb-10">
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">
-            <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">
+<div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
+
+    <!-- 🔥 LOGO ADDED -->
+    <div class="flex flex-col items-center mb-4">
+        <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-400 shadow">
+            <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-cover">
         </div>
-        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>
+        <h1 class="text-lg font-bold mt-2">Nagai 360</h1>
     </div>
 
-    <div class="space-y-5">
+    <!-- Phone -->
+    <input id="phoneNumber" type="tel" maxlength="10"
+        placeholder="Enter Mobile Number"
+        class="w-full p-3 border rounded-lg mb-3">
 
-        <div class="text-left">
-            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
-                <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"
-                    class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-            </div>
-        </div>
+    <!-- OTP -->
+    <input id="otp" type="text"
+        placeholder="Enter OTP"
+        class="w-full p-3 border rounded-lg mb-3">
 
-        <div class="text-left">
-            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>
-            <div class="relative flex items-center">
-                <input type="password" id="loginPassword" placeholder="••••••••"
-                    class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-                <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">
-                    👁
-                </button>
-            </div>
-        </div>
+    <div id="recaptcha-container"></div>
 
-        <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">
-            Login / Sign Up
-        </button>
+    <button onclick="sendOTP()" class="w-full bg-blue-600 text-white p-3 rounded-lg mb-2">
+        Send OTP
+    </button>
 
-        <button onclick="googleLogin()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl mt-2">
-            Continue with Google
-        </button>
-
-        <p id="msg" class="text-[10px] text-slate-400">Enter your number and password to continue.</p>
-    </div>
+    <button onclick="verifyOTP()" class="w-full bg-green-600 text-white p-3 rounded-lg">
+        Verify OTP
+    </button>
 
 </div>
 
@@ -72,75 +55,48 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-/* ✅ Keep login session */
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+let confirmationResult;
 
-auth.onAuthStateChanged(user => {
-    if(user){
-        window.location.href = 'home.html';
-    }
-});
+// Send OTP
+function sendOTP(){
 
-function togglePassword() {
-    const passInput = document.getElementById('loginPassword');
-    passInput.type = passInput.type === 'password' ? 'text' : 'password';
-}
-
-function handleAuth() {
     const phone = document.getElementById('phoneNumber').value.trim();
-    const pass = document.getElementById('loginPassword').value;
-    const btn = document.getElementById('loginBtn');
 
     if(!/^[0-9]{10}$/.test(phone)){
-        alert("Correct 10 digit number podu!");
+        alert("10 digit correct number podu");
         return;
     }
 
-    if(pass.length < 4){
-        alert("Password minimum 4 characters!");
-        return;
-    }
+    const number = "+91" + phone;
 
-    btn.innerText = "PROCESSING...";
-    btn.disabled = true;
+    const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
 
-    const email = phone + "@nagai.com";
-
-    auth.signInWithEmailAndPassword(email, pass)
-    .then(() => success(phone))
-    .catch(err => {
-        if(err.code === "auth/user-not-found"){
-            auth.createUserWithEmailAndPassword(email, pass)
-            .then(() => success(phone))
-            .catch(e => fail(e.message));
-        } else {
-            fail(err.message);
-        }
+    auth.signInWithPhoneNumber(number, appVerifier)
+    .then((result) => {
+        confirmationResult = result;
+        alert("OTP sent!");
+    })
+    .catch((error) => {
+        alert(error.message);
     });
 }
 
-function googleLogin(){
-    const provider = new firebase.auth.GoogleAuthProvider();
+// Verify OTP
+function verifyOTP(){
 
-    auth.signInWithPopup(provider)
-    .then(result => {
-        localStorage.setItem('user_phone', result.user.email);
+    const code = document.getElementById('otp').value;
+
+    confirmationResult.confirm(code)
+    .then((result) => {
+        alert("Login Success!");
+        localStorage.setItem('user', result.user.phoneNumber);
         window.location.href = "home.html";
     })
-    .catch(err => alert(err.message));
+    .catch((error) => {
+        alert("Wrong OTP");
+    });
 }
 
-function success(phone){
-    localStorage.setItem('user_phone', phone);
-    window.location.href = 'home.html';
-}
-
-function fail(msg){
-    alert(msg);
-    const btn = document.getElementById('loginBtn');
-    btn.innerText = "LOGIN / SIGN UP";
-    btn.disabled = false;
-}
 </script>
 
 </body>
