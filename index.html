@@ -76,7 +76,10 @@ const firebaseConfig = {
   databaseURL: "YOUR_DB_URL"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 🔥 SAFE INIT (IMPORTANT FIX)
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.database();
@@ -94,14 +97,13 @@ function handleAuth() {
   }
 
   if (password.length < 6) {
-    alert("Password 6 characters venum");
+    alert("Password minimum 6 characters");
     return;
   }
 
   btn.innerText = "LOADING...";
   btn.disabled = true;
 
-  // 🔥 LOGIN FIRST TRY
   auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
 
@@ -116,7 +118,6 @@ function handleAuth() {
     })
     .catch(() => {
 
-      // 🔥 IF NOT EXIST → CREATE ACCOUNT
       auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
 
@@ -137,12 +138,12 @@ function handleAuth() {
         })
         .catch((err) => {
           alert(err.message);
-          btn.innerText = "Login";
+          btn.innerText = "Login / Sign Up";
           btn.disabled = false;
         });
 
     });
 }
-          </script>
+</script>
 </body>
 </html>
