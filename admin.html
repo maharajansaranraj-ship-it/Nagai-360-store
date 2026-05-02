@@ -98,6 +98,7 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let currentEditID = null; // To track if we are editing or adding new
 
     function showTab(tab) {
         ['orders', 'users', 'delivered', 'inventory', 'add'].forEach(t => {
@@ -108,6 +109,12 @@
         });
         document.getElementById(tab + '-section').classList.remove('hidden');
         document.getElementById(tab + '-tab').classList.add('active-tab');
+
+        // Reset edit mode if switching away from 'Add New' manually
+        if (tab !== 'add') {
+            currentEditID = null;
+            document.querySelector('#add-section button').innerText = "Publish";
+        }
     }
 
     // 👥 FETCH PENDING USERS
@@ -192,7 +199,7 @@
         }
     });
 
-    // 🏷️ INVENTORY
+    // 🏷️ INVENTORY Logic with Edit
     db.ref('products').on('value', (snapshot) => {
         const productList = document.getElementById('admin-product-list');
         if(!productList) return;
@@ -209,15 +216,41 @@
                             <p class="text-orange-500 font-black text-xs">₹${p.price}</p>
                         </div>
                         <div class="flex flex-col gap-2">
-                            <button onclick="toggleSoldOut('${id}', ${p.isSoldOut})" class="px-4 py-2 ${p.isSoldOut ? 'bg-red-500' : 'bg-green-500'} text-white rounded-xl text-[8px] font-black uppercase">
-                                ${p.isSoldOut ? 'Sold Out' : 'In Stock'}
-                            </button>
+                            <div class="flex gap-1">
+                                <button onclick="editProduct('${id}')" class="flex-1 bg-blue-500 text-white py-2 rounded-xl text-[8px] font-black uppercase">Edit</button>
+                                <button onclick="toggleSoldOut('${id}', ${p.isSoldOut})" class="flex-1 ${p.isSoldOut ? 'bg-red-500' : 'bg-green-500'} text-white py-2 rounded-xl text-[8px] font-black uppercase">
+                                    ${p.isSoldOut ? 'Sold' : 'Stock'}
+                                </button>
+                            </div>
                             <button onclick="deleteProduct('${id}')" class="px-4 py-2 bg-slate-50 text-slate-400 rounded-xl text-[8px] font-black uppercase">Delete</button>
                         </div>
                     </div>`;
             });
         }
     });
+
+    function editProduct(id) {
+        db.ref('products/' + id).once('value', (snap) => {
+            const p = snap.val();
+            if (p) {
+                currentEditID = id;
+                document.getElementById('p-name').value = p.name;
+                document.getElementById('p-price').value = p.price;
+                document.getElementById('p-category').value = p.category;
+                document.getElementById('p-sizes').value = p.sizes ? p.sizes.join(', ') : "";
+                document.getElementById('p-colors').value = p.colors ? p.colors.join(', ') : "";
+                document.getElementById('p-desc').value = p.desc;
+                
+                // Fill up to 6 image slots
+                for(let i=1; i<=6; i++){
+                    document.getElementById('img'+i).value = (p.images && p.images[i-1]) ? p.images[i-1] : "";
+                }
+
+                document.querySelector('#add-section button').innerText = "Update Product";
+                showTab('add');
+            }
+        });
+    }
 
     function updateStatus(orderKey, newStatus) {
         db.ref('orders/' + orderKey).once('value', (snap) => {
@@ -247,7 +280,6 @@
         const colorInput = document.getElementById('p-colors').value;
         const desc = document.getElementById('p-desc').value;
         
-        // Fixed Image Collection (Collects all 6)
         const imgs = [];
         for(let i=1; i<=6; i++){
             const val = document.getElementById('img'+i).value.trim();
@@ -256,7 +288,7 @@
         
         if(!name || !price || imgs.length === 0) return alert("Fill all details! (Min 1 image)");
         
-        const pid = "P" + Date.now();
+        const pid = currentEditID || "P" + Date.now();
         const sizesArray = sizeInput ? sizeInput.split(',').map(s => s.trim().toUpperCase()) : ["S", "M", "L", "XL"];
         const colorsArray = colorInput ? colorInput.split(',').map(c => c.trim()) : ["Gold", "Silver"];
 
@@ -264,11 +296,13 @@
             pid, name, price, category, desc, images: imgs, 
             sizes: sizesArray, colors: colorsArray, isSoldOut: false 
         }).then(() => {
-            alert("Product Published! 🚀");
+            alert(currentEditID ? "Product Updated! ⚡" : "Product Published! 🚀");
+            currentEditID = null;
+            document.querySelector('#add-section button').innerText = "Publish";
             showTab('inventory');
             document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
         });
     }
-    </script>
-</body>
+</script>
+
 </html>
