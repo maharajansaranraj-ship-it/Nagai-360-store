@@ -37,6 +37,16 @@
 
     <main class="p-6">
         <div id="users-section" class="hidden space-y-4">
+            <div id="users-section" class="hidden space-y-4">
+    <div class="px-2 flex justify-between items-center">
+        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">New User Requests</h2>
+        <button onclick="cleanJunkUsers()" class="bg-red-100 text-red-500 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">
+            🗑️ Clean Junk
+        </button>
+    </div>
+    <div id="admin-users-list" class="space-y-4"></div>
+</div>
+
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">New User Requests</h2>
             <div id="admin-users-list" class="space-y-4"></div>
         </div>
@@ -294,6 +304,28 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
             document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
         });
     }
+        // 🗑️ STEP 2: CLEAN JUNK USERS LOGIC
+function cleanJunkUsers() {
+    if(confirm("Confirm to delete all unapproved (pending) users?")) {
+        db.ref('users').once('value', (snapshot) => {
+            let count = 0;
+            const data = snapshot.val();
+            if(data) {
+                Object.keys(data).forEach(phone => {
+                    // "approved" status illadha users-ah matum filter panni thookum
+                    if(data[phone].status !== "approved") {
+                        db.ref('users/' + phone).remove();
+                        count++;
+                    }
+                });
+                alert("Database Cleaned! " + count + " junk users removed. ✨");
+            } else {
+                alert("No users found to clean!");
+            }
+        });
+    }
+}
+
 </script>
 
 </html>
