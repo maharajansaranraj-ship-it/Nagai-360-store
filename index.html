@@ -68,12 +68,13 @@
 const firebaseConfig = {
     apiKey: "AIzaSy...",
     authDomain: "ff-id-store-dab0f.firebaseapp.com",
-    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
-    projectId: "ff-id-store-dab0f"
+    projectId: "ff-id-store-dab0f",
+    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+
+const auth = firebase.auth();
 
 if(localStorage.getItem('isLoggedIn') === 'true'){
     window.location.href = 'home.html';
@@ -84,7 +85,6 @@ function togglePassword() {
     passInput.type = passInput.type === 'password' ? 'text' : 'password';
 }
 
-// 🔥 MAIN FIXED LOGIN FUNCTION
 function handleAuth() {
 
     const email = document.getElementById('phoneNumber').value.trim();
@@ -92,16 +92,21 @@ function handleAuth() {
     const btn = document.getElementById('loginBtn');
     const msg = document.getElementById('msg');
 
-    if(password.length < 6){
-        alert("Password minimum 6 characters venum");
+    if(!email || !password){
+        alert("Fill all fields");
         return;
     }
 
-    btn.innerText = "LOGGING IN...";
+    if(password.length < 6){
+        alert("Password minimum 6 characters");
+        return;
+    }
+
+    btn.innerText = "PLEASE WAIT...";
     btn.disabled = true;
 
-    // 🔐 TRY LOGIN
-    firebase.auth().signInWithEmailAndPassword(email, password)
+    // 🔐 LOGIN
+    auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
 
         const user = userCredential.user;
@@ -109,34 +114,32 @@ function handleAuth() {
         localStorage.setItem("uid", user.uid);
         localStorage.setItem("isLoggedIn", "true");
 
-        msg.innerText = "✅ Login Success!";
+        msg.innerText = "Login Success";
         window.location.href = "home.html";
 
     })
     .catch((error) => {
 
-        // ❗ if user not exist → create account
-        firebase.auth().createUserWithEmailAndPassword(email, password)
+        // ❗ create new user
+        auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
 
             const user = userCredential.user;
 
-            // save user data in DB
             firebase.database().ref("users/" + user.uid).set({
                 email: email,
                 coins: 0,
-                status: "active",
                 created: Date.now()
             });
 
             localStorage.setItem("uid", user.uid);
             localStorage.setItem("isLoggedIn", "true");
 
-            msg.innerText = "🎉 Account Created!";
+            msg.innerText = "Account Created";
             window.location.href = "home.html";
 
         })
-        .catch(err => {
+        .catch((err) => {
             alert(err.message);
             btn.innerText = "Login / Sign Up";
             btn.disabled = false;
@@ -144,6 +147,6 @@ function handleAuth() {
 
     });
 }
-   </script>
+        </script>
 </body>
 </html>
