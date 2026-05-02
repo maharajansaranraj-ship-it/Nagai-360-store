@@ -68,7 +68,8 @@
 const firebaseConfig = {
     apiKey: "AIzaSy...",
     authDomain: "ff-id-store-dab0f.firebaseapp.com",
-    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
+    projectId: "ff-id-store-dab0f"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -83,91 +84,66 @@ function togglePassword() {
     passInput.type = passInput.type === 'password' ? 'text' : 'password';
 }
 
-let isWaiting = false;
-let listenerActive = false;
-
+// 🔥 MAIN FIXED LOGIN FUNCTION
 function handleAuth() {
 
-    const phone = document.getElementById('phoneNumber').value.trim();
-    const pass = document.getElementById('loginPassword').value;
+    const email = document.getElementById('phoneNumber').value.trim();
+    const password = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
     const msg = document.getElementById('msg');
 
-    if(phone === "9999999999" && pass === "admin123"){
-        window.location.href = "admin.html";
+    if(password.length < 6){
+        alert("Password minimum 6 characters venum");
         return;
     }
 
-    if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
-    if(pass.length < 6) return alert("Password 6 characters venum");
-
-    btn.innerText = "CHECKING STATUS...";
+    btn.innerText = "LOGGING IN...";
     btn.disabled = true;
 
-    const userRef = db.ref('users/' + phone);
-    const safePass = btoa(pass);
+    // 🔐 TRY LOGIN
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
 
-    // 🔥 prevent multiple listeners
-    if(listenerActive) {
-        userRef.off();
-    }
-    listenerActive = true;
+        const user = userCredential.user;
 
-    userRef.on('value', (snap) => {
-        const userData = snap.val();
+        localStorage.setItem("uid", user.uid);
+        localStorage.setItem("isLoggedIn", "true");
 
-        if (!userData) {
-            if (isWaiting) {
-                msg.innerText = "❌ Rejected. Contact Admin.";
-                msg.style.color = "red";
-                btn.innerText = "LOGIN / SIGN UP";
-                btn.disabled = false;
-                isWaiting = false;
-                userRef.off();
-                listenerActive = false;
-            } else {
-                isWaiting = true;
-                msg.innerText = "✨ Requesting approval...";
+        msg.innerText = "✅ Login Success!";
+        window.location.href = "home.html";
 
-                userRef.set({
-                    phone: phone,
-                    password: safePass,
-                    status: "pending"
-                });
-            }
-            return;
-        }
+    })
+    .catch((error) => {
 
-        if (userData.password !== safePass) {
-            alert("Wrong password!");
+        // ❗ if user not exist → create account
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+
+            const user = userCredential.user;
+
+            // save user data in DB
+            firebase.database().ref("users/" + user.uid).set({
+                email: email,
+                coins: 0,
+                status: "active",
+                created: Date.now()
+            });
+
+            localStorage.setItem("uid", user.uid);
+            localStorage.setItem("isLoggedIn", "true");
+
+            msg.innerText = "🎉 Account Created!";
+            window.location.href = "home.html";
+
+        })
+        .catch(err => {
+            alert(err.message);
+            btn.innerText = "Login / Sign Up";
             btn.disabled = false;
-            userRef.off();
-            listenerActive = false;
-            return;
-        }
+        });
 
-        if (userData.status === "approved") {
-            msg.innerText = "✅ Approved!";
-            localStorage.setItem('user_phone', phone);
-            localStorage.setItem('isLoggedIn', 'true');
-
-            setTimeout(() => {
-                window.location.href = 'home.html';
-            }, 500);
-
-            userRef.off();
-            listenerActive = false;
-
-        } else {
-            isWaiting = true;
-            msg.innerText = "⏳ Waiting approval...";
-            msg.style.color = "orange";
-            btn.innerText = "PENDING...";
-        }
     });
 }
-   
-       
-    </script>
+   </script>
 </body>
 </html>
