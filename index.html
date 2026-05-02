@@ -57,8 +57,8 @@
     </div>    
 </div>   
 
-<!-- 🔥 உங்கள் original JS untouched -->  
-<script>  
+<script>
+    // ✅ Firebase Config (Unga original config apdiye vachukonga)
     const firebaseConfig = {  
         apiKey: "AIzaSy...",  
         authDomain: "ff-id-store-dab0f.firebaseapp.com",  
@@ -66,62 +66,67 @@
     };  
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);  
-    const db = firebase.database();  
-    if(localStorage.getItem('isLoggedIn') === 'true'){  
-window.location.href = 'home.html';  
-    }  
+    const db = firebase.database();
+
+    // ✅ APP START LOGIC: Open aagum bothey check pannum
+    window.onload = function() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const pendingPhone = localStorage.getItem('pending_phone');
+
+        if(isLoggedIn === 'true'){  
+            window.location.href = 'home.html';  
+        } else if (pendingPhone) {
+            // User login panni waiting-la irundhurukan, so direct-ah status check-ku anupu
+            handleAuth(pendingPhone, null, true); 
+        }
+    };
 
     function togglePassword() {  
         const passInput = document.getElementById('loginPassword');  
         passInput.type = passInput.type === 'password' ? 'text' : 'password';  
     }  
 
-    let isWaiting = false;  
-
-    function handleAuth() {  
-        const phone = document.getElementById('phoneNumber').value.trim();  
-        const pass = document.getElementById('loginPassword').value;  
+    // ✅ REFACTORED AUTH: Auto-redirect support-oda
+    function handleAuth(savedPhone = null, savedPass = null, autoCheck = false) {  
+        const phone = savedPhone || document.getElementById('phoneNumber').value.trim();  
+        const pass = savedPass || document.getElementById('loginPassword').value;  
         const btn = document.getElementById('loginBtn');  
         const msg = document.getElementById('msg');  
 
-        if(phone === "9999999999" && pass === "admin123"){  
+        // Admin bypass
+        if(!autoCheck && phone === "9999999999" && pass === "admin123"){  
             window.location.href = "admin.html";  
             return;  
         }  
 
-        if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");  
-        if(pass.length < 6) return alert("Password 6 characters venum");  
-
-        btn.innerText = "CHECKING STATUS...";  
-        btn.disabled = true;  
+        if(!autoCheck) {
+            if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");  
+            if(pass.length < 6) return alert("Password 6 characters venum");  
+            btn.innerText = "CHECKING STATUS...";  
+            btn.disabled = true;
+        }
 
         const userRef = db.ref('users/' + phone);  
-        const safePass = btoa(pass);  
+        const safePass = autoCheck ? null : btoa(pass);  
 
         userRef.on('value', (snap) => {  
             const userData = snap.val();  
 
-            if (!userData) {  
-                if (isWaiting) {  
-                    msg.innerText = "❌ Rejected. Contact Admin.";  
-                    msg.style.color = "red";  
-                    btn.innerText = "LOGIN / SIGN UP";  
-                    btn.disabled = false;  
-                    isWaiting = false;  
-                    userRef.off();  
-                } else {  
-                    isWaiting = true;  
+            if (!userData) {
+                // New User / Rejected logic
+                if (!autoCheck) {
                     msg.innerText = "✨ Requesting approval...";  
-                    userRef.set({  
-                        phone: phone,  
-                        password: safePass,  
-                        status: "pending"  
-                    });  
-                }  
+                    localStorage.setItem('pending_phone', phone); // Save for auto-check
+                    userRef.set({ phone: phone, password: safePass, status: "pending" });
+                } else {
+                    localStorage.removeItem('pending_phone');
+                    location.reload();
+                }
                 return;  
-            }  
+            }
 
-            if (userData.password !== safePass) {  
+            // Password check (Only for manual login)
+            if (!autoCheck && userData.password !== safePass) {  
                 alert("Wrong password!");  
                 btn.disabled = false;  
                 userRef.off();  
@@ -130,14 +135,17 @@ window.location.href = 'home.html';
 
             if (userData.status === "approved") {  
                 msg.innerText = "✅ Approved!";  
+                localStorage.removeItem('pending_phone'); // Pending-la irundhu edu
                 localStorage.setItem('user_phone', phone);  
                 localStorage.setItem('isLoggedIn', 'true');  
-                setTimeout(() => window.location.href = 'home.html', 500);  
+                window.location.href = 'home.html';
             } else {  
-                isWaiting = true;  
+                // Still Pending
+                localStorage.setItem('pending_phone', phone); // Phone number-ah memory-la vai
                 msg.innerText = "⏳ Waiting approval...";  
                 msg.style.color = "orange";  
-                btn.innerText = "PENDING...";  
+                btn.innerText = "PENDING...";
+                btn.disabled = true;
             }  
         });  
     }  
