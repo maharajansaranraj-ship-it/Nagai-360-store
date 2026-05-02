@@ -40,7 +40,6 @@
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
             <img src="nagai.jpg" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-100" onerror="this.src='https://ui-avatars.com/api/?name=N&background=f97316&color=fff'">
-            
             <div>
                 <h1 class="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
                     NAGAI <span class="text-orange-500">360</span>
@@ -48,7 +47,6 @@
                 <p class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">Premium Collections</p>
             </div>
         </div>
-        
         <div class="flex items-center gap-4">
             <div class="bg-orange-50 px-3 py-1 rounded-full flex items-center gap-1 border border-orange-100">
                 <span class="text-sm">🪙</span>
@@ -73,17 +71,16 @@
         </div>
     </section>
 
-    <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar">
-        <button class="px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-200">All</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Rings</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Chains</button>
-        <button class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm">Watches</button>
+    <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar" id="category-bar">
+        <button onclick="filterCategory('All')" id="btn-All" class="cat-btn px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-200 whitespace-nowrap">All</button>
+        <button onclick="filterCategory('Saree')" id="btn-Saree" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Saree</button>
+        <button onclick="filterCategory('Pants')" id="btn-Pants" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Pants</button>
+        <button onclick="filterCategory('Men')" id="btn-Men" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Men</button>
+        <button onclick="filterCategory('Women')" id="btn-Women" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Women</button>
     </div>
 
     <main class="masonry" id="main-product-grid">
-        <div class="masonry-item h-64 bg-slate-100 rounded-[2rem] loading-shimmer"></div>
-        <div class="masonry-item h-48 bg-slate-100 rounded-[2rem] loading-shimmer"></div>
-    </main>
+        </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-8 py-5 flex justify-between items-center shadow-[0_-15px_40px_rgba(0,0,0,0.03)] z-[100]">
         <button onclick="window.location.href='home.html'" class="text-orange-500">
@@ -116,6 +113,9 @@
         const db = firebase.database();
         const userPhone = localStorage.getItem('user_phone');
 
+        let allProducts = {}; 
+        let currentFilter = 'All';
+
         // User Data Fetch
         if(userPhone) {
             db.ref('users/' + userPhone).on('value', (snap) => {
@@ -131,40 +131,67 @@
 
         // Product Grid Fetch
         db.ref('products').on('value', (snapshot) => {
+            allProducts = snapshot.val();
+            renderProducts();
+        });
+
+        function renderProducts() {
             const grid = document.getElementById('main-product-grid');
-            const data = snapshot.val();
             grid.innerHTML = "";
 
-            if(data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const p = data[key];
-                    const soldOutUI = p.isSoldOut ? `
-                        <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
-                        <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
-                    ` : '';
-
-                    grid.innerHTML += `
-                        <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
-                            ${soldOutUI}
-                            <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" 
-                                    class="absolute top-3 right-3 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md active:scale-125 transition-all">
-                                <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                            </button>
-                            <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
-                                <img src="${p.images[0]}" class="w-full object-cover min-h-[150px]">
-                                <div class="p-4">
-                                    <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
-                                    <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-            } else {
+            if(!allProducts) {
                 grid.innerHTML = "<p class='text-center py-20 text-slate-400 font-bold'>No items found.</p>";
+                return;
             }
-        });
+
+            Object.keys(allProducts).reverse().forEach(key => {
+                const p = allProducts[key];
+
+                // Category Filter Logic
+                if (currentFilter !== 'All' && p.category !== currentFilter) return;
+
+                const soldOutUI = p.isSoldOut ? `
+                    <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
+                    <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
+                ` : '';
+
+                grid.innerHTML += `
+                    <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
+                        ${soldOutUI}
+                        <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" 
+                                class="absolute top-3 right-3 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md active:scale-125 transition-all">
+                            <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </button>
+                        <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
+                            <img src="${p.images[0]}" class="w-full object-cover min-h-[150px]">
+                            <div class="p-4">
+                                <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
+                                <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            
+            // Button Active State UI
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-200');
+                btn.classList.add('bg-white', 'text-slate-500', 'border-slate-100');
+            });
+
+            const activeBtn = document.getElementById('btn-' + cat);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-slate-500', 'border-slate-100');
+                activeBtn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-200');
+            }
+
+            renderProducts();
+        }
 
         function toggleWishlist(event, id, name, img, price) {
             event.stopPropagation();
