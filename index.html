@@ -1,159 +1,147 @@
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<!DOCTYPE html>    <html lang="en">    
+<head>    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <!-- ✅ SEO + Title Fix -->  
+<title>Nagai 360 Login | Fast Secure Login</title>  
+<meta name="description" content="Nagai 360 login page. Fast and secure login system for users.">  
 
-    <!-- ✅ SEO + Title Fix -->
-    <title>Nagai 360 Login | Fast Secure Login</title>
-    <meta name="description" content="Nagai 360 login page. Fast and secure login system for users.">
+<!-- ✅ Logo Icon -->  
+<link rel="icon" type="image/png" href="nagai.jpg">  
 
-    <!-- ✅ Logo Icon -->
-    <link rel="icon" type="image/png" href="nagai.jpg">
+<script src="https://cdn.tailwindcss.com"></script>    
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">    
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>    
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>    
 
-    <script src="https://cdn.tailwindcss.com"></script>  
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">  
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>  
+<style>    
+    body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }    
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }    
+</style>
 
-    <style>  
-        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }  
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }  
-    </style>
-</head>  
+</head>    <body class="flex items-center justify-center min-h-screen p-6">    
+    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">    
+        <div class="flex flex-col items-center mb-10">    
+            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">    
+                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">    
+            </div>    
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>    
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>    
+        </div>    <div class="space-y-5">    
+        <div class="text-left">    
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>    
+            <div class="relative flex items-center">    
+                <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>    
+                <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"     
+                    class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">    
+            </div>    
+        </div>    
 
-<body class="flex items-center justify-center min-h-screen p-6">  
-    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">  
-        <div class="flex flex-col items-center mb-10">  
-            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">  
-                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">  
-            </div>  
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>  
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>  
-        </div>  
+        <div class="text-left">    
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>    
+            <div class="relative flex items-center">    
+                <input type="password" id="loginPassword" placeholder="••••••••"     
+                    class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">    
+                <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">    
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">    
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />    
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />    
+                    </svg>    
+                </button>    
+            </div>    
+        </div>    
+            
+        <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">    
+            Login / Sign Up    
+        </button>    
+            
+        <p id="msg" class="text-[10px] font-bold text-slate-400 mt-2">Enter your number and password to continue.</p>    
+    </div>    
+</div>   
 
-        <div class="space-y-5">  
-            <div class="text-left">  
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>  
-                <div class="relative flex items-center">  
-                    <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>  
-                    <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210"   
-                        class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
-                </div>  
-            </div>  
+<!-- 🔥 உங்கள் original JS untouched -->  
+<script>  
+    const firebaseConfig = {  
+        apiKey: "AIzaSy...",  
+        authDomain: "ff-id-store-dab0f.firebaseapp.com",  
+        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"  
+    };  
 
-            <div class="text-left">  
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>  
-                <div class="relative flex items-center">  
-                    <input type="password" id="loginPassword" placeholder="••••••••"   
-                        class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">  
-                    <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-orange-500 transition-colors">  
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />  
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />  
-                        </svg>  
-                    </button>  
-                </div>  
-            </div>  
-              
-            <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">  
-                Login / Sign Up  
-            </button>  
-              
-            <p id="msg" class="text-[10px] font-bold text-slate-400 mt-2">Enter your number and password to continue.</p>  
-        </div>  
-    </div> 
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);  
+    const db = firebase.database();  
+    if(localStorage.getItem('isLoggedIn') === 'true'){  
+window.location.href = 'home.html';  
+    }  
 
-    <!-- 🔥 உங்கள் original JS untouched -->
-   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    function togglePassword() {  
+        const passInput = document.getElementById('loginPassword');  
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';  
+    }  
 
-<script>
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "YOUR_DB_URL",
-  projectId: "YOUR_PROJECT_ID"
-};
+    let isWaiting = false;  
 
-// safe init
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+    function handleAuth() {  
+        const phone = document.getElementById('phoneNumber').value.trim();  
+        const pass = document.getElementById('loginPassword').value;  
+        const btn = document.getElementById('loginBtn');  
+        const msg = document.getElementById('msg');  
 
-const db = firebase.database();
+        if(phone === "9999999999" && pass === "admin123"){  
+            window.location.href = "admin.html";  
+            return;  
+        }  
 
-function togglePassword() {
-  const pass = document.getElementById("loginPassword");
-  pass.type = pass.type === "password" ? "text" : "password";
-}
+        if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");  
+        if(pass.length < 6) return alert("Password 6 characters venum");  
 
-function handleAuth() {
+        btn.innerText = "CHECKING STATUS...";  
+        btn.disabled = true;  
 
-  const phone = document.getElementById("phoneNumber").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  const btn = document.getElementById("loginBtn");
-  const msg = document.getElementById("msg");
+        const userRef = db.ref('users/' + phone);  
+        const safePass = btoa(pass);  
 
-  // validation
-  if (!/^[0-9]{10}$/.test(phone)) {
-    alert("10 digit mobile number enter pannunga");
-    return;
-  }
+        userRef.on('value', (snap) => {  
+            const userData = snap.val();  
 
-  if (password.length < 6) {
-    alert("Password minimum 6 characters venum");
-    return;
-  }
+            if (!userData) {  
+                if (isWaiting) {  
+                    msg.innerText = "❌ Rejected. Contact Admin.";  
+                    msg.style.color = "red";  
+                    btn.innerText = "LOGIN / SIGN UP";  
+                    btn.disabled = false;  
+                    isWaiting = false;  
+                    userRef.off();  
+                } else {  
+                    isWaiting = true;  
+                    msg.innerText = "✨ Requesting approval...";  
+                    userRef.set({  
+                        phone: phone,  
+                        password: safePass,  
+                        status: "pending"  
+                    });  
+                }  
+                return;  
+            }  
 
-  btn.innerText = "LOADING...";
-  btn.disabled = true;
+            if (userData.password !== safePass) {  
+                alert("Wrong password!");  
+                btn.disabled = false;  
+                userRef.off();  
+                return;  
+            }  
 
-  const userRef = db.ref("users/" + phone);
-
-  userRef.once("value").then((snap) => {
-
-    const data = snap.val();
-
-    // 🔥 NEW USER → CREATE
-    if (!data) {
-
-      userRef.set({
-        phone: phone,
-        password: password,
-        coins: 0,
-        created: Date.now()
-      });
-
-      localStorage.setItem("user_phone", phone);
-      localStorage.setItem("login", "true");
-
-      msg.innerText = "Account Created Successfully";
-      window.location.href = "home.html";
-      return;
-    }
-
-    // 🔐 PASSWORD CHECK
-    if (data.password === password) {
-
-      localStorage.setItem("user_phone", phone);
-      localStorage.setItem("login", "true");
-
-      msg.innerText = "Login Success";
-      window.location.href = "home.html";
-
-    } else {
-      alert("Wrong password ❌");
-      btn.innerText = "Login / Sign Up";
-      btn.disabled = false;
-    }
-
-  }).catch((err) => {
-    alert("Error: " + err.message);
-    btn.innerText = "Login / Sign Up";
-    btn.disabled = false;
-  });
-
-}
+            if (userData.status === "approved") {  
+                msg.innerText = "✅ Approved!";  
+                localStorage.setItem('user_phone', phone);  
+                localStorage.setItem('isLoggedIn', 'true');  
+                setTimeout(() => window.location.href = 'home.html', 500);  
+            } else {  
+                isWaiting = true;  
+                msg.innerText = "⏳ Waiting approval...";  
+                msg.style.color = "orange";  
+                btn.innerText = "PENDING...";  
+            }  
+        });  
+    }  
 </script>
-</body>
-</html>
+
+</body>  
+</html>  
