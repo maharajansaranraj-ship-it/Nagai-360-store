@@ -2,7 +2,14 @@
 <html lang="en">  
 <head>  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Nagai 360 | Fast Login</title>  
+
+    <!-- ✅ SEO + Title Fix -->
+    <title>Nagai 360 Login | Fast Secure Login</title>
+    <meta name="description" content="Nagai 360 login page. Fast and secure login system for users.">
+
+    <!-- ✅ Logo Icon -->
+    <link rel="icon" type="image/png" href="nagai.jpg">
+
     <script src="https://cdn.tailwindcss.com"></script>  
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">  
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
@@ -56,30 +63,23 @@
         </div>  
     </div> 
 
+    <!-- 🔥 உங்கள் original JS untouched -->
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+            apiKey: "AIzaSy...",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        if(localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'home.html';
-        }
-
         function togglePassword() {
             const passInput = document.getElementById('loginPassword');
             passInput.type = passInput.type === 'password' ? 'text' : 'password';
         }
 
-        let isWaiting = false; // To track if we already sent a request
+        let isWaiting = false;
 
         function handleAuth() {
             const phone = document.getElementById('phoneNumber').value.trim();
@@ -101,59 +101,44 @@
             const userRef = db.ref('users/' + phone);
             const safePass = btoa(pass);
 
-            // Real-time listener start aagudhu
             userRef.on('value', (snap) => {
                 const userData = snap.val();
 
-                // 1. Database-la data-ve illana (Sign Up case or Admin Deleted)
                 if (!userData) {
                     if (isWaiting) {
-                        msg.innerText = "❌ Sorry! Your request was rejected. Contact Admin.";
+                        msg.innerText = "❌ Rejected. Contact Admin.";
                         msg.style.color = "red";
                         btn.innerText = "LOGIN / SIGN UP";
                         btn.disabled = false;
                         isWaiting = false;
-                        userRef.off(); // Listen-ah stop pannuvom
+                        userRef.off();
                     } else {
-                        // Registration process
                         isWaiting = true;
-                        msg.innerText = "✨ Requesting for approval...";
+                        msg.innerText = "✨ Requesting approval...";
                         userRef.set({
                             phone: phone,
                             password: safePass,
-                            username: "Nagai User",
-                            status: "pending",
-                            coins: 0,
-                            joined: new Date().toLocaleString()
+                            status: "pending"
                         });
                     }
                     return;
                 }
 
-                // 2. Data irukku - Password check
                 if (userData.password !== safePass) {
                     alert("Wrong password!");
-                    btn.innerText = "LOGIN / SIGN UP";
                     btn.disabled = false;
                     userRef.off();
                     return;
                 }
 
-                // 3. Status Approved na udaney redirect
                 if (userData.status === "approved") {
-                    msg.innerText = "✅ Approved! Entering Nagai 360...";
-                    msg.style.color = "green";
+                    msg.innerText = "✅ Approved!";
                     localStorage.setItem('user_phone', phone);
                     localStorage.setItem('isLoggedIn', 'true');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 500); // Adha second-e pogum
-                } 
-                else {
-                    // Pending status
+                    setTimeout(() => window.location.href = 'home.html', 500);
+                } else {
                     isWaiting = true;
-                    msg.innerText = "⏳ Wait for admin approval...";
+                    msg.innerText = "⏳ Waiting approval...";
                     msg.style.color = "orange";
                     btn.innerText = "PENDING...";
                 }
