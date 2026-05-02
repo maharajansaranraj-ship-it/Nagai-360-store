@@ -65,84 +65,94 @@
 
     <!-- 🔥 உங்கள் original JS untouched -->
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <script>
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  databaseURL: "YOUR_DB_URL"
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID"
 };
 
-// 🔥 SAFE INIT (IMPORTANT FIX)
+// safe init
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth();
 const db = firebase.database();
+
+function togglePassword() {
+  const pass = document.getElementById("loginPassword");
+  pass.type = pass.type === "password" ? "text" : "password";
+}
 
 function handleAuth() {
 
-  const email = document.getElementById("phoneNumber").value.trim();
+  const phone = document.getElementById("phoneNumber").value.trim();
   const password = document.getElementById("loginPassword").value;
   const btn = document.getElementById("loginBtn");
   const msg = document.getElementById("msg");
 
-  if (!email.includes("@")) {
-    alert("Valid email enter pannunga");
+  // validation
+  if (!/^[0-9]{10}$/.test(phone)) {
+    alert("10 digit mobile number enter pannunga");
     return;
   }
 
   if (password.length < 6) {
-    alert("Password minimum 6 characters");
+    alert("Password minimum 6 characters venum");
     return;
   }
 
   btn.innerText = "LOADING...";
   btn.disabled = true;
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
+  const userRef = db.ref("users/" + phone);
 
-      const user = userCredential.user;
+  userRef.once("value").then((snap) => {
 
-      localStorage.setItem("uid", user.uid);
+    const data = snap.val();
+
+    // 🔥 NEW USER → CREATE
+    if (!data) {
+
+      userRef.set({
+        phone: phone,
+        password: password,
+        coins: 0,
+        created: Date.now()
+      });
+
+      localStorage.setItem("user_phone", phone);
+      localStorage.setItem("login", "true");
+
+      msg.innerText = "Account Created Successfully";
+      window.location.href = "home.html";
+      return;
+    }
+
+    // 🔐 PASSWORD CHECK
+    if (data.password === password) {
+
+      localStorage.setItem("user_phone", phone);
       localStorage.setItem("login", "true");
 
       msg.innerText = "Login Success";
       window.location.href = "home.html";
 
-    })
-    .catch(() => {
+    } else {
+      alert("Wrong password ❌");
+      btn.innerText = "Login / Sign Up";
+      btn.disabled = false;
+    }
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
+  }).catch((err) => {
+    alert("Error: " + err.message);
+    btn.innerText = "Login / Sign Up";
+    btn.disabled = false;
+  });
 
-          const user = userCredential.user;
-
-          db.ref("users/" + user.uid).set({
-            email: email,
-            coins: 0,
-            created: Date.now()
-          });
-
-          localStorage.setItem("uid", user.uid);
-          localStorage.setItem("login", "true");
-
-          msg.innerText = "Account Created";
-          window.location.href = "home.html";
-
-        })
-        .catch((err) => {
-          alert(err.message);
-          btn.innerText = "Login / Sign Up";
-          btn.disabled = false;
-        });
-
-    });
 }
 </script>
 </body>
