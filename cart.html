@@ -4,22 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 | Shopping Cart</title>
+
+    <script>
+        const userPhone = localStorage.getItem('user_phone');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+        if(isLoggedIn !== 'true' || !userPhone) {
+            window.location.href = 'index.html'; 
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #fcfcfc; }
         .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .item-card { transition: all 0.3s ease; }
+        .item-card { transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        .item-card:active { transform: scale(0.98); }
     </style>
 </head>
 <body class="pb-32">
 
     <nav class="glass-nav sticky top-0 z-50 p-5 flex items-center border-b border-gray-100">
-        <button onclick="window.location.href='home.html'" class="p-2 bg-slate-100 rounded-full mr-4 active:scale-90 transition-all">
+        <button onclick="window.history.back()" class="p-2 bg-slate-100 rounded-full mr-4 active:scale-90 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
         <h1 id="cart-count-header" class="text-xl font-bold text-slate-800">Your Cart</h1>
@@ -72,102 +82,102 @@
     </div>
 
     <script>
-        // ✅ 1. Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const userPhone = localStorage.getItem('user_phone');
 
-        // ✅ 2. Fetch and Render Cart Items
-        function loadCart() {
-            if(!userPhone) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            db.ref('users/' + userPhone + '/cart').on('value', (snapshot) => {
-                const list = document.getElementById('cart-items-list');
-                const summary = document.getElementById('order-summary');
-                const bottomBar = document.getElementById('bottom-bar');
-                const emptyMsg = document.getElementById('empty-cart');
-                const cartData = snapshot.val();
+        // ✅ 2. REAL-TIME ACCOUNT & CART CHECK
+        if(userPhone) {
+            db.ref('users/' + userPhone).on('value', (snap) => {
+                const data = snap.val();
                 
-                list.innerHTML = "";
-                let total = 0;
-                let count = 0;
-
-                if(cartData) {
-                    summary.classList.remove('hidden');
-                    bottomBar.classList.remove('flex');
-                    bottomBar.classList.remove('hidden');
-                    bottomBar.classList.add('flex');
-                    emptyMsg.classList.add('hidden');
-
-                    Object.keys(cartData).forEach(key => {
-                        const item = cartData[key];
-                        total += parseInt(item.price);
-                        count++;
-
-                        list.innerHTML += `
-                            <div class="bg-white p-4 rounded-[2.5rem] shadow-sm border border-slate-50 flex gap-4 item-card relative overflow-hidden">
-                                <img src="${item.img}" class="w-24 h-28 object-cover rounded-[1.5rem]">
-                                <div class="flex-1 flex flex-col justify-between py-1">
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <h3 class="font-black text-slate-800 text-sm leading-tight">${item.name}</h3>
-                                            <button onclick="removeItem('${key}')" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                            </button>
-                                        </div>
-                                        <p class="text-[10px] font-bold text-slate-400 mt-1">SIZE: ${item.size}</p>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-black text-orange-500">₹${item.price}</span>
-                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Qty: 1</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    document.getElementById('cart-count-header').innerText = `Your Cart (${count})`;
-                    document.getElementById('subtotal').innerText = "₹" + total;
-                    document.getElementById('grand-total').innerText = "₹" + total;
-                    document.getElementById('bar-total').innerText = "₹" + total;
-                    localStorage.setItem('cart_total', total); // Global total for checkout
-                } else {
-                    summary.classList.add('hidden');
-                    bottomBar.classList.add('hidden');
-                    emptyMsg.classList.remove('hidden');
-                    document.getElementById('cart-count-header').innerText = "Your Cart (0)";
+                // Security Kick-out if user is not approved
+                if(!data || data.status !== "approved") {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                    return;
                 }
+
+                // Load Cart Items if valid
+                renderCart(data.cart);
             });
         }
 
-        // ✅ 3. Remove Item Function
+        function renderCart(cartData) {
+            const list = document.getElementById('cart-items-list');
+            const summary = document.getElementById('order-summary');
+            const bottomBar = document.getElementById('bottom-bar');
+            const emptyMsg = document.getElementById('empty-cart');
+            
+            list.innerHTML = "";
+            let total = 0;
+            let count = 0;
+
+            if(cartData) {
+                summary.classList.remove('hidden');
+                bottomBar.classList.remove('hidden');
+                bottomBar.classList.add('flex');
+                emptyMsg.classList.add('hidden');
+
+                Object.keys(cartData).forEach(key => {
+                    const item = cartData[key];
+                    total += parseInt(item.price);
+                    count++;
+
+                    list.innerHTML += `
+                        <div class="bg-white p-4 rounded-[2.5rem] shadow-sm border border-slate-50 flex gap-4 item-card relative overflow-hidden">
+                            <img src="${item.img}" class="w-24 h-28 object-cover rounded-[1.5rem]">
+                            <div class="flex-1 flex flex-col justify-between py-1">
+                                <div>
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="font-black text-slate-800 text-sm leading-tight">${item.name}</h3>
+                                        <button onclick="removeItem('${key}')" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tight">SIZE: ${item.size}</p>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-black text-orange-500">₹${item.price}</span>
+                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Qty: 1</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('cart-count-header').innerText = `Your Cart (${count})`;
+                document.getElementById('subtotal').innerText = "₹" + total;
+                document.getElementById('grand-total').innerText = "₹" + total;
+                document.getElementById('bar-total').innerText = "₹" + total;
+                localStorage.setItem('cart_total', total); 
+            } else {
+                summary.classList.add('hidden');
+                bottomBar.classList.add('hidden');
+                emptyMsg.classList.remove('hidden');
+                document.getElementById('cart-count-header').innerText = "Your Cart (0)";
+            }
+        }
+
         function removeItem(itemId) {
-            if(confirm("Remove this item?")) {
+            if(confirm("Remove this item from cart?")) {
                 db.ref('users/' + userPhone + '/cart/' + itemId).remove();
             }
         }
 
-        // ✅ 4. Redirect to Checkout
         function goToCheckout() {
-            window.location.href = 'checkout.html';
+            // Final safety check before redirect
+            if(localStorage.getItem('cart_total') > 0) {
+                window.location.href = 'checkout.html';
+            } else {
+                alert("Your cart is empty!");
+            }
         }
-
-        // Start loading
-        loadCart();
     </script>
-
 </body>
 </html>
-
