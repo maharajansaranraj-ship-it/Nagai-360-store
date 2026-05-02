@@ -38,7 +38,6 @@
     </div>
 
 <script>
-    // 1. Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
         authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -52,36 +51,38 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. Search Query edukkurom
     const params = new URLSearchParams(window.location.search);
+    // 1. User search panna query-ah clean-ah edukkurom
     const query = params.get('q') ? params.get('q').toLowerCase().trim() : "";
-    document.getElementById('search-title').innerText = query ? `"${query}"` : "All Products";
+    document.getElementById('search-title').innerText = query ? `"${query}"` : "Search Results";
 
-    // 3. Smart Search Logic
     if (query) {
+        // 2. Database-la products node-ah check pandrom
         db.ref('products').once('value', (snap) => {
             const products = snap.val();
             const container = document.getElementById('product-list');
             const noResults = document.getElementById('no-results');
+            
             container.innerHTML = "";
             let count = 0;
 
             if (products) {
-                Object.keys(products).reverse().forEach(id => {
+                Object.keys(products).forEach(id => {
                     const p = products[id];
                     
-                    // ✅ Ella data-vum edukkurom (Name, Description, Category)
-                    const name = p.name ? p.name.toLowerCase() : "";
-                    const desc = p.description ? p.description.toLowerCase() : "";
-                    const category = p.category ? p.category.toLowerCase() : "";
+                    // 3. Product-oda details check pandrom (null check kooda panni)
+                    const pName = p.name ? p.name.toLowerCase() : "";
+                    const pDesc = p.description ? p.description.toLowerCase() : "";
+                    const pCat = p.category ? p.category.toLowerCase() : "";
 
-                    // ✅ Smart Match: Keyword enga match aanalum product-ah kaatum
-                    if (name.includes(query) || desc.includes(query) || category.includes(query)) {
+                    // 4. Inga dhaan logic: 
+                    // Search query product name, description, illa category-la enga irundhalum result kaatum
+                    if (pName.indexOf(query) !== -1 || pDesc.indexOf(query) !== -1 || pCat.indexOf(query) !== -1) {
                         count++;
                         container.innerHTML += `
                             <div class="product-card" onclick="location.href='product.html?id=${p.pid || id}'">
                                 <div class="relative">
-                                    <img src="${p.images[0]}" class="w-full h-44 object-cover" onerror="this.src='https://placehold.co/400x400?text=No+Image'">
+                                    <img src="${p.images ? p.images[0] : ''}" class="w-full h-44 object-cover">
                                     ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-bold text-red-600 text-[10px] uppercase">Sold Out</div>' : ''}
                                 </div>
                                 <div class="p-3">
@@ -105,6 +106,7 @@
         document.getElementById('no-results').classList.remove('hidden');
     }
 </script>
+
 
 </body>
 </html>
