@@ -64,89 +64,110 @@
     </div> 
 
     <!-- 🔥 உங்கள் original JS untouched -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSy...",
-            authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
-        };
+   <script>
+const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "ff-id-store-dab0f.firebaseapp.com",
+    databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
+};
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        if(localStorage.getItem('isLoggedIn') === 'true'){
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+if(localStorage.getItem('isLoggedIn') === 'true'){
     window.location.href = 'home.html';
-        }
+}
 
-        function togglePassword() {
-            const passInput = document.getElementById('loginPassword');
-            passInput.type = passInput.type === 'password' ? 'text' : 'password';
-        }
+function togglePassword() {
+    const passInput = document.getElementById('loginPassword');
+    passInput.type = passInput.type === 'password' ? 'text' : 'password';
+}
 
-        let isWaiting = false;
+let isWaiting = false;
+let listenerActive = false;
 
-        function handleAuth() {
-            const phone = document.getElementById('phoneNumber').value.trim();
-            const pass = document.getElementById('loginPassword').value;
-            const btn = document.getElementById('loginBtn');
-            const msg = document.getElementById('msg');
+function handleAuth() {
 
-            if(phone === "9999999999" && pass === "admin123"){
-                window.location.href = "admin.html";
-                return;
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
+
+    if(phone === "9999999999" && pass === "admin123"){
+        window.location.href = "admin.html";
+        return;
+    }
+
+    if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
+    if(pass.length < 6) return alert("Password 6 characters venum");
+
+    btn.innerText = "CHECKING STATUS...";
+    btn.disabled = true;
+
+    const userRef = db.ref('users/' + phone);
+    const safePass = btoa(pass);
+
+    // 🔥 prevent multiple listeners
+    if(listenerActive) {
+        userRef.off();
+    }
+    listenerActive = true;
+
+    userRef.on('value', (snap) => {
+        const userData = snap.val();
+
+        if (!userData) {
+            if (isWaiting) {
+                msg.innerText = "❌ Rejected. Contact Admin.";
+                msg.style.color = "red";
+                btn.innerText = "LOGIN / SIGN UP";
+                btn.disabled = false;
+                isWaiting = false;
+                userRef.off();
+                listenerActive = false;
+            } else {
+                isWaiting = true;
+                msg.innerText = "✨ Requesting approval...";
+
+                userRef.set({
+                    phone: phone,
+                    password: safePass,
+                    status: "pending"
+                });
             }
-
-            if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
-            if(pass.length < 6) return alert("Password 6 characters venum");
-
-            btn.innerText = "CHECKING STATUS...";
-            btn.disabled = true;
-
-            const userRef = db.ref('users/' + phone);
-            const safePass = btoa(pass);
-
-            userRef.on('value', (snap) => {
-                const userData = snap.val();
-
-                if (!userData) {
-                    if (isWaiting) {
-                        msg.innerText = "❌ Rejected. Contact Admin.";
-                        msg.style.color = "red";
-                        btn.innerText = "LOGIN / SIGN UP";
-                        btn.disabled = false;
-                        isWaiting = false;
-                        userRef.off();
-                    } else {
-                        isWaiting = true;
-                        msg.innerText = "✨ Requesting approval...";
-                        userRef.set({
-                            phone: phone,
-                            password: safePass,
-                            status: "pending"
-                        });
-                    }
-                    return;
-                }
-
-                if (userData.password !== safePass) {
-                    alert("Wrong password!");
-                    btn.disabled = false;
-                    userRef.off();
-                    return;
-                }
-
-                if (userData.status === "approved") {
-                    msg.innerText = "✅ Approved!";
-                    localStorage.setItem('user_phone', phone);
-                    localStorage.setItem('isLoggedIn', 'true');
-                    setTimeout(() => window.location.href = 'home.html', 500);
-                } else {
-                    isWaiting = true;
-                    msg.innerText = "⏳ Waiting approval...";
-                    msg.style.color = "orange";
-                    btn.innerText = "PENDING...";
-                }
-            });
+            return;
         }
+
+        if (userData.password !== safePass) {
+            alert("Wrong password!");
+            btn.disabled = false;
+            userRef.off();
+            listenerActive = false;
+            return;
+        }
+
+        if (userData.status === "approved") {
+            msg.innerText = "✅ Approved!";
+            localStorage.setItem('user_phone', phone);
+            localStorage.setItem('isLoggedIn', 'true');
+
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 500);
+
+            userRef.off();
+            listenerActive = false;
+
+        } else {
+            isWaiting = true;
+            msg.innerText = "⏳ Waiting approval...";
+            msg.style.color = "orange";
+            btn.innerText = "PENDING...";
+        }
+    });
+}
+   
+       
     </script>
 </body>
 </html>
