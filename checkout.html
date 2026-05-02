@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 | Checkout</title>
+
+    <script>
+        const userPhone = localStorage.getItem('user_phone');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+        if(isLoggedIn !== 'true' || !userPhone) {
+            window.location.href = 'index.html'; 
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -94,9 +104,7 @@
         </button>
     </div>
 
-
     <script>
-    // 1. Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
         authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -109,15 +117,25 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const userPhone = localStorage.getItem('user_phone');
     
     let selectedMethod = "UPI";
     let subtotal = 0;
     let cartItems = []; 
     const rechargeFee = 80;
-    const myUpiId = "yourname@okicici"; // 👈 UNGA UPI ID INGA MATHUNGA
+    const myUpiId = "yourname@okicici"; 
 
-    // 2. UI Update & Sold Out Safety Check
+    // ✅ 2. LIVE ACCOUNT CHECK: Checkout poyittu irukkum pothu admin reject panna auto logout aagum
+    if(userPhone) {
+        db.ref('users/' + userPhone).on('value', (snap) => {
+            const data = snap.val();
+            if(!data || data.status !== "approved") {
+                localStorage.clear();
+                window.location.href = 'index.html';
+                return;
+            }
+        });
+    }
+
     function updateUI() {
         const listDiv = document.getElementById('items-list');
         listDiv.innerHTML = "";
@@ -135,7 +153,7 @@
                         <div class="flex flex-col items-center justify-center py-24 text-center">
                             <div class="text-6xl mb-4">🚫</div>
                             <h2 class="text-xl font-bold text-slate-800">Item Unavailable</h2>
-                            <p class="text-slate-400 text-sm mt-2 px-10">This product just went out of stock or was removed.</p>
+                            <p class="text-slate-400 text-sm mt-2 px-10">This product just went out of stock.</p>
                             <button onclick="location.href='home.html'" class="mt-8 bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-widest">Back to Home</button>
                         </div>`;
                     document.querySelector('.fixed.bottom-0').classList.add('hidden');
@@ -147,7 +165,6 @@
             cartItems.forEach((item, index) => {
                 subtotal += parseInt(item.price);
                 const itemSize = item.size || item.selectedSize || 'M';
-                // ✅ GET COLOR DATA
                 const itemColor = item.selectedColor || 'Default'; 
 
                 if(index === 0) finalSize = itemSize;
@@ -169,7 +186,6 @@
         }
     }
 
-    // 3. Load Data
     db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
         const data = snap.val();
         if(data) {
@@ -211,7 +227,6 @@
             if(selectedMethod === "UPI") {
                 const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
                 window.location.href = upiUrl;
-                // Wait and place order
                 setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
             } else {
                 placeOrder(name, addr, pin, totalAmount);
@@ -224,7 +239,6 @@
         const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
         const firstItem = cartItems[0];
         
-        // ✅ CONSTRUCT ORDER DATA WITH COLOR
         const orderData = {
             orderID: orderID, 
             customerName: name, 
@@ -236,10 +250,10 @@
             productName: firstItem.name,
             productID: firstItem.pid || firstItem.productID || "", 
             size: firstItem.size || firstItem.selectedSize || "N/A",
-            selectedColor: firstItem.selectedColor || "Default", // 👈 INDHA LINE DHAN ADMIN-KU COLOR ANUPPUM
+            selectedColor: firstItem.selectedColor || "Default",
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
-            timestamp: Date.now() // 👈 CANCELLATION LOGIC-KU IDHU MUST!
+            timestamp: Date.now()
         };
 
         const updates = {};
@@ -257,8 +271,5 @@
         });
     }
 </script>
-
-
-
 </body>
 </html>
