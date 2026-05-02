@@ -70,6 +70,12 @@
                 <p id="product-desc" class="text-slate-500 text-sm leading-relaxed font-medium">Fetching details...</p>
             </div>
 
+            <div class="mt-12 mb-10" id="related-section">
+                <h3 class="font-bold text-slate-800 text-[10px] uppercase tracking-[0.2em] mb-4">You May Also Like</h3>
+                <div id="related-products-list" class="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                    </div>
+            </div>
+
             <div class="mt-8 p-6 bg-slate-900 rounded-[2.5rem] shadow-xl relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
                 <h3 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4">Store Privileges</h3>
@@ -132,6 +138,9 @@
                     document.getElementById('product-price').innerText = "₹" + data.price;
                     document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
                     
+                    // Call related products
+                    loadRelatedProducts(data.category, productId);
+
                     const footer = document.getElementById('footer-buttons');
                     const badge = document.getElementById('sold-out-badge');
                     const slider = document.getElementById('slider-main');
@@ -192,6 +201,33 @@
                     document.getElementById('footer-buttons').classList.add('hidden');
                     document.getElementById('error-content').classList.remove('hidden');
                 }
+            });
+        }
+
+        function loadRelatedProducts(category, currentPid) {
+            if(!category) return;
+            db.ref('products').orderByChild('category').equalTo(category).limitToFirst(10).once('value', (snapshot) => {
+                const relatedList = document.getElementById('related-products-list');
+                relatedList.innerHTML = "";
+                const data = snapshot.val();
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        if(id !== currentPid) {
+                            const p = data[id];
+                            relatedList.innerHTML += `
+                                <div onclick="location.href='product-details.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all">
+                                    <div class="relative h-44 w-full bg-slate-100 rounded-[2rem] overflow-hidden mb-2 shadow-sm">
+                                        <img src="${p.images[0]}" class="w-full h-full object-cover">
+                                        ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center text-[8px] font-black uppercase text-red-500">Sold</div>' : ''}
+                                    </div>
+                                    <h4 class="text-[10px] font-bold text-slate-800 truncate px-1">${p.name}</h4>
+                                    <p class="text-[10px] font-black text-orange-500 px-1">₹${p.price}</p>
+                                </div>`;
+                        }
+                    });
+                }
+                if(relatedList.innerHTML === "") document.getElementById('related-section').classList.add('hidden');
+                else document.getElementById('related-section').classList.remove('hidden');
             });
         }
 
