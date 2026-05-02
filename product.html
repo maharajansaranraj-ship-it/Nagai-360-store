@@ -215,7 +215,7 @@
                         if(id !== currentPid) {
                             const p = data[id];
                             relatedList.innerHTML += `
-                                <div onclick="location.href='product-details.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all">
+                                <div onclick="location.href='product.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all">
                                     <div class="relative h-44 w-full bg-slate-100 rounded-[2rem] overflow-hidden mb-2 shadow-sm">
                                         <img src="${p.images[0]}" class="w-full h-full object-cover">
                                         ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center text-[8px] font-black uppercase text-red-500">Sold</div>' : ''}
