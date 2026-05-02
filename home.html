@@ -4,38 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 | Discover</title>
+    
+    <script>
+        const userPhone = localStorage.getItem('user_phone');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+        if(isLoggedIn !== 'true' || !userPhone) {
+            window.location.href = 'index.html'; 
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #fcfcfc; }
         .masonry { columns: 2; column-gap: 16px; padding: 16px; }
-        .masonry-item { 
-            break-inside: avoid; 
-            margin-bottom: 16px; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .masonry-item { break-inside: avoid; margin-bottom: 16px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .masonry-item:active { transform: scale(0.92); opacity: 0.8; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .active-heart { fill: #ef4444; stroke: #ef4444; }
-        .loading-shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .active-heart { fill: #ef4444 !important; stroke: #ef4444 !important; }
     </style>
 </head>
 <body class="pb-24">
-
-    <script>
-        if(localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'index.html'; 
-        }
-    </script>
 
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
@@ -72,17 +65,15 @@
     </section>
 
     <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar" id="category-bar">
-        <button onclick="filterCategory('All')" id="btn-All" class="cat-btn px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-200 whitespace-nowrap">All</button>
+        <button onclick="filterCategory('All')" id="btn-All" class="cat-btn px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg whitespace-nowrap">All</button>
         <button onclick="filterCategory('Saree')" id="btn-Saree" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Saree</button>
         <button onclick="filterCategory('Pants')" id="btn-Pants" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Pants</button>
         <button onclick="filterCategory('Men')" id="btn-Men" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Men</button>
-        <button onclick="filterCategory('Women')" id="btn-Women" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Women</button>
     </div>
 
-    <main class="masonry" id="main-product-grid">
-        </main>
+    <main class="masonry" id="main-product-grid"></main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-8 py-5 flex justify-between items-center shadow-[0_-15px_40px_rgba(0,0,0,0.03)] z-[100]">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-8 py-5 flex justify-between items-center shadow-md z-[100]">
         <button onclick="window.location.href='home.html'" class="text-orange-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
         </button>
@@ -102,117 +93,89 @@
         const firebaseConfig = {
             apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
             authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
             databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const userPhone = localStorage.getItem('user_phone');
 
         let allProducts = {}; 
         let currentFilter = 'All';
 
-        // User Data Fetch
+        // ✅ 2. REAL-TIME ACCOUNT & SAFETY CHECK
         if(userPhone) {
             db.ref('users/' + userPhone).on('value', (snap) => {
                 const data = snap.val();
-                if(data) {
-                    document.getElementById('user-coins').innerText = data.coins || 0;
-                    const cartCount = data.cart ? Object.keys(data.cart).length : 0;
-                    document.getElementById('cart-count').innerText = cartCount;
-                    if(data.profileImg) document.getElementById('user-avatar').src = data.profileImg;
+                
+                // Account Reject aayitta or Delete aayitta automatic-ah logout pannum
+                if(!data || data.status !== "approved") {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                    return;
                 }
+
+                // Update UI details
+                document.getElementById('user-coins').innerText = data.coins || 0;
+                const cartCount = data.cart ? Object.keys(data.cart).length : 0;
+                document.getElementById('cart-count').innerText = cartCount;
+                if(data.profileImg) document.getElementById('user-avatar').src = data.profileImg;
             });
         }
 
-        // Product Grid Fetch
+        // Fetch Products
         db.ref('products').on('value', (snapshot) => {
             allProducts = snapshot.val();
             renderProducts();
         });
 
         function renderProducts() {
-    const grid = document.getElementById('main-product-grid');
-    grid.innerHTML = "";
+            const grid = document.getElementById('main-product-grid');
+            grid.innerHTML = "";
+            if(!allProducts) return;
 
-    if(!allProducts) {
-        grid.innerHTML = "<p class='text-center py-20 text-slate-400 font-bold'>No items found.</p>";
-        return;
-    }
+            Object.keys(allProducts).reverse().forEach(key => {
+                const p = allProducts[key];
+                const pCategory = p.category ? p.category.toLowerCase() : "";
+                if (currentFilter !== 'All' && pCategory !== currentFilter.toLowerCase()) return;
 
-    let count = 0;
-    Object.keys(allProducts).reverse().forEach(key => {
-        const p = allProducts[key];
+                const soldOutUI = p.isSoldOut ? `
+                    <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
+                    <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
+                ` : '';
 
-        // ✅ Case-Insensitive Filter (Small or Capital letter - renduume work aagum)
-        const pCategory = p.category ? p.category.toLowerCase() : "";
-        const fCategory = currentFilter.toLowerCase();
-
-        if (currentFilter !== 'All' && pCategory !== fCategory) return;
-
-        count++;
-        const soldOutUI = p.isSoldOut ? `
-            <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
-            <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
-        ` : '';
-
-        grid.innerHTML += `
-            <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
-                ${soldOutUI}
-                <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" 
-                        class="absolute top-3 right-3 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md active:scale-125 transition-all">
-                    <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                </button>
-                <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
-                    <img src="${p.images[0]}" class="w-full object-cover min-h-[150px]">
-                    <div class="p-4">
-                        <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
-                        <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
-                    </div>
-                </div>
-            </div>`;
-    });
-
-    if(count === 0) {
-        grid.innerHTML = `<p class='text-center py-20 text-slate-400 font-bold w-full'>No products in ${currentFilter} category.</p>`;
-    }
-}
-
+                grid.innerHTML += `
+                    <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
+                        ${soldOutUI}
+                        <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" class="absolute top-3 right-3 z-20 p-2 bg-white/90 rounded-full shadow-md">
+                            <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </button>
+                        <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
+                            <img src="${p.images[0]}" class="w-full object-cover">
+                            <div class="p-4">
+                                <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
+                                <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
 
         function filterCategory(cat) {
             currentFilter = cat;
-            
-            // Button Active State UI
             document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-200');
-                btn.classList.add('bg-white', 'text-slate-500', 'border-slate-100');
+                btn.classList.replace('bg-slate-900', 'bg-white');
+                btn.classList.replace('text-white', 'text-slate-500');
             });
-
-            const activeBtn = document.getElementById('btn-' + cat);
-            if(activeBtn) {
-                activeBtn.classList.remove('bg-white', 'text-slate-500', 'border-slate-100');
-                activeBtn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-200');
-            }
-
+            document.getElementById('btn-' + cat).classList.add('bg-slate-900', 'text-white');
             renderProducts();
         }
 
         function toggleWishlist(event, id, name, img, price) {
             event.stopPropagation();
-            if(!userPhone) return alert("Login first!");
-            const heartIcon = document.getElementById('heart-' + id);
-            db.ref('users/' + userPhone + '/wishlist/' + id).set({
-                name: name, image: img, price: price
-            }).then(() => {
-                heartIcon.classList.add('active-heart');
-                heartIcon.style.color = "#ef4444";
-            });
+            db.ref('users/' + userPhone + '/wishlist/' + id).set({ name, image: img, price })
+            .then(() => document.getElementById('heart-' + id).classList.add('active-heart'));
         }
     </script>
 </body>
