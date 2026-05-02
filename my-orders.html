@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 | My Orders</title>
+
+    <script>
+        const userPhone = localStorage.getItem('user_phone');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+        if(isLoggedIn !== 'true' || !userPhone) {
+            window.location.href = 'index.html'; 
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -20,7 +29,7 @@
 
     <header class="p-6 bg-white sticky top-0 z-50 shadow-sm space-y-4">
         <div class="flex items-center gap-4">
-            <button onclick="window.location.href='profile.html'" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
+            <button onclick="window.history.back()" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
             </button>
             <h1 class="text-xl font-bold text-slate-800">My Orders</h1>
@@ -38,88 +47,93 @@
     const firebaseConfig = {
         apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
         authDomain: "ff-id-store-dab0f.firebaseapp.com",
-        projectId: "ff-id-store-dab0f",
-        storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-        messagingSenderId: "655049193530",
-        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
         databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com"
     };
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const userPhone = localStorage.getItem('user_phone');
 
+    // ✅ 2. REAL-TIME ACCOUNT & SAFETY CHECK
     if(userPhone) {
-        db.ref('users/' + userPhone + '/myOrders').on('value', (snapshot) => {
-            const container = document.getElementById('orders-container');
-            container.innerHTML = ""; 
-            const orders = snapshot.val();
+        db.ref('users/' + userPhone).on('value', (snap) => {
+            const data = snap.val();
+            
+            // Security check: User status status logic
+            if(!data || data.status !== "approved") {
+                localStorage.clear();
+                window.location.href = 'index.html';
+                return;
+            }
 
-            if(orders) {
-                const orderKeys = Object.keys(orders).reverse();
+            // Fetch Orders if user is valid
+            loadOrders(data.myOrders);
+        });
+    }
+
+    function loadOrders(orders) {
+        const container = document.getElementById('orders-container');
+        container.innerHTML = ""; 
+
+        if(orders) {
+            const orderKeys = Object.keys(orders).reverse();
+            
+            orderKeys.forEach(id => {
+                const order = orders[id];
+                const statusClass = getStatusStyle(order.status);
+                const pId = order.productID || order.pid || "";
                 
-                orderKeys.forEach(id => {
-                    const order = orders[id];
-                    const statusClass = getStatusStyle(order.status);
-                    
-                    // ✅ PRODUCT ID AH EDUTHTHU PRODUCT PAGE-KU ANUPPURA LOGIC
-                    const pId = order.productID || order.pid || "";
+                // Cancellation logic (1 day limit)
+                const orderTime = order.timestamp || 0; 
+                const currentTime = Date.now();
+                const oneDayMs = 24 * 60 * 60 * 1000;
+                const canCancel = (currentTime - orderTime < oneDayMs) && (order.status !== 'Cancelled' && order.status !== 'Delivered');
 
-                    // ✅ 1-DAY CANCELLATION LOGIC
-                    const orderTime = order.timestamp || 0; 
-                    const currentTime = Date.now();
-                    const oneDayMs = 24 * 60 * 60 * 1000;
-                    const canCancel = (currentTime - orderTime < oneDayMs) && (order.status !== 'Cancelled' && order.status !== 'Delivered');
-
-                    container.innerHTML += `
-                        <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
-                             class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer">
-                            
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
-                                    <h3 class="font-black text-slate-800">#${order.orderID}</h3>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+                container.innerHTML += `
+                    <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
+                         class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer">
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
+                                <h3 class="font-black text-slate-800">#${order.orderID}</h3>
                             </div>
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 py-4 border-y border-slate-50">
+                            <img src="${order.productImg}" class="w-16 h-16 object-cover rounded-2xl shadow-inner bg-slate-50">
                             
-                            <div class="flex items-center gap-4 py-4 border-y border-slate-50">
-                                <img src="${order.productImg}" class="w-16 h-16 object-cover rounded-2xl shadow-inner bg-slate-50">
-                                
-                                <div class="flex-1">
-                                    <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
-                                    <div class="flex gap-2 mt-1">
-                                        <p class="text-[9px] text-slate-400 font-bold uppercase">Size: ${order.size || 'N/A'}</p>
-                                        <p class="text-[9px] text-blue-400 font-bold uppercase">Color: ${order.selectedColor || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
+                            <div class="flex-1">
+                                <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
+                                <div class="flex gap-2 mt-1">
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase">Size: ${order.size || 'N/A'}</p>
+                                    <p class="text-[9px] text-blue-400 font-bold uppercase">Color: ${order.selectedColor || 'N/A'}</p>
                                 </div>
                             </div>
-
-                            <div class="mt-4 flex justify-between items-center">
-                                <p class="text-[9px] text-slate-400 font-bold uppercase">${order.orderDate || ''}</p>
-                                
-                                ${canCancel ? `
-                                    <button onclick="event.stopPropagation(); cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                                        Cancel Order
-                                    </button>
-                                ` : ''}
-
-                                ${order.status === 'Cancelled' ? `
-                                    <p class="text-[9px] text-red-400 font-bold uppercase italic">Cancelled</p>
-                                ` : ''}
+                            <div class="text-right">
+                                <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
                             </div>
                         </div>
-                    `;
-                });
-            } else {
-                container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
-            }
-        });
-    } else {
-        window.location.href = 'index.html';
+
+                        <div class="mt-4 flex justify-between items-center">
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">${order.orderDate || ''}</p>
+                            
+                            ${canCancel ? `
+                                <button onclick="event.stopPropagation(); cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                    Cancel Order
+                                </button>
+                            ` : ''}
+
+                            ${order.status === 'Cancelled' ? `
+                                <p class="text-[9px] text-red-400 font-bold uppercase italic">Cancelled</p>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
+        }
     }
 
     function cancelMyOrder(orderKey) {
@@ -144,6 +158,5 @@
         }
     }
 </script>
-
 </body>
 </html>
