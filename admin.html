@@ -58,6 +58,27 @@
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
             <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
         </div>
+        <div id="add-offer-section" class="hidden">
+    <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
+        <h2 class="text-xs font-black text-orange-500 uppercase tracking-widest mb-4">Add Special Offer</h2>
+        
+        <input type="text" id="offerName" placeholder="Offer Name (Ex: Diwali Sale)">
+        <input type="text" id="offerImg" placeholder="Offer Image URL">
+        
+        <div class="grid grid-cols-2 gap-2">
+            <input type="number" id="offerPrice" placeholder="Offer Price (₹)">
+            <input type="number" id="originalPrice" placeholder="Old Price (₹)">
+        </div>
+
+        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Offer End Time</label>
+        <input type="datetime-local" id="endTime">
+
+        <button onclick="addOffer()" class="w-full bg-slate-900 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs mt-2">
+            Launch Offer 🔥
+        </button>
+    </div>
+</div>
+
 
         <div id="add-section" class="hidden">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
@@ -92,21 +113,34 @@
     if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
     let currentEditID = null;
-
-    function showTab(tab) {
-        ['orders', 'users', 'delivered', 'inventory', 'add'].forEach(t => {
-            document.getElementById(t + '-section')?.classList.add('hidden');
-            document.getElementById(t + '-tab')?.classList.remove('active-tab');
-        });
-        document.getElementById(tab + '-section')?.classList.remove('hidden');
-        document.getElementById(tab + '-tab')?.classList.add('active-tab');
+        function showTab(tab) {
+    // Intha list-la ippo 6 tabs irukku
+    ['orders', 'users', 'delivered', 'inventory', 'add', 'add-offer'].forEach(t => {
+        const section = document.getElementById(t + '-section');
+        const tabBtn = document.getElementById(t + '-tab');
         
-        if (tab !== 'add') {
-            currentEditID = null;
-            document.getElementById('submit-btn').innerText = "Publish";
-            clearForm();
-        }
+        // Ellathaiyum hidden pannidum
+        if (section) section.classList.add('hidden');
+        if (tabBtn) tabBtn.classList.remove('active-tab');
+    });
+
+    // Neenga click panna tab-ah mattum kaatum
+    const activeSection = document.getElementById(tab + '-section');
+    const activeBtn = document.getElementById(tab + '-tab');
+    
+    if (activeSection) activeSection.classList.remove('hidden');
+    if (activeBtn) activeBtn.classList.add('active-tab');
+    
+    // Form clean panna
+    if (tab !== 'add' && tab !== 'add-offer') {
+        currentEditID = null;
+        if(document.getElementById('submit-btn')) document.getElementById('submit-btn').innerText = "Publish";
+        clearForm();
     }
+}
+
+
+    
 
     function clearForm() {
         document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
