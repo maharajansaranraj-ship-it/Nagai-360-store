@@ -101,7 +101,7 @@
     </div>
 
     
-    <script>
+        <script>
     // 🔐 Password Logic
     function checkAdminPass() {
         const pass = document.getElementById('admin-pass-input').value;
@@ -113,22 +113,31 @@
         }
     }
 
-    // ✅ FIREBASE CONFIG (Don't Change)
+    // ✅ FIREBASE CONFIG
     var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x61\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
-    if(!firebase.apps.length){ firebase.initializeApp(firebaseConfig); }
-    const db = firebase.database();
+    if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
+    // 🔥 PATH
     const SEC = "nagai_secure_v1";
     let currentEditID = null;
 
     function showTab(tab) {
         ['orders', 'users', 'delivered', 'inventory', 'add'].forEach(t => {
-            document.getElementById(t + '-section')?.classList.add('hidden');
-            document.getElementById(t + '-tab')?.classList.remove('active-tab');
+            const section = document.getElementById(t + '-section');
+            const btn = document.getElementById(t + '-tab');
+            if(section) section.classList.add('hidden');
+            if(btn) btn.classList.remove('active-tab');
         });
-        document.getElementById(tab + '-section').classList.remove('hidden');
-        document.getElementById(tab + '-tab').classList.add('active-tab');
-        if (tab !== 'add') { currentEditID = null; document.getElementById('submit-btn').innerText = "Publish"; clearForm(); }
+        const activeSection = document.getElementById(tab + '-section');
+        const activeBtn = document.getElementById(tab + '-tab');
+        if(activeSection) activeSection.classList.remove('hidden');
+        if(activeBtn) activeBtn.classList.add('active-tab');
+        
+        if (tab !== 'add') {
+            currentEditID = null;
+            document.getElementById('submit-btn').innerText = "Publish";
+            clearForm();
+        }
     }
 
     function clearForm() {
@@ -136,21 +145,21 @@
         document.getElementById('p-category').value = "Rings";
     }
 
-    // 👥 USERS
+    // 👥 USERS FETCH & APPROVE
     db.ref(SEC + '/users').on('value', snap => {
         const list = document.getElementById('admin-users-list');
         list.innerHTML = "";
         const data = snap.val();
         if(data) {
-            Object.keys(data).forEach(ph => {
-                const u = data[ph];
+            Object.keys(data).forEach(phone => {
+                const u = data[phone];
                 const isApproved = u.status === "approved";
-                list.innerHTML += `<div class="bg-white p-4 rounded-2xl border ${isApproved?'border-green-100':'border-orange-100'} mb-2 shadow-sm">
-                    <p class="text-[8px] font-black ${isApproved?'text-green-500':'text-orange-500'} uppercase">${isApproved?'Approved':'Pending'}</p>
-                    <p class="font-bold text-slate-800">${ph}</p>
-                    <div class="flex gap-2 mt-2">
-                        ${!isApproved ? `<button onclick="approveUser('${ph}')" class="bg-orange-500 text-white px-3 py-2 rounded-lg text-[8px] font-black">APPROVE</button>` : ''}
-                        <button onclick="deleteUser('${ph}')" class="bg-red-50 text-red-500 px-3 py-2 rounded-lg text-[8px] font-black">DELETE</button>
+                list.innerHTML += `<div class="bg-white p-5 rounded-[2rem] border ${isApproved ? 'border-green-100' : 'border-orange-100'} shadow-sm mb-3">
+                    <p class="text-[9px] font-black ${isApproved ? 'text-green-500':'text-orange-500'} uppercase">${isApproved ? 'Approved':'Pending'}</p>
+                    <h4 class="font-black text-slate-800 text-lg">${phone}</h4>
+                    <div class="flex gap-2 mt-3">
+                        ${!isApproved ? `<button onclick="approveUser('${phone}')" class="flex-1 bg-orange-500 text-white py-3 rounded-xl text-[9px] font-black">APPROVE</button>` : ''}
+                        <button onclick="deleteUser('${phone}')" class="flex-1 bg-red-50 text-red-500 py-3 rounded-xl text-[9px] font-black">DELETE</button>
                     </div>
                 </div>`;
             });
@@ -159,8 +168,17 @@
 
     function approveUser(p) { db.ref(SEC + '/users/' + p).update({ status: "approved" }); }
     function deleteUser(p) { if(confirm("Delete User?")) db.ref(SEC + '/users/' + p).remove(); }
+    
+    function cleanJunkUsers() {
+        if(confirm("Delete all pending users?")) {
+            db.ref(SEC + '/users').once('value', s => {
+                const d = s.val();
+                if(d) Object.keys(d).forEach(p => { if(d[p].status !== "approved") db.ref(SEC + '/users/'+p).remove(); });
+            });
+        }
+    }
 
-    // 📦 ORDERS
+    // 📦 ORDERS FETCH
     db.ref(SEC + '/orders').on('value', snap => {
         const live = document.getElementById('admin-orders-list');
         const done = document.getElementById('admin-delivered-list');
@@ -169,12 +187,14 @@
         if(data) {
             Object.keys(data).reverse().forEach(id => {
                 const o = data[id];
-                const card = `<div class="bg-white p-4 rounded-2xl border border-slate-100 mb-3">
-                    <div class="flex justify-between mb-2"><span class="text-[8px] font-black text-slate-400">#${o.orderID}</span><span class="text-orange-500 font-black text-[8px] uppercase">${o.status}</span></div>
-                    <p class="text-xs font-bold">${o.productName}</p>
-                    <p class="text-blue-600 text-[10px] font-bold">📞 ${o.primaryPhone}</p>
-                    <p class="text-slate-500 text-[9px] mb-2">${o.fullAddress}</p>
-                    ${o.status !== 'Delivered' ? `<div class="flex gap-2"><button onclick="upStat('${id}','Shipped','${o.primaryPhone}')" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-[8px] font-black">SHIP</button><button onclick="upStat('${id}','Delivered','${o.primaryPhone}')" class="bg-green-500 text-white px-4 py-2 rounded-lg text-[8px] font-black">DELIVER</button></div>` : ''}
+                const card = `<div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 mb-3 shadow-sm">
+                    <div class="flex justify-between items-center mb-2"><span class="text-[9px] font-black text-slate-400">#${o.orderID}</span><span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-[8px] font-black uppercase">${o.status || 'Ordered'}</span></div>
+                    <div class="flex gap-3 mb-3">
+                        <img src="${o.productImg}" class="w-12 h-12 rounded-xl object-cover">
+                        <div><p class="text-xs font-bold text-slate-700">${o.productName}</p><p class="text-orange-500 font-black text-[10px]">₹${o.totalBill}</p></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl text-[9px] mb-3"><p class="font-black text-blue-600 mb-1">📞 ${o.primaryPhone}</p><p class="text-slate-500 leading-tight">${o.fullAddress}</p></div>
+                    ${o.status !== 'Delivered' ? `<div class="flex gap-2"><button onclick="upStat('${id}','Shipped','${o.primaryPhone}')" class="flex-1 bg-slate-900 text-white py-3 rounded-xl text-[8px] font-black">SHIP</button><button onclick="upStat('${id}','Delivered','${o.primaryPhone}')" class="flex-1 bg-green-500 text-white py-3 rounded-xl text-[8px] font-black">DELIVER</button></div>`:''}
                 </div>`;
                 if(o.status === 'Delivered') done.innerHTML += card; else live.innerHTML += card;
             });
@@ -182,13 +202,13 @@
     });
 
     function upStat(id, s, p) {
-        let up = {}; 
+        const up = {}; 
         up[SEC + '/orders/'+id+'/status'] = s; 
         up[SEC + '/users/'+p+'/myOrders/'+id+'/status'] = s;
-        db.ref().update(up).then(() => alert("Updated!"));
+        db.ref().update(up).then(() => alert("Status Updated!"));
     }
 
-    // 🏷️ INVENTORY
+    // 🏷️ INVENTORY FETCH
     db.ref(SEC + '/products').on('value', snap => {
         const list = document.getElementById('admin-product-list');
         list.innerHTML = "";
@@ -196,60 +216,86 @@
         if(data) {
             Object.keys(data).reverse().forEach(id => {
                 const p = data[id];
-                list.innerHTML += `<div class="bg-white p-4 rounded-3xl border border-slate-100 flex items-center gap-4 mb-2">
-                    <img src="${p.images[0]}" class="w-12 h-12 rounded-xl object-cover">
-                    <div class="flex-1"><p class="text-xs font-bold">${p.name}</p><p class="text-orange-500 font-black text-[9px]">₹${p.price}</p></div>
-                    <button onclick="editProduct('${id}')" class="bg-blue-500 text-white px-3 py-2 rounded-lg text-[7px] font-black">EDIT</button>
-                    <button onclick="delProd('${id}')" class="bg-red-50 text-red-500 px-3 py-2 rounded-lg text-[7px] font-black">DEL</button>
+                const isOut = p.isSoldOut === true;
+                list.innerHTML += `<div class="bg-white p-4 rounded-3xl border border-slate-100 flex items-center gap-4 shadow-sm mb-2">
+                    <img src="${p.images[0]}" class="w-14 h-14 rounded-xl object-cover ${isOut ? 'grayscale opacity-50':''}">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-700">${p.name}</p>
+                        <p class="text-orange-500 font-black text-[10px]">₹${p.price}</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex gap-1">
+                            <button onclick="editProduct('${id}')" class="bg-blue-500 text-white p-2 px-3 rounded-lg text-[7px] font-black">EDIT</button>
+                            <button onclick="toggleSold('${id}')" class="${isOut ? 'bg-red-500' : 'bg-green-500'} text-white p-2 px-3 rounded-lg text-[7px] font-black">${isOut ? 'SOLD' : 'STOCK'}</button>
+                        </div>
+                        <button onclick="delProd('${id}')" class="bg-slate-50 text-slate-400 p-2 rounded-lg text-[7px] font-black">DELETE</button>
+                    </div>
                 </div>`;
             });
         }
     });
 
-    function editProduct(id) {
-        currentEditID = id;
-        db.ref(SEC + '/products/' + id).once('value', s => {
-            const p = s.val();
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-price').value = p.price;
-            document.getElementById('p-category').value = p.category;
-            document.getElementById('p-desc').value = p.desc;
-            document.getElementById('img1').value = p.images[0];
-            document.getElementById('submit-btn').innerText = "Update Now";
-            showTab('add');
+    function toggleSold(id) {
+        const ref = db.ref(SEC + '/products/'+id);
+        ref.once('value').then(s => {
+            const current = s.val().isSoldOut || false;
+            ref.update({ isSoldOut: !current });
         });
     }
 
-    function delProd(id) { if(confirm("Delete?")) db.ref(SEC + '/products/'+id).remove(); }
+    function delProd(id) { if(confirm("Delete Product?")) db.ref(SEC + '/products/'+id).remove(); }
 
-    // 🚀 PUBLISH
+    function editProduct(id) {
+        currentEditID = id;
+        db.ref(SEC + '/products/' + id).once('value', snap => {
+            const p = snap.val();
+            if(p) {
+                document.getElementById('p-name').value = p.name;
+                document.getElementById('p-price').value = p.price;
+                document.getElementById('p-category').value = p.category;
+                document.getElementById('p-sizes').value = p.sizes ? p.sizes.join(',') : "";
+                document.getElementById('p-colors').value = p.colors ? p.colors.join(',') : "";
+                document.getElementById('p-desc').value = p.desc;
+                for(let i=1; i<=6; i++) {
+                    document.getElementById('img'+i).value = (p.images && p.images[i-1]) ? p.images[i-1] : "";
+                }
+                document.getElementById('submit-btn').innerText = "Update Product";
+                showTab('add');
+            }
+        });
+    }
+
+    // 🚀 UPLOAD
     function uploadProduct() {
         const name = document.getElementById('p-name').value;
         const price = document.getElementById('p-price').value;
-        const img1 = document.getElementById('img1').value;
-        if(!name || !price || !img1) return alert("Fill Name, Price and Image 1!");
+        let imgs = [];
+        for(let i=1; i<=6; i++) {
+            let v = document.getElementById('img'+i).value.trim();
+            if(v) imgs.push(v);
+        }
+        
+        if(!name || !price || imgs.length === 0) return alert("Error: Name, Price, Image!");
 
         const pid = currentEditID || "P" + Date.now();
-        const imgs = [img1];
-        for(let i=2; i<=6; i++) {
-            let val = document.getElementById('img' + i).value;
-            if(val) imgs.push(val);
-        }
-
-        const productData = {
+        const pData = {
             pid: pid, name: name, price: price,
             category: document.getElementById('p-category').value,
             desc: document.getElementById('p-desc').value,
-            images: imgs, isSoldOut: false
+            images: imgs,
+            sizes: document.getElementById('p-sizes').value.split(','),
+            colors: document.getElementById('p-colors').value.split(','),
+            isSoldOut: false
         };
 
-        db.ref(SEC + '/products/' + pid).set(productData).then(() => {
-            alert("Success!");
+        db.ref(SEC + '/products/' + pid).update(pData).then(() => {
+            alert("Done!");
             clearForm();
             showTab('inventory');
-        }).catch(e => alert("Error: " + e.message));
+        });
     }
 </script>
+
 
 
 
