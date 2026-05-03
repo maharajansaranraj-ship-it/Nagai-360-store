@@ -7,23 +7,40 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { background-color: #FFB800; font-family: sans-serif; }
+        ::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-[#FFB800] pb-10">
+<body class="pb-10">
 
     <header class="p-6 flex justify-between items-center">
         <button onclick="history.back()" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg text-xl">⬅️</button>
         <h1 class="text-2xl font-black text-slate-900 italic">FLASH SALE</h1>
     </header>
 
-    <div id="offers-list" class="px-6">
+    <div class="px-6 mb-6">
+        <div class="w-full h-52 bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white/30">
+            <img src="YOUR_BANNER_IMAGE_URL_HERE" class="w-full h-full object-cover" alt="Promotion Banner">
+        </div>
+    </div>
+
+    <div class="px-6 relative mb-8">
+        <input type="text" id="searchInput" onkeyup="searchOffers()" placeholder="Search deals..." class="w-full p-5 pl-14 bg-white rounded-[2.5rem] outline-none shadow-xl text-sm font-bold">
+        <span class="absolute left-12 top-5 text-xl">🔍</span>
+    </div>
+
+    <div id="offers-list" class="px-6 grid grid-cols-2 gap-5">
         </div>
 
     <script>
-        // ✅ UNGA FIREBASE CONFIG INGA PODUNGA
+        // ✅ YOUR FIREBASE CONFIG
         var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
         
         if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        let allOffers = [];
 
         function loadOffers() {
             db.ref('offers').on('value', snap => {
@@ -32,37 +49,40 @@
                 const now = new Date().getTime();
 
                 if(o && (new Date(o.endTime).getTime() - now > 0)) {
+                    allOffers = [o];
                     const img = o.images ? o.images[0] : '';
                     list.innerHTML = `
-                        <div class="bg-white p-5 rounded-[2.5rem] shadow-2xl" onclick="location.href='product.html?id=${o.pid}'">
-                            <div class="relative mb-4">
-                                <img src="${img}" class="w-full h-64 object-cover rounded-[2rem]">
-                                <div id="timer-box" class="absolute bottom-4 left-4 bg-slate-900 text-white font-black px-4 py-2 rounded-xl text-xs shadow-lg">00h 00m 00s</div>
+                        <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${o.pid}'">
+                            <div class="relative mb-3">
+                                <img src="${img}" class="w-full h-40 object-cover rounded-[1.8rem]">
+                                <div id="timer-box" class="absolute bottom-2 left-2 bg-slate-900 text-white font-black px-3 py-1 rounded-lg text-[9px] shadow-lg">00h 00m 00s</div>
                             </div>
-                            <h2 class="text-xl font-black text-slate-800 mb-1">${o.name}</h2>
-                            <div class="flex justify-between items-center">
-                                <p class="text-2xl font-black text-orange-500">₹${o.price} <span class="text-slate-300 text-sm line-through ml-2">₹${o.originalPrice}</span></p>
-                                <button class="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase">Buy Now</button>
+                            <h3 class="font-bold text-slate-800 text-[11px] truncate px-1">${o.name}</h3>
+                            <div class="flex items-center justify-between mt-1 px-1">
+                                <p class="text-orange-500 font-black text-sm">₹${o.price}</p>
+                                <p class="text-slate-300 text-[9px] line-through font-bold">₹${o.originalPrice}</p>
                             </div>
                         </div>
                     `;
                     startCountdown(o.endTime);
                 } else {
-                    list.innerHTML = "<p class='text-center text-white font-bold opacity-60 mt-10 text-xs uppercase tracking-widest'>No Active Deals Right Now!</p>";
+                    list.innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-60'>No active deals!</p>";
                 }
             });
         }
 
         function startCountdown(endTime) {
-            setInterval(() => {
+            const timer = setInterval(() => {
                 const now = new Date().getTime();
                 const dist = new Date(endTime).getTime() - now;
                 const el = document.getElementById('timer-box');
-                if(!el) return;
+                
+                if(!el) { clearInterval(timer); return; }
 
                 if (dist < 0) {
                     el.innerHTML = "EXPIRED";
-                    location.reload(); // Time mudinja refresh panni hide aagidum
+                    loadOffers(); // Re-check to hide card
+                    clearInterval(timer);
                 } else {
                     const h = Math.floor((dist % 86400000) / 3600000);
                     const m = Math.floor((dist % 3600000) / 60000);
@@ -70,6 +90,14 @@
                     el.innerHTML = `${h}h ${m}m ${s}s`;
                 }
             }, 1000);
+        }
+
+        function searchOffers() {
+            const val = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allOffers.filter(o => o.name.toLowerCase().includes(val));
+            // Simple render for search
+            if(filtered.length === 0) document.getElementById('offers-list').innerHTML = "";
+            else loadOffers(); 
         }
 
         loadOffers();
