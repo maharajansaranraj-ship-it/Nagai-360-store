@@ -270,6 +270,28 @@
             showTab('inventory');
         }).catch(err => alert("Error: " + err.message));
     }
+        function addOffer() {
+    const name = document.getElementById('offerName').value;
+    const price = document.getElementById('offerPrice').value;
+    const oPrice = document.getElementById('originalPrice').value;
+    const time = document.getElementById('endTime').value;
+    const img = document.getElementById('offerImg').value;
+
+    const offerData = {
+        name: name,
+        price: price,
+        originalPrice: oPrice,
+        endTime: time,
+        image: img,
+        timestamp: Date.now()
+    };
+
+    // 'offers' nu thani folder-la save aagum
+    db.ref('offers').push(offerData).then(() => {
+        alert("Offer Successfully Added! 🔥");
+    });
+}
+
 
     </script>
 </body>
