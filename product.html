@@ -88,6 +88,12 @@
             </div>
         </div>
     </div>
+    <div class="px-6 mb-10">
+    <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">More for you</h2>
+    <div id="more-products-grid" class="grid grid-cols-2 gap-4">
+        </div>
+</div>
+
 
     <div id="error-content" class="hidden flex flex-col items-center justify-center min-h-screen p-10 text-center">
         <div class="text-6xl mb-4">🔍</div>
@@ -304,6 +310,35 @@
             }).then(() => console.log("Added to wishlist"));
         }
     }
+    function loadMoreGrid(category, currentPid) {
+    db.ref('products').once('value', snap => {
+        const grid = document.getElementById('more-products-grid');
+        grid.innerHTML = "";
+        const data = snap.val();
+        
+        if(data) {
+            Object.keys(data).reverse().forEach(id => {
+                const p = data[id];
+                // Same category items mattum filter pannu
+                if(p.category === category && id !== currentPid) {
+                    grid.innerHTML += `
+                    <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
+                        <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
+                        <div class="px-2">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${p.category}</p>
+                            <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
+                                <div class="w-8 h-8 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xs">＋</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+            });
+        }
+    });
+}
+
 </script>
 
                         
