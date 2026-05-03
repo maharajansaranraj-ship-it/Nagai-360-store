@@ -10,7 +10,6 @@
     <style>
         body { background-color: #FFB800; font-family: sans-serif; }
         ::-webkit-scrollbar { display: none; }
-        .banner-shadow { shadow-shadow: 0 20px 50px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="pb-10">
@@ -25,26 +24,21 @@
 
     <div class="px-6 mb-8">
         <div class="w-full h-52 bg-white rounded-[3rem] overflow-hidden shadow-2xl border-[6px] border-white/30">
-            <img src="YOUR_BANNER_IMAGE_URL_HERE" class="w-full h-full object-cover" alt="Big Deal Banner">
+            <img src="YOUR_BANNER_IMAGE_URL_HERE" class="w-full h-full object-cover" id="top-banner">
         </div>
     </div>
 
     <div class="px-6 relative mb-8">
-        <input type="text" id="searchInput" onkeyup="searchOffers()" placeholder="Search from offers..." class="w-full p-6 pl-14 bg-white rounded-[2.5rem] outline-none shadow-2xl text-sm font-bold text-slate-800 placeholder:text-slate-300">
+        <input type="text" id="searchInput" onkeyup="searchOffers()" placeholder="Search from offers..." class="w-full p-6 pl-14 bg-white rounded-[2.5rem] outline-none shadow-2xl text-sm font-bold text-slate-800">
         <span class="absolute left-12 top-6 text-xl">🔍</span>
     </div>
 
-    <div class="px-8 mb-6 flex items-center">
-        <h2 class="text-slate-900 font-black text-[11px] uppercase tracking-widest bg-white/20 px-4 py-2 rounded-full">Items on Sale</h2>
-        <div class="h-[1px] flex-1 bg-white/30 ml-4"></div>
-    </div>
-
     <div id="offers-list" class="px-6 grid grid-cols-2 gap-5">
-        <p class="col-span-2 text-center text-white font-bold py-10 opacity-50">Fetching deals...</p>
+        <p class="col-span-2 text-center text-white font-bold py-10 opacity-50">Checking for deals...</p>
     </div>
 
     <script>
-        // ✅ PASTE YOUR FIREBASE CONFIG FROM ADMIN PANEL HERE
+        // ✅ YOUR FIREBASE CONFIG
         var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
         
         if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -55,14 +49,11 @@
         function loadOffers() {
             db.ref('offers').on('value', snap => {
                 const data = snap.val();
-                allOffers = [];
                 if(data) {
-                    // Admin single set nu sonnathala oru object ah edukkuron
-                    // List ah iruntha multiple items loop panna mudiyum
                     allOffers = [data]; 
                     renderOffers(allOffers);
                 } else {
-                    document.getElementById('offers-list').innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-50'>No active offers today!</p>";
+                    document.getElementById('offers-list').innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-50'>No offers available!</p>";
                 }
             });
         }
@@ -70,13 +61,23 @@
         function renderOffers(items) {
             const list = document.getElementById('offers-list');
             list.innerHTML = "";
+            const now = new Date().getTime();
+
             items.forEach(o => {
+                const dist = new Date(o.endTime).getTime() - now;
+                
+                // ✅ Time mudinjirundha show panna vaandaam (Auto-hide)
+                if (dist < 0) {
+                    list.innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-50'>Offer Expired!</p>";
+                    return;
+                }
+
                 const img = (o.images && o.images[0]) ? o.images[0] : 'https://via.placeholder.com/300';
                 list.innerHTML += `
-                    <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all border-b-4 border-slate-200" onclick="location.href='product.html?id=${o.linkedPid || 'PROD123'}'">
+                    <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${o.pid || 'P123'}'">
                         <div class="relative mb-3">
                             <img src="${img}" class="w-full h-36 object-cover rounded-[1.8rem]">
-                            <div class="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] font-black px-3 py-1 rounded-full uppercase shadow-lg">Sale</div>
+                            <div id="timer-display" class="absolute bottom-2 left-2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded-lg shadow-lg">Loading...</div>
                         </div>
                         <h3 class="font-bold text-slate-800 text-[11px] truncate px-1">${o.name}</h3>
                         <div class="flex items-center justify-between mt-1 px-1">
@@ -85,7 +86,30 @@
                         </div>
                     </div>
                 `;
+                startCountdown(o.endTime, "timer-display");
             });
+        }
+
+        function startCountdown(endTime, elementId) {
+            if(!endTime) return;
+            const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const dist = new Date(endTime).getTime() - now;
+                const el = document.getElementById(elementId);
+                
+                if(!el) { clearInterval(timer); return; }
+
+                if (dist < 0) {
+                    el.innerHTML = "EXPIRED";
+                    clearInterval(timer);
+                    loadOffers(); // Refresh panna automatic-ah hide aagidum
+                } else {
+                    const h = Math.floor((dist % 86400000) / 3600000);
+                    const m = Math.floor((dist % 3600000) / 60000);
+                    const s = Math.floor((dist % 60000) / 1000);
+                    el.innerHTML = `${h}h ${m}m ${s}s`;
+                }
+            }, 1000);
         }
 
         function searchOffers() {
