@@ -128,10 +128,20 @@ function startApprovalListener(phone) {
 
     localStorage.setItem('user_phone', phone);
 
-    db.ref(SEC + '/users/' + phone + '/status').on('value', (snap) => {
-        const status = snap.val();
+    db.ref(SEC + '/users/' + phone).on('value', (snap) => {
+        const data = snap.val();
 
-        if(status === "approved") {
+        // ❗ NEW FIX
+        if(!data) {
+            // user delete aayirundha reset
+            localStorage.clear();
+            msg.innerText = "User removed. Please login again.";
+            btn.innerText = "Login / Sign Up";
+            btn.disabled = false;
+            return;
+        }
+
+        if(data.status === "approved") {
             localStorage.setItem('isLoggedIn', 'true');
             window.location.href = 'home.html';
         } else {
