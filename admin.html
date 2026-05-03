@@ -179,17 +179,34 @@ db.ref(SEC+'/users').on('value', snap => {
 
 function approveUser(p){ db.ref(SEC+'/users/'+p).update({status:"approved"}); }
 function deleteUser(p){ if(confirm("Delete User?")) db.ref(SEC+'/users/'+p).remove(); }
+function cleanJunkUsers() {
+    if(confirm("Delete all pending users?")) {
 
-function cleanJunkUsers(){
-    if(confirm("Delete all pending users?")){
-        db.ref(SEC+'/users').once('value', s=>{
-            const d=s.val()||{};
-            Object.keys(d).forEach(p=>{
-                if(d[p].status!=="approved") db.ref(SEC+'/users/'+p).remove();
-            });
+        db.ref(SEC + '/users').once('value')
+        .then(snapshot => {
+            const data = snapshot.val();
+            const updates = {};
+
+            if(data) {
+                Object.keys(data).forEach(phone => {
+                    if(data[phone].status !== "approved") {
+                        updates[phone] = null; // delete
+                    }
+                });
+
+                return db.ref(SEC + '/users').update(updates);
+            }
+        })
+        .then(() => {
+            alert("Pending users cleared!");
+        })
+        .catch(err => {
+            alert("Error: " + err.message);
         });
+
     }
 }
+
 
 // 📦 ORDERS
 db.ref(SEC+'/orders').on('value', snap => {
