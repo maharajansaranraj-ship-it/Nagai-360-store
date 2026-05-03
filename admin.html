@@ -26,13 +26,7 @@
             </div>
             <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xl">👑</div>
         </div>
-        <div class="flex overflow-x-auto">
-            <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
-            <button onclick="showTab('users')" id="users-tab" class="tab-btn">Users</button>
-            <button onclick="showTab('delivered')" id="delivered-tab" class="tab-btn">Delivered</button>
-            <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Inventory</button>
-            <button onclick="showTab('add')" id="add-tab" class="tab-btn">Add New</button>
-        </div>
+        
         <div class="flex overflow-x-auto">
     <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
     <button onclick="showTab('users')" id="users-tab" class="tab-btn">Users</button>
@@ -42,6 +36,7 @@
     
     <button onclick="showTab('add-offer')" id="add-offer-tab" class="tab-btn">Offers</button>
 </div>
+        
 
     </header>
 
@@ -123,31 +118,19 @@
     if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
     let currentEditID = null;
-        function showTab(tab) {
-    // Intha list-la ippo 6 tabs irukku
+    function showTab(tab) {
+    // Intha list-la 'add-offer' nu puthusa sethurukkaen
     ['orders', 'users', 'delivered', 'inventory', 'add', 'add-offer'].forEach(t => {
         const section = document.getElementById(t + '-section');
         const tabBtn = document.getElementById(t + '-tab');
-        
-        // Ellathaiyum hidden pannidum
         if (section) section.classList.add('hidden');
         if (tabBtn) tabBtn.classList.remove('active-tab');
     });
 
-    // Neenga click panna tab-ah mattum kaatum
-    const activeSection = document.getElementById(tab + '-section');
-    const activeBtn = document.getElementById(tab + '-tab');
-    
-    if (activeSection) activeSection.classList.remove('hidden');
-    if (activeBtn) activeBtn.classList.add('active-tab');
-    
-    // Form clean panna
-    if (tab !== 'add' && tab !== 'add-offer') {
-        currentEditID = null;
-        if(document.getElementById('submit-btn')) document.getElementById('submit-btn').innerText = "Publish";
-        clearForm();
-    }
+    document.getElementById(tab + '-section').classList.remove('hidden');
+    document.getElementById(tab + '-tab').classList.add('active-tab');
 }
+    
 
 
     
