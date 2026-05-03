@@ -42,34 +42,72 @@
 
         let allOffers = [];
 
-        function loadOffers() {
-            db.ref('offers').on('value', snap => {
-                const o = snap.val();
-                const list = document.getElementById('offers-list');
+        
+function loadOffers() {
+    db.ref('offers').on('value', snap => {
+        const data = snap.val();
+        const list = document.getElementById('offers-list');
+        const now = new Date().getTime();
+
+        list.innerHTML = "";
+        allOffers = [];
+
+        if(data){
+            Object.keys(data).reverse().forEach(id => {
+                const o = data[id];
+
+                // ❌ expired skip
+                if(o.endTime && (new Date(o.endTime).getTime() - now <= 0)) return;
+
+                allOffers.push(o);
+
+                const img = o.images ? o.images[0] : '';
+
+                list.innerHTML += `
+                <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${o.pid}'">
+                    <div class="relative mb-3">
+                        <img src="${img}" class="w-full h-40 object-cover rounded-[1.8rem]">
+                        <div class="timer-box absolute bottom-2 left-2 bg-slate-900 text-white font-black px-3 py-1 rounded-lg text-[9px] shadow-lg" data-time="${o.endTime}">
+                            00h 00m 00s
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-[11px] truncate px-1">${o.name}</h3>
+                    <div class="flex items-center justify-between mt-1 px-1">
+                        <p class="text-orange-500 font-black text-sm">₹${o.price}</p>
+                        <p class="text-slate-300 text-[9px] line-through font-bold">₹${o.originalPrice || ''}</p>
+                    </div>
+                </div>
+                `;
+            });
+
+            // 🔥 Timer (inside same function)
+            setInterval(() => {
                 const now = new Date().getTime();
 
-                if(o && (new Date(o.endTime).getTime() - now > 0)) {
-                    allOffers = [o];
-                    const img = o.images ? o.images[0] : '';
-                    list.innerHTML = `
-                        <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${o.pid}'">
-                            <div class="relative mb-3">
-                                <img src="${img}" class="w-full h-40 object-cover rounded-[1.8rem]">
-                                <div id="timer-box" class="absolute bottom-2 left-2 bg-slate-900 text-white font-black px-3 py-1 rounded-lg text-[9px] shadow-lg">00h 00m 00s</div>
-                            </div>
-                            <h3 class="font-bold text-slate-800 text-[11px] truncate px-1">${o.name}</h3>
-                            <div class="flex items-center justify-between mt-1 px-1">
-                                <p class="text-orange-500 font-black text-sm">₹${o.price}</p>
-                                <p class="text-slate-300 text-[9px] line-through font-bold">₹${o.originalPrice}</p>
-                            </div>
-                        </div>
-                    `;
-                    startCountdown(o.endTime);
-                } else {
-                    list.innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-60'>No active deals!</p>";
-                }
-            });
+                document.querySelectorAll('.timer-box').forEach(el => {
+                    const endTime = el.getAttribute('data-time');
+                    const dist = new Date(endTime).getTime() - now;
+
+                    if (dist < 0) {
+                        el.innerHTML = "EXPIRED";
+                    } else {
+                        const h = Math.floor((dist % 86400000) / 3600000);
+                        const m = Math.floor((dist % 3600000) / 60000);
+                        const s = Math.floor((dist % 60000) / 1000);
+                        el.innerHTML = `${h}h ${m}m ${s}s`;
+                    }
+                });
+            }, 1000);
+
+            if(allOffers.length === 0){
+                list.innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-60'>No active deals!</p>";
+            }
+
+        } else {
+            list.innerHTML = "<p class='col-span-2 text-center text-white font-bold opacity-60'>No active deals!</p>";
         }
+    });
+}          
 
         function startCountdown(endTime) {
             const timer = setInterval(() => {
