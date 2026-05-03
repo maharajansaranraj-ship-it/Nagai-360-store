@@ -63,35 +63,33 @@
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
             <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
         </div>
+        <div id="add-offer-section" class="hidden">
+    <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
+        <h2 class="text-xs font-black text-orange-500 uppercase tracking-widest mb-4">Add Special Offer</h2>
+        <input type="text" id="offerName" placeholder="Offer Name">
         
-
-
-
-        <div id="add-section" class="hidden">
-            <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
-                <input type="text" id="p-name" placeholder="Product Name">
-                <input type="number" id="p-price" placeholder="Price (₹)">
-                <select id="p-category">
-                    <option value="Rings">Rings</option>
-                    <option value="Chains">Chains</option>
-                    <option value="Watches">Watches</option>
-                    <option value="Bracelets">Bracelets</option>
-                    <option value="Combo">Combo Pack</option>
-                </select>
-                <input type="text" id="p-sizes" placeholder="Sizes (e.g. S, M, L)">
-                <input type="text" id="p-colors" placeholder="Colors (e.g. Gold, Silver)">
-                <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <input type="text" id="img1" placeholder="Main Image URL">
-                    <input type="text" id="img2" placeholder="Image 2 URL">
-                    <input type="text" id="img3" placeholder="Image 3 URL">
-                    <input type="text" id="img4" placeholder="Image 4 URL">
-                    <input type="text" id="img5" placeholder="Image 5 URL">
-                    <input type="text" id="img6" placeholder="Image 6 URL">
-                </div>
-                <button id="submit-btn" onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Publish</button>
-            </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+            <input type="text" id="offImg1" placeholder="Offer Image 1 URL">
+            <input type="text" id="offImg2" placeholder="Offer Image 2 URL">
+            <input type="text" id="offImg3" placeholder="Offer Image 3 URL">
+            <input type="text" id="offImg4" placeholder="Offer Image 4 URL">
+            <input type="text" id="offImg5" placeholder="Offer Image 5 URL">
+            <input type="text" id="offImg6" placeholder="Offer Image 6 URL">
         </div>
+        
+        <div class="grid grid-cols-2 gap-2">
+            <input type="number" id="offerPrice" placeholder="Offer Price (₹)">
+            <input type="number" id="originalPrice" placeholder="Old Price (₹)">
+        </div>
+        <input type="datetime-local" id="endTime">
+        <button onclick="addOffer()" class="w-full bg-slate-900 text-white font-black py-5 rounded-3xl uppercase tracking-widest text-xs mt-2">Launch Offer 🔥</button>
+    </div>
+</div>
+
+
+
+
+        
     </main>
 
     <script>
