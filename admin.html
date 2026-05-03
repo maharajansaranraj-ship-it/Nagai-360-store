@@ -63,36 +63,7 @@
             <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
             <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
         </div>
-        <div id="add-section" class="hidden">
-    <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
-        <input type="text" id="p-name" placeholder="Product Name">
-        <input type="number" id="p-price" placeholder="Price (₹)">
         
-        <select id="p-category">
-            <option value="Rings">Rings</option>
-            <option value="Chains">Chains</option>
-            <option value="Watches">Watches</option>
-            <option value="Bracelets">Bracelets</option>
-            <option value="Combo">Combo Pack</option>
-        </select>
-
-        <input type="text" id="p-sizes" placeholder="Sizes (Ex: S, M, L or 6, 7, 8)">
-        <input type="text" id="p-colors" placeholder="Colors (Ex: Gold, Silver, RoseGold)">
-        
-        <textarea id="p-desc" rows="3" placeholder="Write product description here..."></textarea>
-
-        <div class="grid grid-cols-2 gap-2 mb-3">
-            <input type="text" id="img1" placeholder="Main Image URL">
-            <input type="text" id="img2" placeholder="Image 2 URL">
-            <input type="text" id="img3" placeholder="Image 3 URL">
-            <input type="text" id="img4" placeholder="Image 4 URL">
-            <input type="text" id="img5" placeholder="Image 5 URL">
-            <input type="text" id="img6" placeholder="Image 6 URL">
-        </div>
-
-        <button id="submit-btn" onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Publish Product</button>
-    </div>
-</div>
 
 
 
@@ -276,38 +247,41 @@
     }
 
     function uploadProduct() {
-        const name = document.getElementById('p-name').value;
-        const price = document.getElementById('p-price').value;
-        const imgs = [];
-        for(let i=1; i<=6; i++) {
-            const v = document.getElementById('img'+i).value.trim();
-            if(v) imgs.push(v);
-        }
-        
-        if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and at least 1 Image!");
+    const name = document.getElementById('p-name').value;
+    const price = document.getElementById('p-price').value;
+    
+    // Intha puthu values-ah fetch panrom
+    const desc = document.getElementById('p-desc').value;
+    const sizes = document.getElementById('p-sizes').value.split(',').map(s => s.trim());
+    const colors = document.getElementById('p-colors').value.split(',').map(c => c.trim());
 
-        const pid = currentEditID || "P" + Date.now();
-        const productData = {
-            pid: pid,
-            name: name,
-            price: price,
-            category: document.getElementById('p-category').value,
-            desc: document.getElementById('p-desc').value,
-            images: imgs,
-            sizes: document.getElementById('p-sizes').value.split(',').map(s => s.trim()),
-            colors: document.getElementById('p-colors').value.split(',').map(c => c.trim())
-        };
-
-        if (!currentEditID) {
-            productData.isSoldOut = false;
-        }
-
-        db.ref('products/' + pid).update(productData).then(() => {
-            alert(currentEditID ? "Updated Successfully!" : "Added Successfully!");
-            currentEditID = null;
-            showTab('inventory');
-        }).catch(err => alert("Error: " + err.message));
+    const imgs = [];
+    for(let i=1; i<=6; i++) {
+        const v = document.getElementById('img'+i).value.trim();
+        if(v) imgs.push(v);
     }
+    
+    if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and at least 1 Image!");
+
+    const pid = currentEditID || "P" + Date.now();
+    const productData = {
+        pid: pid,
+        name: name,
+        price: price,
+        category: document.getElementById('p-category').value,
+        desc: desc,        // Ippo save aagum
+        sizes: sizes,      // Ippo save aagum
+        colors: colors,    // Ippo save aagum
+        images: imgs,
+        isSoldOut: false
+    };
+
+    db.ref('products/' + pid).update(productData).then(() => {
+        alert("Success! ✅");
+        showTab('inventory');
+    });
+}
+
         function addOffer() {
     const name = document.getElementById('offerName').value;
     const price = document.getElementById('offerPrice').value;
