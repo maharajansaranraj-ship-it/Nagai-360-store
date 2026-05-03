@@ -87,6 +87,34 @@
 </div>
 
 
+<div id="add-section" class="hidden">
+    <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
+        <input type="text" id="p-name" placeholder="Product Name">
+        <input type="number" id="p-price" placeholder="Price (₹)">
+        
+        <select id="p-category">
+            <option value="Rings">Rings</option>
+            <option value="Chains">Chains</option>
+            <option value="Watches">Watches</option>
+            <option value="Bracelets">Bracelets</option>
+            <option value="Combo">Combo Pack</option>
+        </select>
+
+        <input type="text" id="p-sizes" placeholder="Sizes (e.g. S, M, L)">
+        <input type="text" id="p-colors" placeholder="Colors (e.g. Gold, Silver)">
+        <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
+
+        <div class="grid grid-cols-2 gap-2 mb-3">
+            <input type="text" id="img1" placeholder="Main Image URL">
+            <input type="text" id="img2" placeholder="Image 2 URL">
+            <input type="text" id="img3" placeholder="Image 3 URL">
+            <input type="text" id="img4" placeholder="Image 4 URL">
+            <input type="text" id="img5" placeholder="Image 5 URL">
+            <input type="text" id="img6" placeholder="Image 6 URL">
+        </div>
+        <button id="submit-btn" onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Publish</button>
+    </div>
+</div>
 
 
         
