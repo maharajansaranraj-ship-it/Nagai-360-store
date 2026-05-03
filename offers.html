@@ -20,47 +20,48 @@
     <div id="offers-list" class="p-6 grid grid-cols-1 gap-6">
         </div>
 
-    <script>
-        // Unga Firebase Config inga podunga (Same as Product Page)
+        <script>
+        // ✅ Unga Firebase Config inga irukanum
         const db = firebase.database();
 
         function loadOffers() {
             db.ref('offers').on('value', snap => {
                 const list = document.getElementById('offers-list');
                 list.innerHTML = "";
-                const data = snap.val();
+                const o = snap.val(); // Direct-ah data-va edukkuron
 
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const o = data[id];
-                        const offerId = id;
-                        
-                        list.innerHTML += `
-                            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-100 relative">
-                                <div class="absolute top-4 left-4 z-10 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Limited</div>
-                                <img src="${o.image}" class="w-full h-64 object-cover">
-                                
-                                <div class="p-6">
-                                    <div class="flex justify-between items-end mb-4">
-                                        <div>
-                                            <h3 class="font-bold text-slate-800 text-lg">${o.name}</h3>
-                                            <p class="text-orange-500 font-black text-xl mt-1">₹${o.price} <span class="text-slate-300 text-sm line-through ml-2">₹${o.originalPrice}</span></p>
-                                        </div>
-                                        <div id="timer-${offerId}" class="text-right font-black text-slate-800 text-xs bg-slate-100 px-3 py-2 rounded-xl">
-                                            Loading...
-                                        </div>
+                if(o) {
+                    // Admin-la images array-ah irukku, so images[0] edukkuron
+                    const mainImg = o.images ? o.images[0] : 'https://via.placeholder.com/300';
+                    
+                    list.innerHTML = `
+                        <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-100 relative">
+                            <div class="absolute top-4 left-4 z-10 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Limited</div>
+                            <img src="${mainImg}" class="w-full h-64 object-cover">
+                            
+                            <div class="p-6">
+                                <div class="flex justify-between items-end mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-lg">${o.name}</h3>
+                                        <p class="text-orange-500 font-black text-xl mt-1">₹${o.price} <span class="text-slate-300 text-sm line-through ml-2">₹${o.originalPrice}</span></p>
                                     </div>
-                                    <button onclick="location.href='product.html?id=${o.linkedPid}'" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl text-xs uppercase tracking-[0.2em]">View Offer</button>
+                                    <div id="timer-offer" class="text-right font-black text-slate-800 text-xs bg-slate-100 px-3 py-2 rounded-xl">
+                                        Loading...
+                                    </div>
                                 </div>
+                                <button onclick="location.href='index.html'" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl text-xs uppercase tracking-[0.2em]">Shop Now</button>
                             </div>
-                        `;
-                        startCountdown(o.endTime, `timer-${offerId}`);
-                    });
+                        </div>
+                    `;
+                    startCountdown(o.endTime, `timer-offer`);
+                } else {
+                    list.innerHTML = "<p class='text-center text-slate-400 font-bold'>No Active Offers! 🔥</p>";
                 }
             });
         }
 
         function startCountdown(endTime, elementId) {
+            if(!endTime) return;
             setInterval(() => {
                 const now = new Date().getTime();
                 const dist = new Date(endTime).getTime() - now;
@@ -81,5 +82,6 @@
 
         loadOffers();
     </script>
+
 </body>
 </html>
