@@ -45,70 +45,103 @@
         </div>    
     </div>   
 
-<script>  
-    // ✅ Step 1: Encrypted Firebase Config (Hacker-ala read panna mudiyaathu)
-var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
+<script>
+/* ✅ Firebase Init (unchanged) */
+var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
 
-    // ✅ CHECK STATUS ON PAGE LOAD (User thallivittu vandhaalum check pannum)
-    window.onload = function() {
-        const phoneMemory = localStorage.getItem('user_phone');
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
+if(!firebase.apps.length){ firebase.initializeApp(firebaseConfig); }
+const db = firebase.database();
 
-        if(isLoggedIn === 'true') {
-            window.location.href = 'home.html';
-        } else if(phoneMemory) {
-            // User login panni waiting-la irundha, thirumba check status
-            startApprovalListener(phoneMemory);
+/* ✅ FIXED PATH */
+const SEC = "nagai_secure_v1";
+
+/* ✅ Page Load Check */
+window.onload = function() {
+    const phoneMemory = localStorage.getItem('user_phone');
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+    if(isLoggedIn === 'true') {
+        window.location.href = 'home.html';
+    } else if(phoneMemory) {
+        startApprovalListener(phoneMemory);
+    }
+}
+
+/* ✅ LOGIN / SIGNUP */
+function handleAuth() {  
+    const phone = document.getElementById('phoneNumber').value.trim();  
+    const pass = document.getElementById('loginPassword').value;  
+    const btn = document.getElementById('loginBtn');  
+    const msg = document.getElementById('msg');  
+
+    if(phone === "9999999999" && pass === "admin123") {
+        window.location.href = "admin.html";
+        return;
+    }
+
+    if(!/^[0-9]{10}$/.test(phone)) {
+        alert("10 digit number podu bro");
+        return;
+    }
+
+    if(pass.length < 6) {
+        alert("Password 6 characters venum");
+        return;
+    }
+
+    const safePass = btoa(pass);  
+
+    db.ref(SEC + '/users/' + phone).once('value')
+    .then((snap) => {
+        const userData = snap.val();
+
+        if(!userData) {
+            /* 🆕 NEW USER CREATE */
+            return db.ref(SEC + '/users/' + phone).set({
+                phone: phone,
+                password: safePass,
+                status: "pending",
+                coins: 0,
+                cart: {},
+                wishlist: {},
+                createdAt: Date.now()
+            }).then(() => startApprovalListener(phone));
         }
-    }
 
-    function handleAuth() {  
-        const phone = document.getElementById('phoneNumber').value.trim();  
-        const pass = document.getElementById('loginPassword').value;  
-        const btn = document.getElementById('loginBtn');  
-        const msg = document.getElementById('msg');  
+        if(userData.password !== safePass) {
+            alert("Wrong Password!");
+            return;
+        }
 
-        if(phone === "9999999999" && pass === "admin123") return window.location.href = "admin.html";  
-        if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");  
-        if(pass.length < 6) return alert("Password 6 characters venum");  
+        /* ✅ EXISTING USER */
+        startApprovalListener(phone);
+    })
+    .catch(err => {
+        alert("Error: " + err.message);
+    });
+}
 
-        const safePass = btoa(pass);  
+/* ✅ REALTIME APPROVAL CHECK */
+function startApprovalListener(phone) {
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('loginBtn');
 
-        db.ref('users/' + phone).once('value', (snap) => {
-            const userData = snap.val();
+    localStorage.setItem('user_phone', phone);
 
-            if(!userData) {
-                // New User Register
-                db.ref('users/' + phone).set({ phone, password: safePass, status: "pending" })
-                .then(() => startApprovalListener(phone));
-            } else if(userData.password !== safePass) {
-                alert("Wrong Password!");
-            } else {
-                // Existing user, check status
-                startApprovalListener(phone);
-            }
-        });
-    }
+    db.ref(SEC + '/users/' + phone + '/status').on('value', (snap) => {
+        const status = snap.val();
 
-    // ✅ REAL-TIME LISTENER (Idhu dhaan automatic-ah home pogum)
-    function startApprovalListener(phone) {
-        localStorage.setItem('user_phone', phone); // Phone memory-la vachuko
-        const msg = document.getElementById('msg');
-        const btn = document.getElementById('loginBtn');
-
-        db.ref('users/' + phone + '/status').on('value', (snap) => {
-            const status = snap.val();
-            if(status === "approved") {
-                localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'home.html';
-            } else {
-                msg.innerText = "⏳ Waiting for Admin Approval...";
-                msg.style.color = "orange";
-                btn.innerText = "PENDING...";
-                btn.disabled = true;
-            }
-        });
-    }
-</script>
+        if(status === "approved") {
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'home.html';
+        } else {
+            msg.innerText = "⏳ Waiting for Admin Approval...";
+            msg.style.color = "orange";
+            btn.innerText = "PENDING...";
+            btn.disabled = true;
+        }
+    });
+}
+        </script>
 </body>  
 </html>
