@@ -308,12 +308,14 @@
     });
 }
 
-        function addOffer() {
+    function addOffer() {
     const name = document.getElementById('offerName').value;
     const price = document.getElementById('offerPrice').value;
     const oPrice = document.getElementById('originalPrice').value;
     const time = document.getElementById('endTime').value;
-    const pid = document.getElementById('p-pid-offer').value;
+
+    const pidInput = document.getElementById('p-pid-offer');
+    const pid = pidInput ? pidInput.value : "";
 
     const offImgs = [];
     for(let i=1; i<=6; i++) {
@@ -327,23 +329,23 @@
     }
 
     const offerData = {
-        name: name,
-        price: price,
+        name,
+        price,
         originalPrice: oPrice,
         endTime: time,
-        pid: pid,
+        pid,
         images: offImgs,
         timestamp: Date.now()
     };
 
-    db.ref('offers').push(offerData).then(() => {
+    db.ref('offers').push(offerData)
+    .then(() => {
         alert("🔥 Offer Added Successfully!");
-        
-        // Clear form
-        document.querySelectorAll('#add-offer-section input').forEach(i => i.value = "");
+    })
+    .catch(err => {
+        alert("Error: " + err.message);
     });
-        }
-
+}    
 
 
     </script>
