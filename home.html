@@ -25,6 +25,7 @@
         .masonry-item { break-inside: avoid; margin-bottom: 16px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .masonry-item:active { transform: scale(0.92); opacity: 0.8; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-heart { fill: #ef4444 !important; stroke: #ef4444 !important; }
     </style>
 </head>
 <body class="pb-24">
@@ -106,6 +107,7 @@
     const db = firebase.database();
 
     let allProducts={};
+    let userWishlist={};
     let currentFilter="All";
 
     // USER DATA
@@ -115,12 +117,14 @@
             localStorage.clear();
             window.location.href='index.html';
         }
+        userWishlist = data.wishlist || {};
         document.getElementById('user-coins').innerText=data.coins||0;
         document.getElementById('cart-count').innerText=data.cart?Object.keys(data.cart).length:0;
         if(data.profileImg) document.getElementById('user-avatar').src=data.profileImg;
+        renderProducts(); // Refresh icon status
     });
 
-    // PRODUCTS (Direct path - Admin maariyae)
+    // PRODUCTS
     db.ref('products').on('value',snap=>{
         allProducts=snap.val()||{};
         renderProducts();
@@ -134,15 +138,20 @@
             const p=allProducts[id];
             const img=(p.images&&p.images[0])?p.images[0]:"https://via.placeholder.com/300";
             
-            // Category check
             const pCat = (p.category || "").toLowerCase();
             const filter = currentFilter.toLowerCase();
             if(filter !== "all" && pCat !== filter) return;
 
             const isSold=p.isSoldOut===true;
+            const isInWishlist = userWishlist[p.pid] ? 'active-heart' : '';
 
             grid.innerHTML+=`
             <div class="masonry-item bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-50 relative">
+                <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${img}', ${p.price})" class="absolute top-3 right-3 z-20 p-2 bg-white/90 rounded-full shadow-md">
+                    <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300 ${isInWishlist}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </button>
                 ${isSold ? '<div class="absolute top-2 left-2 bg-red-500 text-white text-[7px] font-black px-2 py-1 rounded-lg z-10 uppercase">Sold Out</div>' : ''}
                 <div class="${isSold?'opacity-50 grayscale':''} cursor-pointer" onclick="${isSold?"alert('Out of stock')":"go('"+p.pid+"')"}">
                     <img src="${img}" class="w-full object-cover">
@@ -153,6 +162,16 @@
                 </div>
             </div>`;
         });
+    }
+
+    function toggleWishlist(e, id, name, img, price) {
+        e.stopPropagation();
+        const ref = db.ref('users/' + userPhone + '/wishlist/' + id);
+        if (userWishlist[id]) {
+            ref.remove();
+        } else {
+            ref.set({ pid: id, name, image: img, price });
+        }
     }
 
     function filterCategory(cat){
