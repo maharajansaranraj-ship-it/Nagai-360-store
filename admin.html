@@ -99,9 +99,7 @@
             </div>
         </main>
     </div>
-
-    
-        <script>
+<script>
     // 🔐 Password Logic
     function checkAdminPass() {
         const pass = document.getElementById('admin-pass-input').value;
@@ -145,7 +143,7 @@
         document.getElementById('p-category').value = "Rings";
     }
 
-    // 👥 USERS FETCH & APPROVE
+    // 👥 USERS FETCH
     db.ref(SEC + '/users').on('value', snap => {
         const list = document.getElementById('admin-users-list');
         list.innerHTML = "";
@@ -250,12 +248,12 @@
         db.ref(SEC + '/products/' + id).once('value', snap => {
             const p = snap.val();
             if(p) {
-                document.getElementById('p-name').value = p.name;
-                document.getElementById('p-price').value = p.price;
-                document.getElementById('p-category').value = p.category;
+                document.getElementById('p-name').value = p.name || "";
+                document.getElementById('p-price').value = p.price || "";
+                document.getElementById('p-category').value = p.category || "Rings";
                 document.getElementById('p-sizes').value = p.sizes ? p.sizes.join(',') : "";
                 document.getElementById('p-colors').value = p.colors ? p.colors.join(',') : "";
-                document.getElementById('p-desc').value = p.desc;
+                document.getElementById('p-desc').value = p.desc || "";
                 for(let i=1; i<=6; i++) {
                     document.getElementById('img'+i).value = (p.images && p.images[i-1]) ? p.images[i-1] : "";
                 }
@@ -265,38 +263,49 @@
         });
     }
 
-    // 🚀 UPLOAD
+    // 🚀 UPLOAD (FIXED LOGIC)
     function uploadProduct() {
         const name = document.getElementById('p-name').value;
         const price = document.getElementById('p-price').value;
+        const cat = document.getElementById('p-category').value;
+        const sizes = document.getElementById('p-sizes').value;
+        const colors = document.getElementById('p-colors').value;
+        const desc = document.getElementById('p-desc').value;
+
         let imgs = [];
         for(let i=1; i<=6; i++) {
             let v = document.getElementById('img'+i).value.trim();
             if(v) imgs.push(v);
         }
         
-        if(!name || !price || imgs.length === 0) return alert("Error: Name, Price, Image!");
+        if(!name || !price || imgs.length === 0) {
+            alert("Error: Name, Price, and Image 1 required!");
+            return;
+        }
 
         const pid = currentEditID || "P" + Date.now();
         const pData = {
-            pid: pid, name: name, price: price,
-            category: document.getElementById('p-category').value,
-            desc: document.getElementById('p-desc').value,
+            pid: pid, 
+            name: name, 
+            price: price,
+            category: cat,
+            desc: desc,
             images: imgs,
-            sizes: document.getElementById('p-sizes').value.split(','),
-            colors: document.getElementById('p-colors').value.split(','),
+            sizes: sizes ? sizes.split(',') : [],
+            colors: colors ? colors.split(',') : [],
             isSoldOut: false
         };
 
         db.ref(SEC + '/products/' + pid).update(pData).then(() => {
-            alert("Done!");
+            alert("Done! Product Published.");
             clearForm();
             showTab('inventory');
-        });
+        }).catch(err => alert("Error: " + err.message));
     }
 </script>
 
-
+    
+                    
 
 
 </body>
