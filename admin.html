@@ -313,32 +313,31 @@
     const price = document.getElementById('offerPrice').value;
     const oPrice = document.getElementById('originalPrice').value;
     const time = document.getElementById('endTime').value;
-    
-    // 6 images-aiyum collect panna loop
+    const pid = document.getElementById('p-pid-offer').value; // 👈 Puthu Line
+
     const offImgs = [];
     for(let i=1; i<=6; i++) {
         const v = document.getElementById('offImg' + i).value.trim();
         if(v) offImgs.push(v);
     }
 
-    if(!name || !price || offImgs.length === 0) return alert("Fill Name, Price and at least 1 Image!");
+    if(!name || !price || !pid) return alert("Fill Name, Price and Product ID!");
 
     const offerData = {
         name: name,
         price: price,
         originalPrice: oPrice,
         endTime: time,
-        images: offImgs, // Ippo array-ah save aagum
+        pid: pid, // 👈 Idhu save aaganum
+        images: offImgs,
         timestamp: Date.now()
     };
 
     db.ref('offers').set(offerData).then(() => {
         alert("Offer Successfully Added! 🔥");
-        // Form clear panna
-        for(let i=1; i<=6; i++) document.getElementById('offImg' + i).value = "";
-        document.getElementById('offerName').value = "";
     });
 }
+
 
 
     </script>
