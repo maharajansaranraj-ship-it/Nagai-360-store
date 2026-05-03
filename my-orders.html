@@ -65,7 +65,7 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
         });
     }
 
-    function loadOrders(orders) {
+        function loadOrders(orders) {
         const container = document.getElementById('orders-container');
         container.innerHTML = ""; 
 
@@ -77,11 +77,16 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
                 const statusClass = getStatusStyle(order.status);
                 const pId = order.productID || order.pid || "";
                 
-                // Cancellation logic (1 day limit)
+                // Cancellation logic (Fixed: Shipped status-laum hide aagum)
                 const orderTime = order.timestamp || 0; 
                 const currentTime = Date.now();
                 const oneDayMs = 24 * 60 * 60 * 1000;
-                const canCancel = (currentTime - orderTime < oneDayMs) && (order.status !== 'Cancelled' && order.status !== 'Delivered');
+                
+                // Intha line thaan logic change:
+                const canCancel = (currentTime - orderTime < oneDayMs) && 
+                                  (order.status !== 'Cancelled' && 
+                                   order.status !== 'Delivered' && 
+                                   order.status !== 'Shipped');
 
                 container.innerHTML += `
                     <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
@@ -130,6 +135,7 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
             container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
         }
     }
+
 
     function cancelMyOrder(orderKey) {
         if(confirm("Are you sure you want to cancel this order?")) {
