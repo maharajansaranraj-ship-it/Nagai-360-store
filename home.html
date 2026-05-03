@@ -25,14 +25,13 @@
         .masonry-item { break-inside: avoid; margin-bottom: 16px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .masonry-item:active { transform: scale(0.92); opacity: 0.8; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .active-heart { fill: #ef4444 !important; stroke: #ef4444 !important; }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
-            <img src="nagai.jpg" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-100" onerror="this.src='https://ui-avatars.com/api/?name=N&background=f97316&color=fff'">
+            <img src="nagai.jpg" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-100">
             <div>
                 <h1 class="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
                     NAGAI <span class="text-orange-500">360</span>
@@ -65,10 +64,12 @@
     </section>
 
     <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar" id="category-bar">
-        <button onclick="filterCategory('All')" id="btn-All" class="cat-btn px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg whitespace-nowrap">All</button>
-        <button onclick="filterCategory('Saree')" id="btn-Saree" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Saree</button>
-        <button onclick="filterCategory('Pants')" id="btn-Pants" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Pants</button>
-        <button onclick="filterCategory('Men')" id="btn-Men" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Men</button>
+        <button onclick="filterCategory('All')" class="px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg whitespace-nowrap">All</button>
+        <button onclick="filterCategory('Rings')" class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Rings</button>
+        <button onclick="filterCategory('Chains')" class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Chains</button>
+        <button onclick="filterCategory('Watches')" class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Watches</button>
+        <button onclick="filterCategory('Saree')" class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Saree</button>
+        <button onclick="filterCategory('Men')" class="px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Men</button>
     </div>
 
     <main class="masonry" id="main-product-grid"></main>
@@ -89,93 +90,79 @@
         </button>
     </nav>
 
-        <script>
-// LOGIN CHECK
-const userPhone = localStorage.getItem('user_phone');
-const isLoggedIn = localStorage.getItem('isLoggedIn');
+    <script>
+    // FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAiLX0GQnN127N1SxCJ861qMxAO0svNUQ",
+      authDomain: "ff-id-store-dab0f.firebaseapp.com",
+      databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
+      projectId: "ff-id-store-dab0f",
+      storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+      messagingSenderId: "655049193530",
+      appId: "1:655049193530:web:978aaf75e10dd26bb8dd03"
+    };
 
-if(isLoggedIn!=='true'||!userPhone){
-    window.location.href='index.html';
-}
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-// FIREBASE
-const firebaseConfig = {
-  apiKey: "AIzaSyCAiLX0GQnN127N1SxCJ861qMxAO0svNUQ",
-  authDomain: "ff-id-store-dab0f.firebaseapp.com",
-  databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
-  projectId: "ff-id-store-dab0f",
-  storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-  messagingSenderId: "655049193530",
-  appId: "1:655049193530:web:978aaf75e10dd26bb8dd03"
-};
+    let allProducts={};
+    let currentFilter="All";
 
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+    // USER DATA
+    db.ref('users/'+userPhone).on('value',snap=>{
+        const data=snap.val();
+        if(!data || data.status !== "approved"){
+            localStorage.clear();
+            window.location.href='index.html';
+        }
+        document.getElementById('user-coins').innerText=data.coins||0;
+        document.getElementById('cart-count').innerText=data.cart?Object.keys(data.cart).length:0;
+        if(data.profileImg) document.getElementById('user-avatar').src=data.profileImg;
+    });
 
-const SEC="nagai_secure_v1";
+    // PRODUCTS (Direct path - Admin maariyae)
+    db.ref('products').on('value',snap=>{
+        allProducts=snap.val()||{};
+        renderProducts();
+    });
 
-let allProducts={};
-let currentFilter="All";
+    function renderProducts(){
+        const grid=document.getElementById('main-product-grid');
+        grid.innerHTML="";
 
-// USER DATA
-db.ref(SEC+'/users/'+userPhone).on('value',snap=>{
-    const data=snap.val();
-    if(!data||data.status!=="approved"){
-        localStorage.clear();
-        window.location.href='index.html';
+        Object.keys(allProducts).reverse().forEach(id=>{
+            const p=allProducts[id];
+            const img=(p.images&&p.images[0])?p.images[0]:"https://via.placeholder.com/300";
+            
+            // Category check
+            const pCat = (p.category || "").toLowerCase();
+            const filter = currentFilter.toLowerCase();
+            if(filter !== "all" && pCat !== filter) return;
+
+            const isSold=p.isSoldOut===true;
+
+            grid.innerHTML+=`
+            <div class="masonry-item bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-50 relative">
+                ${isSold ? '<div class="absolute top-2 left-2 bg-red-500 text-white text-[7px] font-black px-2 py-1 rounded-lg z-10 uppercase">Sold Out</div>' : ''}
+                <div class="${isSold?'opacity-50 grayscale':''} cursor-pointer" onclick="${isSold?"alert('Out of stock')":"go('"+p.pid+"')"}">
+                    <img src="${img}" class="w-full object-cover">
+                    <div class="p-3 text-center">
+                        <p class="text-[10px] font-bold text-slate-700 truncate">${p.name}</p>
+                        <p class="text-orange-500 font-black text-xs">₹${p.price}</p>
+                    </div>
+                </div>
+            </div>`;
+        });
     }
 
-    document.getElementById('user-coins').innerText=data.coins||0;
-    document.getElementById('cart-count').innerText=data.cart?Object.keys(data.cart).length:0;
-    if(data.profileImg) document.getElementById('user-avatar').src=data.profileImg;
-});
+    function filterCategory(cat){
+        currentFilter=cat;
+        renderProducts();
+    }
 
-// PRODUCTS
-db.ref(SEC+'/products').on('value',snap=>{
-    allProducts=snap.val()||{};
-    renderProducts();
-});
-
-function renderProducts(){
-    const grid=document.getElementById('main-product-grid');
-    grid.innerHTML="";
-
-    Object.keys(allProducts).reverse().forEach(id=>{
-        const p=allProducts[id];
-        const img=(p.images&&p.images[0])?p.images[0]:"https://via.placeholder.com/300";
-
-        const pCategory=(p.category||"").toLowerCase();
-        const filter=currentFilter.toLowerCase();
-
-        if(filter!=="all" && !pCategory.includes(filter)) return;
-
-        const isSold=p.isSoldOut===true;
-
-        grid.innerHTML+=`
-        <div class="masonry-item">
-            ${isSold?'<div>SOLD OUT</div>':''}
-            <img src="${img}" onclick="${isSold?"alert('Out of stock')":"go('"+p.pid+"')"}">
-            <p>${p.name}</p>
-            <p>₹${p.price}</p>
-        </div>`;
-    });
-}
-
-function filterCategory(cat){
-    currentFilter=cat;
-    renderProducts();
-}
-
-function go(id){
-    window.location.href="product.html?id="+id;
-}
-
-function toggleWishlist(e,id,name,img,price){
-    e.stopPropagation();
-    db.ref(SEC+'/users/'+userPhone+'/wishlist/'+id)
-    .set({name,image:img,price});
-}
-        </script>
-
+    function go(id){
+        window.location.href="product.html?id="+id;
+    }
+    </script>
 </body>
 </html>
