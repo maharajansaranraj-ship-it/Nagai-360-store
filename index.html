@@ -1,177 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Discover</title>
-    
-    <script>
-        const userPhone = localStorage.getItem('user_phone');
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
+<!DOCTYPE html>    <html lang="en">      <head>      
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">      
+    <title>Nagai 360 Login</title>    
+    <link rel="icon" type="image/png" href="nagai.jpg">    
+    <script src="https://cdn.tailwindcss.com"></script>      
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">      
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>      
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>      <style>      
+    body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }      
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }      
+</style>
 
-        if(isLoggedIn !== 'true' || !userPhone) {
-            window.location.href = 'index.html'; 
-        }
-    </script>
+</head>      <body class="flex items-center justify-center min-h-screen p-6">      
+    <div id="auth-container" class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">      
+        <div class="flex flex-col items-center mb-10">      
+            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">      
+                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">      
+            </div>      
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>      
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>      
+        </div>      <div class="space-y-5">      
+        <div class="text-left">      
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>      
+            <div class="relative flex items-center">      
+                <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>      
+                <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210" class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">      
+            </div>      
+        </div>      
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+        <div class="text-left">      
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>      
+            <div class="relative flex items-center">      
+                <input type="password" id="loginPassword" placeholder="••••••••" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">      
+            </div>      
+        </div>      
+              
+        <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">Login / Sign Up</button>      
+        <p id="msg" class="text-[10px] font-bold text-slate-400 mt-2">Enter your number and password to continue.</p>      
+    </div>      
+</div>
 
-    <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #fcfcfc; }
-        .masonry { columns: 2; column-gap: 16px; padding: 16px; }
-        .masonry-item { break-inside: avoid; margin-bottom: 16px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .masonry-item:active { transform: scale(0.92); opacity: 0.8; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .active-heart { fill: #ef4444 !important; stroke: #ef4444 !important; }
-    </style>
-</head>
-<body class="pb-24">
-
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
-        <div class="flex items-center gap-3">
-            <img src="nagai.jpg" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-100" onerror="this.src='https://ui-avatars.com/api/?name=N&background=f97316&color=fff'">
-            <div>
-                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
-                    NAGAI <span class="text-orange-500">360</span>
-                </h1>
-                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">Premium Collections</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="bg-orange-50 px-3 py-1 rounded-full flex items-center gap-1 border border-orange-100">
-                <span class="text-sm">🪙</span>
-                <span id="user-coins" class="text-orange-600 font-bold text-sm">0</span>
-            </div>
-            <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=334155&color=fff" 
-                 onclick="window.location.href='profile.html'" 
-                 class="w-10 h-10 rounded-full border-2 border-white shadow-sm cursor-pointer">
-        </div>
-    </header>
-
-    <section class="px-6 py-4">
-        <div onclick="window.location.href='search.html'" class="relative cursor-pointer group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <div class="w-full p-4 pl-12 bg-slate-100 rounded-[1.5rem] text-slate-500 text-sm font-medium border border-transparent group-hover:border-orange-200 transition-all">
-                Search latest collections...
-            </div>
-        </div>
-    </section>
-
-    <div class="flex gap-3 overflow-x-auto px-6 py-2 no-scrollbar" id="category-bar">
-        <button onclick="filterCategory('All')" id="btn-All" class="cat-btn px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold shadow-lg whitespace-nowrap">All</button>
-        <button onclick="filterCategory('Saree')" id="btn-Saree" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Saree</button>
-        <button onclick="filterCategory('Pants')" id="btn-Pants" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Pants</button>
-        <button onclick="filterCategory('Men')" id="btn-Men" class="cat-btn px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 shadow-sm whitespace-nowrap">Men</button>
-    </div>
-
-    <main class="masonry" id="main-product-grid"></main>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-8 py-5 flex justify-between items-center shadow-md z-[100]">
-        <button onclick="window.location.href='home.html'" class="text-orange-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        </button>
-        <button onclick="window.location.href='wishlist.html'" class="text-slate-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-        </button>
-        <button onclick="window.location.href='cart.html'" class="text-slate-300 relative">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-            <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-        </button>
-        <button onclick="window.location.href='profile.html'" class="text-slate-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-        </button>
-    </nav>
-
-    <script>
-        // ✅ Step 1: Encrypted Firebase Config (Hacker-ala read panna mudiyaathu)
-var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
-
-        let allProducts = {}; 
-        let currentFilter = 'All';
-
-        // ✅ 2. REAL-TIME ACCOUNT & SAFETY CHECK
-        if(userPhone) {
-            db.ref('users/' + userPhone).on('value', (snap) => {
-                const data = snap.val();
-                
-                // Account Reject aayitta or Delete aayitta automatic-ah logout pannum
-                if(!data || data.status !== "approved") {
-                    localStorage.clear();
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                // Update UI details
-                document.getElementById('user-coins').innerText = data.coins || 0;
-                const cartCount = data.cart ? Object.keys(data.cart).length : 0;
-                document.getElementById('cart-count').innerText = cartCount;
-                if(data.profileImg) document.getElementById('user-avatar').src = data.profileImg;
-            });
-        }
-
-        // Fetch Products
-        db.ref('products').on('value', (snapshot) => {
-            allProducts = snapshot.val();
-            renderProducts();
-        });
-
-        function renderProducts() {
-            const grid = document.getElementById('main-product-grid');
-            grid.innerHTML = "";
-            if(!allProducts) return;
-
-            Object.keys(allProducts).reverse().forEach(key => {
-                const p = allProducts[key];
-                const pCategory = p.category ? p.category.toLowerCase() : "";
-                if (currentFilter !== 'All' && pCategory !== currentFilter.toLowerCase()) return;
-
-                const soldOutUI = p.isSoldOut ? `
-                    <div class="absolute top-3 left-3 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg z-10">SOLD OUT</div>
-                    <div class="absolute inset-0 bg-white/40 z-0 backdrop-grayscale-[0.5]"></div>
-                ` : '';
-
-                grid.innerHTML += `
-                    <div class="masonry-item bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-50 relative">
-                        ${soldOutUI}
-                        <button onclick="toggleWishlist(event, '${p.pid}', '${p.name}', '${p.images[0]}', ${p.price})" class="absolute top-3 right-3 z-20 p-2 bg-white/90 rounded-full shadow-md">
-                            <svg id="heart-${p.pid}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </button>
-                        <div onclick="${p.isSoldOut ? "alert('Out of stock!')" : `window.location.href='product.html?id=${p.pid}'`}">
-                            <img src="${p.images[0]}" class="w-full object-cover">
-                            <div class="p-4">
-                                <h3 class="text-[11px] font-bold text-slate-700 truncate">${p.name}</h3>
-                                <p class="text-orange-500 font-extrabold text-sm mt-1">₹${p.price}</p>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function filterCategory(cat) {
-            currentFilter = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.replace('bg-slate-900', 'bg-white');
-                btn.classList.replace('text-white', 'text-slate-500');
-            });
-            document.getElementById('btn-' + cat).classList.add('bg-slate-900', 'text-white');
-            renderProducts();
-        }
-
-        function toggleWishlist(event, id, name, img, price) {
-            event.stopPropagation();
-            db.ref('users/' + userPhone + '/wishlist/' + id).set({ name, image: img, price })
-            .then(() => document.getElementById('heart-' + id).classList.add('active-heart'));
-        }
-    </script>
-</body>
-</html>
-
+<script>    
+    // ✅ Step 1: Encrypted Firebase Config (Hacker-ala read panna mudiyaathu)  
+var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();  
+  
+    // ✅ CHECK STATUS ON PAGE LOAD (User thallivittu vandhaalum check pannum)  
+    window.onload = function() {  
+        const phoneMemory = localStorage.getItem('user_phone');  
+        const isLoggedIn = localStorage.getItem('isLoggedIn');  
+  
+        if(isLoggedIn === 'true') {  
+            window.location.href = 'home.html';  
+        } else if(phoneMemory) {  
+            // User login panni waiting-la irundha, thirumba check status  
+            startApprovalListener(phoneMemory);  
+        }  
+    }  
+  
+    function handleAuth() {    
+        const phone = document.getElementById('phoneNumber').value.trim();    
+        const pass = document.getElementById('loginPassword').value;    
+        const btn = document.getElementById('loginBtn');    
+        const msg = document.getElementById('msg');    
+  
+        if(phone === "9999999999" && pass === "admin123") return window.location.href = "admin.html";    
+        if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");    
+        if(pass.length < 6) return alert("Password 6 characters venum");    
+  
+        const safePass = btoa(pass);    
+  
+        db.ref('users/' + phone).once('value', (snap) => {  
+            const userData = snap.val();  
+  
+            if(!userData) {  
+                // New User Register  
+                db.ref('users/' + phone).set({ phone, password: safePass, status: "pending" })  
+                .then(() => startApprovalListener(phone));  
+            } else if(userData.password !== safePass) {  
+                alert("Wrong Password!");  
+            } else {  
+                // Existing user, check status  
+                startApprovalListener(phone);  
+            }  
+        });  
+    }  
+  
+    // ✅ REAL-TIME LISTENER (Idhu dhaan automatic-ah home pogum)  
+    function startApprovalListener(phone) {  
+        localStorage.setItem('user_phone', phone); // Phone memory-la vachuko  
+        const msg = document.getElementById('msg');  
+        const btn = document.getElementById('loginBtn');  
+  
+        db.ref('users/' + phone + '/status').on('value', (snap) => {  
+            const status = snap.val();  
+            if(status === "approved") {  
+                localStorage.setItem('isLoggedIn', 'true');  
+                window.location.href = 'home.html';  
+            } else {  
+                msg.innerText = "⏳ Waiting for Admin Approval...";  
+                msg.style.color = "orange";  
+                btn.innerText = "PENDING...";  
+                btn.disabled = true;  
+            }  
+        });  
+    }  
+</script>  </body>    
+</html>  Intha ethuvum change panna koodathu😡
