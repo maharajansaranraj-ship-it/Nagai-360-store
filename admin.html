@@ -14,329 +14,260 @@
         .active-tab { @apply text-orange-500 border-orange-500 bg-orange-50/50; }
         input, textarea, select { @apply w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 mb-3 text-sm shadow-sm; }
         ::-webkit-scrollbar { display: none; }
-        /* Hidden initially for security */
-        #main-admin-ui { display: none; }
-        #login-overlay { display: flex; }
     </style>
 </head>
 <body class="pb-24">
 
-    <div id="login-overlay" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center p-6 text-center">
-        <div class="w-full max-w-xs">
-            <p class="text-orange-500 font-black text-[10px] uppercase tracking-[0.4em] mb-2">Security Check</p>
-            <h2 class="text-white text-2xl font-black mb-6">Admin Access</h2>
-            <input type="password" id="admin-pass-input" placeholder="Enter Password" class="text-center">
-            <button onclick="checkAdminPass()" class="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Login</button>
+    <header class="bg-slate-900 text-white pt-8 shadow-2xl sticky top-0 z-50">
+        <div class="px-8 flex justify-between items-center mb-6">
+            <div>
+                <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">Nagai 360</p>
+                <h1 class="text-2xl font-black">Control Room</h1>
+            </div>
+            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xl">👑</div>
         </div>
-    </div>
+        <div class="flex overflow-x-auto">
+            <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
+            <button onclick="showTab('users')" id="users-tab" class="tab-btn">Users</button>
+            <button onclick="showTab('delivered')" id="delivered-tab" class="tab-btn">Delivered</button>
+            <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Inventory</button>
+            <button onclick="showTab('add')" id="add-tab" class="tab-btn">Add New</button>
+        </div>
+    </header>
 
-    <div id="main-admin-ui">
-        <header class="bg-slate-900 text-white pt-8 shadow-2xl sticky top-0 z-50">
-            <div class="px-8 flex justify-between items-center mb-6">
-                <div>
-                    <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">Nagai 360</p>
-                    <h1 class="text-2xl font-black">Control Room</h1>
+    <main class="p-6">
+        <div id="users-section" class="hidden space-y-4">
+            <div class="px-2 flex justify-between items-center">
+                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">User Management</h2>
+                <button onclick="cleanJunkUsers()" class="bg-red-100 text-red-500 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest">🗑️ Clean Junk</button>
+            </div>
+            <div id="admin-users-list" class="space-y-4"></div>
+        </div>
+
+        <div id="orders-section" class="space-y-4">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Orders</h2>
+            <div id="admin-orders-list"></div>
+        </div>
+
+        <div id="delivered-section" class="hidden space-y-4">
+            <h2 class="text-[10px] font-black text-green-500 uppercase tracking-widest px-2">Completed Deliveries</h2>
+            <div id="admin-delivered-list"></div>
+        </div>
+
+        <div id="inventory-section" class="hidden space-y-4">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
+            <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
+        </div>
+
+        <div id="add-section" class="hidden">
+            <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
+                <input type="text" id="p-name" placeholder="Product Name">
+                <input type="number" id="p-price" placeholder="Price (₹)">
+                <select id="p-category">
+                    <option value="Rings">Rings</option>
+                    <option value="Chains">Chains</option>
+                    <option value="Watches">Watches</option>
+                    <option value="Bracelets">Bracelets</option>
+                    <option value="Combo">Combo Pack</option>
+                </select>
+                <input type="text" id="p-sizes" placeholder="Sizes (e.g. S, M, L)">
+                <input type="text" id="p-colors" placeholder="Colors (e.g. Gold, Silver)">
+                <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <input type="text" id="img1" placeholder="Main Image URL">
+                    <input type="text" id="img2" placeholder="Image 2 URL">
+                    <input type="text" id="img3" placeholder="Image 3 URL">
+                    <input type="text" id="img4" placeholder="Image 4 URL">
+                    <input type="text" id="img5" placeholder="Image 5 URL">
+                    <input type="text" id="img6" placeholder="Image 6 URL">
                 </div>
-                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xl">👑</div>
+                <button id="submit-btn" onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Publish</button>
             </div>
-            <div class="flex overflow-x-auto">
-                <button onclick="showTab('orders')" id="orders-tab" class="tab-btn active-tab">Orders</button>
-                <button onclick="showTab('users')" id="users-tab" class="tab-btn">Users</button>
-                <button onclick="showTab('delivered')" id="delivered-tab" class="tab-btn">Delivered</button>
-                <button onclick="showTab('inventory')" id="inventory-tab" class="tab-btn">Inventory</button>
-                <button onclick="showTab('add')" id="add-tab" class="tab-btn">Add New</button>
-            </div>
-        </header>
+        </div>
+    </main>
 
-        <main class="p-6">
-            <div id="users-section" class="hidden space-y-4">
-                <div class="px-2 flex justify-between items-center">
-                    <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">User Management</h2>
-                    <button onclick="cleanJunkUsers()" class="bg-red-100 text-red-500 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest">🗑️ Clean Junk</button>
-                </div>
-                <div id="admin-users-list" class="space-y-4"></div>
-            </div>
-
-            <div id="orders-section" class="space-y-4">
-                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Orders</h2>
-                <div id="admin-orders-list"></div>
-            </div>
-
-            <div id="delivered-section" class="hidden space-y-4">
-                <h2 class="text-[10px] font-black text-green-500 uppercase tracking-widest px-2">Completed Deliveries</h2>
-                <div id="admin-delivered-list"></div>
-            </div>
-
-            <div id="inventory-section" class="hidden space-y-4">
-                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Manage Website Products</h2>
-                <div id="admin-product-list" class="grid grid-cols-1 gap-4"></div>
-            </div>
-
-            <div id="add-section" class="hidden">
-                <div class="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-sm">
-                    <input type="text" id="p-name" placeholder="Product Name">
-                    <input type="number" id="p-price" placeholder="Price (₹)">
-                    <select id="p-category">
-                        <option value="Rings">Rings</option>
-                        <option value="Chains">Chains</option>
-                        <option value="Watches">Watches</option>
-                        <option value="Bracelets">Bracelets</option>
-                        <option value="Combo">Combo Pack</option>
-                    </select>
-                    <input type="text" id="p-sizes" placeholder="Sizes (e.g. S, M, L)">
-                    <input type="text" id="p-colors" placeholder="Colors (e.g. Gold, Silver)">
-                    <textarea id="p-desc" rows="3" placeholder="Description..."></textarea>
-                    <div class="grid grid-cols-2 gap-2 mb-3">
-                        <input type="text" id="img1" placeholder="Main Image URL">
-                        <input type="text" id="img2" placeholder="Image 2 URL">
-                        <input type="text" id="img3" placeholder="Image 3 URL">
-                        <input type="text" id="img4" placeholder="Image 4 URL">
-                        <input type="text" id="img5" placeholder="Image 5 URL">
-                        <input type="text" id="img6" placeholder="Image 6 URL">
-                    </div>
-                    <button id="submit-btn" onclick="uploadProduct()" class="w-full bg-orange-500 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase tracking-widest text-xs">Publish</button>
-                </div>
-            </div>
-        </main>
-    </div>
     <script>
-// 🔐 LOGIN
-function checkAdminPass() {
-    const pass = document.getElementById('admin-pass-input').value;
-    if(pass === "thivash*-*2009") {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-admin-ui').style.display = 'block';
-    } else {
-        alert("Wrong Password!");
-    }
-}
+    // ✅ FIREBASE CONFIG
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
+    if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
-// 🔥 FIREBASE (CLEAN)
-const firebaseConfig = {
-  apiKey: "AIzaSyCAiLX0GQnN127N1SxCJ861qMxAO0svNUQ",
-  authDomain: "ff-id-store-dab0f.firebaseapp.com",
-  databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
-  projectId: "ff-id-store-dab0f",
-  storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-  messagingSenderId: "655049193530",
-  appId: "1:655049193530:web:978aaf75e10dd26bb8dd03"
-};
+    let currentEditID = null;
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// 🔥 PATH
-const SEC = "nagai_secure_v1";
-let currentEditID = null;
-
-// 🔁 TAB
-function showTab(tab) {
-    ['orders','users','delivered','inventory','add'].forEach(t=>{
-        document.getElementById(t+'-section')?.classList.add('hidden');
-        document.getElementById(t+'-tab')?.classList.remove('active-tab');
-    });
-
-    document.getElementById(tab+'-section')?.classList.remove('hidden');
-    document.getElementById(tab+'-tab')?.classList.add('active-tab');
-
-    if(tab !== 'add'){
-        currentEditID = null;
-        document.getElementById('submit-btn').innerText = "Publish";
-        clearForm();
-    }
-}
-
-// 🧹 FORM
-function clearForm(){
-    document.querySelectorAll('#add-section input, #add-section textarea')
-    .forEach(i=>i.value="");
-    document.getElementById('p-category').value = "Rings";
-}
-
-// 👥 USERS
-db.ref(SEC+'/users').on('value', snap => {
-    const list = document.getElementById('admin-users-list');
-    list.innerHTML = "";
-    const data = snap.val() || {};
-
-    Object.keys(data).forEach(phone => {
-        const u = data[phone];
-        const isApproved = u.status === "approved";
-
-        list.innerHTML += `
-        <div class="bg-white p-5 rounded-[2rem] border ${isApproved ? 'border-green-100':'border-orange-100'} shadow-sm mb-3">
-            <p class="text-[9px] font-black ${isApproved ? 'text-green-500':'text-orange-500'} uppercase">
-                ${isApproved ? 'Approved':'Pending'}
-            </p>
-            <h4 class="font-black text-slate-800 text-lg">${phone}</h4>
-            <div class="flex gap-2 mt-3">
-                ${!isApproved ? `<button onclick="approveUser('${phone}')" class="flex-1 bg-orange-500 text-white py-3 rounded-xl text-[9px] font-black">APPROVE</button>` : ''}
-                <button onclick="deleteUser('${phone}')" class="flex-1 bg-red-50 text-red-500 py-3 rounded-xl text-[9px] font-black">DELETE</button>
-            </div>
-        </div>`;
-    });
-});
-
-function approveUser(p){ db.ref(SEC+'/users/'+p).update({status:"approved"}); }
-function deleteUser(p){ if(confirm("Delete User?")) db.ref(SEC+'/users/'+p).remove(); }
-function cleanJunkUsers() {
-    if(confirm("Delete all pending users?")) {
-
-        db.ref(SEC + '/users').once('value')
-        .then(snapshot => {
-            const data = snapshot.val();
-            const updates = {};
-
-            if(data) {
-                Object.keys(data).forEach(phone => {
-                    if(data[phone].status !== "approved") {
-                        updates[phone] = null; // delete
-                    }
-                });
-
-                return db.ref(SEC + '/users').update(updates);
-            }
-        })
-        .then(() => {
-            alert("Pending users cleared!");
-        })
-        .catch(err => {
-            alert("Error: " + err.message);
+    function showTab(tab) {
+        ['orders', 'users', 'delivered', 'inventory', 'add'].forEach(t => {
+            document.getElementById(t + '-section')?.classList.add('hidden');
+            document.getElementById(t + '-tab')?.classList.remove('active-tab');
         });
-
+        document.getElementById(tab + '-section')?.classList.remove('hidden');
+        document.getElementById(tab + '-tab')?.classList.add('active-tab');
+        
+        if (tab !== 'add') {
+            currentEditID = null;
+            document.getElementById('submit-btn').innerText = "Publish";
+            clearForm();
+        }
     }
-}
 
+    function clearForm() {
+        document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
+        document.getElementById('p-category').value = "Rings";
+    }
 
-// 📦 ORDERS
-db.ref(SEC+'/orders').on('value', snap => {
-    const live = document.getElementById('admin-orders-list');
-    const done = document.getElementById('admin-delivered-list');
-    live.innerHTML=""; done.innerHTML="";
-
-    const data = snap.val() || {};
-
-    Object.keys(data).reverse().forEach(id => {
-        const o = data[id];
-
-        const card = `
-        <div class="bg-white p-4 rounded-[1.5rem] border mb-3">
-            <p>#${o.orderID}</p>
-            <p>${o.productName}</p>
-            <p>₹${o.totalBill}</p>
-            <p>${o.primaryPhone}</p>
-            <p>${o.fullAddress}</p>
-
-            ${o.status !== 'Delivered' ? `
-            <div class="flex gap-2 mt-2">
-                <button onclick="upStat('${id}','Shipped','${o.primaryPhone}')">Ship</button>
-                <button onclick="upStat('${id}','Delivered','${o.primaryPhone}')">Deliver</button>
-            </div>`:''}
-        </div>`;
-
-        if(o.status==='Delivered') done.innerHTML+=card;
-        else live.innerHTML+=card;
+    // 👥 USERS
+    db.ref('users').on('value', snap => {
+        const list = document.getElementById('admin-users-list');
+        list.innerHTML = "";
+        const data = snap.val();
+        if(data) {
+            Object.keys(data).forEach(phone => {
+                const u = data[phone];
+                const isApproved = u.status === "approved";
+                list.innerHTML += `<div class="bg-white p-5 rounded-[2rem] border ${isApproved ? 'border-green-100' : 'border-orange-100'} shadow-sm mb-3">
+                    <p class="text-[9px] font-black ${isApproved ? 'text-green-500':'text-orange-500'} uppercase">${isApproved ? 'Approved':'Pending'}</p>
+                    <h4 class="font-black text-slate-800 text-lg">${u.phone}</h4>
+                    <div class="flex gap-2 mt-3">
+                        ${!isApproved ? `<button onclick="approveUser('${phone}')" class="flex-1 bg-orange-500 text-white py-3 rounded-xl text-[9px] font-black">APPROVE</button>` : ''}
+                        <button onclick="deleteUser('${phone}')" class="flex-1 bg-red-50 text-red-500 py-3 rounded-xl text-[9px] font-black">DELETE</button>
+                    </div>
+                </div>`;
+            });
+        }
     });
-});
 
-function upStat(id,s,p){
-    const up={};
-    up[SEC+'/orders/'+id+'/status']=s;
-    up[SEC+'/users/'+p+'/myOrders/'+id+'/status']=s;
-    db.ref().update(up);
-}
+    function approveUser(p) { db.ref('users/' + p).update({ status: "approved" }); }
+    function deleteUser(p) { if(confirm("Delete this user?")) db.ref('users/' + p).remove(); }
+    
+    function cleanJunkUsers() {
+        if(confirm("Delete all pending users?")) {
+            db.ref('users').once('value', s => {
+                const d = s.val();
+                if(d) Object.keys(d).forEach(p => { if(d[p].status !== "approved") db.ref('users/'+p).remove(); });
+            });
+        }
+    }
 
-// 🏷️ PRODUCTS
-db.ref(SEC+'/products').on('value', snap => {
-    const list = document.getElementById('admin-product-list');
-    list.innerHTML="";
-    const data = snap.val() || {};
-
-    Object.keys(data).reverse().forEach(id => {
-        const p = data[id];
-        const img = (p.images && p.images[0]) ? p.images[0] : "https://via.placeholder.com/100";
-        const isOut = p.isSoldOut === true;
-
-        list.innerHTML += `
-        <div class="bg-white p-4 rounded-3xl flex items-center gap-4 mb-2">
-            <img src="${img}" class="w-14 h-14 rounded-xl ${isOut?'grayscale opacity-50':''}">
-            <div class="flex-1">
-                <p>${p.name}</p>
-                <p>₹${p.price}</p>
-            </div>
-            <button onclick="editProduct('${id}')">EDIT</button>
-            <button onclick="toggleSold('${id}')">${isOut?'SOLD':'STOCK'}</button>
-            <button onclick="delProd('${id}')">DELETE</button>
-        </div>`;
+    // 📦 ORDERS
+    db.ref('orders').on('value', snap => {
+        const live = document.getElementById('admin-orders-list');
+        const done = document.getElementById('admin-delivered-list');
+        live.innerHTML = ""; done.innerHTML = "";
+        const data = snap.val();
+        if(data) {
+            Object.keys(data).reverse().forEach(id => {
+                const o = data[id];
+                const card = `<div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 mb-3 shadow-sm">
+                    <div class="flex justify-between items-center mb-2"><span class="text-[9px] font-black text-slate-400">#${o.orderID}</span><span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-[8px] font-black uppercase">${o.status || 'Ordered'}</span></div>
+                    <div class="flex gap-3 mb-3">
+                        <img src="${o.productImg}" class="w-12 h-12 rounded-xl object-cover">
+                        <div><p class="text-xs font-bold text-slate-700">${o.productName}</p><p class="text-orange-500 font-black text-[10px]">₹${o.totalBill}</p></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl text-[9px] mb-3"><p class="font-black text-blue-600 mb-1">📞 ${o.primaryPhone}</p><p class="text-slate-500 leading-tight">${o.fullAddress}</p></div>
+                    ${o.status !== 'Delivered' ? `<div class="flex gap-2"><button onclick="upStat('${id}','Shipped','${o.primaryPhone}')" class="flex-1 bg-slate-900 text-white py-3 rounded-xl text-[8px] font-black">SHIP</button><button onclick="upStat('${id}','Delivered','${o.primaryPhone}')" class="flex-1 bg-green-500 text-white py-3 rounded-xl text-[8px] font-black">DELIVER</button></div>`:''}
+                </div>`;
+                if(o.status === 'Delivered') done.innerHTML += card; else live.innerHTML += card;
+            });
+        }
     });
-});
 
-function toggleSold(id){
-    const ref=db.ref(SEC+'/products/'+id);
-    ref.once('value').then(s=>{
-        const cur=s.val().isSoldOut||false;
-        ref.update({isSoldOut:!cur});
+    function upStat(id, s, p) {
+        const up = {}; 
+        up['orders/'+id+'/status'] = s; 
+        up['users/'+p+'/myOrders/'+id+'/status'] = s;
+        db.ref().update(up);
+    }
+
+    // 🏷️ INVENTORY
+    db.ref('products').on('value', snap => {
+        const list = document.getElementById('admin-product-list');
+        list.innerHTML = "";
+        const data = snap.val();
+        if(data) {
+            Object.keys(data).reverse().forEach(id => {
+                const p = data[id];
+                const isOut = p.isSoldOut === true;
+                list.innerHTML += `<div class="bg-white p-4 rounded-3xl border border-slate-100 flex items-center gap-4 shadow-sm">
+                    <img src="${p.images[0]}" class="w-14 h-14 rounded-xl object-cover ${isOut ? 'grayscale opacity-50':''}">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-700">${p.name}</p>
+                        <p class="text-orange-500 font-black text-[10px]">₹${p.price}</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex gap-1">
+                            <button onclick="editProduct('${id}')" class="bg-blue-500 text-white p-2 px-3 rounded-lg text-[7px] font-black">EDIT</button>
+                            <button onclick="toggleSold('${id}')" class="${isOut ? 'bg-red-500' : 'bg-green-500'} text-white p-2 px-3 rounded-lg text-[7px] font-black">${isOut ? 'SOLD' : 'STOCK'}</button>
+                        </div>
+                        <button onclick="delProd('${id}')" class="bg-slate-50 text-slate-400 p-2 rounded-lg text-[7px] font-black">DELETE</button>
+                    </div>
+                </div>`;
+            });
+        }
     });
-}
 
-function delProd(id){
-    if(confirm("Delete Product?")) db.ref(SEC+'/products/'+id).remove();
-}
+    function toggleSold(id) {
+        const ref = db.ref('products/'+id);
+        ref.once('value').then(s => {
+            const current = s.val().isSoldOut || false;
+            ref.update({ isSoldOut: !current });
+        });
+    }
 
-function editProduct(id){
-    currentEditID=id;
-    db.ref(SEC+'/products/'+id).once('value', snap=>{
-        const p=snap.val();
-        if(!p) return;
+    function delProd(id) { if(confirm("Delete Product?")) db.ref('products/'+id).remove(); }
 
-        document.getElementById('p-name').value=p.name||"";
-        document.getElementById('p-price').value=p.price||"";
-        document.getElementById('p-category').value=p.category||"Rings";
-        document.getElementById('p-desc').value=p.desc||"";
+    function editProduct(id) {
+        currentEditID = id;
+        db.ref('products/' + id).once('value', snap => {
+            const p = snap.val();
+            if(p) {
+                document.getElementById('p-name').value = p.name;
+                document.getElementById('p-price').value = p.price;
+                document.getElementById('p-category').value = p.category;
+                document.getElementById('p-sizes').value = p.sizes ? p.sizes.join(',') : "";
+                document.getElementById('p-colors').value = p.colors ? p.colors.join(',') : "";
+                document.getElementById('p-desc').value = p.desc;
+                for(let i=1; i<=6; i++) {
+                    document.getElementById('img'+i).value = (p.images && p.images[i-1]) ? p.images[i-1] : "";
+                }
+                document.getElementById('submit-btn').innerText = "Update Product";
+                showTab('add');
+            }
+        });
+    }
 
-        for(let i=1;i<=6;i++){
-            document.getElementById('img'+i).value = (p.images && p.images[i-1]) ? p.images[i-1] : "";
+    function uploadProduct() {
+        const name = document.getElementById('p-name').value;
+        const price = document.getElementById('p-price').value;
+        const imgs = [];
+        for(let i=1; i<=6; i++) {
+            const v = document.getElementById('img'+i).value.trim();
+            if(v) imgs.push(v);
+        }
+        
+        if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and at least 1 Image!");
+
+        const pid = currentEditID || "P" + Date.now();
+        const productData = {
+            pid: pid,
+            name: name,
+            price: price,
+            category: document.getElementById('p-category').value,
+            desc: document.getElementById('p-desc').value,
+            images: imgs,
+            sizes: document.getElementById('p-sizes').value.split(',').map(s => s.trim()),
+            colors: document.getElementById('p-colors').value.split(',').map(c => c.trim())
+        };
+
+        // Edit pannum pothu sold out status-ah maatha koodathu, but new product-ku default-ah false venum.
+        if (!currentEditID) {
+            productData.isSoldOut = false;
         }
 
-        document.getElementById('submit-btn').innerText="Update Product";
-        showTab('add');
-    });
-}
-
-// 🚀 UPLOAD
-function uploadProduct(){
-    const name=document.getElementById('p-name').value.trim();
-    const price=document.getElementById('p-price').value.trim();
-    const cat=document.getElementById('p-category').value;
-    const desc=document.getElementById('p-desc').value;
-
-    let imgs=[];
-    for(let i=1;i<=6;i++){
-        let v=document.getElementById('img'+i).value.trim();
-        if(v) imgs.push(v);
+        db.ref('products/' + pid).update(productData).then(() => {
+            alert(currentEditID ? "Updated Successfully!" : "Added Successfully!");
+            currentEditID = null;
+            showTab('inventory');
+        }).catch(err => alert("Error: " + err.message));
     }
-
-    if(!name||!price||imgs.length===0){
-        alert("Name, Price, Image required!");
-        return;
-    }
-
-    const pid=currentEditID||"P"+Date.now();
-
-    db.ref(SEC+'/products/'+pid).update({
-        pid,name,price,category:cat,desc,
-        images:imgs,
-        isSoldOut:false
-    }).then(()=>{
-        alert("Done!");
-        clearForm();
-        showTab('inventory');
-    });
-}
     </script>
-    
-                    
-
-
 </body>
 </html>
+
