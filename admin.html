@@ -116,6 +116,9 @@
     var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x61\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
     if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
+    // 🔥 SECRET FOLDER PATH
+    const SEC = "nagai_secure_v1";
+
     let currentEditID = null;
 
     function showTab(tab) {
@@ -139,7 +142,7 @@
     }
 
     // 👥 USERS
-    db.ref('users').on('value', snap => {
+    db.ref(SEC + '/users').on('value', snap => {
         const list = document.getElementById('admin-users-list');
         list.innerHTML = "";
         const data = snap.val();
@@ -159,20 +162,20 @@
         }
     });
 
-    function approveUser(p) { db.ref('users/' + p).update({ status: "approved" }); }
-    function deleteUser(p) { if(confirm("Delete this user?")) db.ref('users/' + p).remove(); }
+    function approveUser(p) { db.ref(SEC + '/users/' + p).update({ status: "approved" }); }
+    function deleteUser(p) { if(confirm("Delete this user?")) db.ref(SEC + '/users/' + p).remove(); }
     
     function cleanJunkUsers() {
         if(confirm("Delete all pending users?")) {
-            db.ref('users').once('value', s => {
+            db.ref(SEC + '/users').once('value', s => {
                 const d = s.val();
-                if(d) Object.keys(d).forEach(p => { if(d[p].status !== "approved") db.ref('users/'+p).remove(); });
+                if(d) Object.keys(d).forEach(p => { if(d[p].status !== "approved") db.ref(SEC + '/users/'+p).remove(); });
             });
         }
     }
 
     // 📦 ORDERS
-    db.ref('orders').on('value', snap => {
+    db.ref(SEC + '/orders').on('value', snap => {
         const live = document.getElementById('admin-orders-list');
         const done = document.getElementById('admin-delivered-list');
         live.innerHTML = ""; done.innerHTML = "";
@@ -196,13 +199,13 @@
 
     function upStat(id, s, p) {
         const up = {}; 
-        up['orders/'+id+'/status'] = s; 
-        up['users/'+p+'/myOrders/'+id+'/status'] = s;
+        up[SEC + '/orders/'+id+'/status'] = s; 
+        up[SEC + '/users/'+p+'/myOrders/'+id+'/status'] = s;
         db.ref().update(up);
     }
 
     // 🏷️ INVENTORY
-    db.ref('products').on('value', snap => {
+    db.ref(SEC + '/products').on('value', snap => {
         const list = document.getElementById('admin-product-list');
         list.innerHTML = "";
         const data = snap.val();
@@ -229,18 +232,18 @@
     });
 
     function toggleSold(id) {
-        const ref = db.ref('products/'+id);
+        const ref = db.ref(SEC + '/products/'+id);
         ref.once('value').then(s => {
             const current = s.val().isSoldOut || false;
             ref.update({ isSoldOut: !current });
         });
     }
 
-    function delProd(id) { if(confirm("Delete Product?")) db.ref('products/'+id).remove(); }
+    function delProd(id) { if(confirm("Delete Product?")) db.ref(SEC + '/products/'+id).remove(); }
 
     function editProduct(id) {
         currentEditID = id;
-        db.ref('products/' + id).once('value', snap => {
+        db.ref(SEC + '/products/' + id).once('value', snap => {
             const p = snap.val();
             if(p) {
                 document.getElementById('p-name').value = p.name;
@@ -285,12 +288,13 @@
             productData.isSoldOut = false;
         }
 
-        db.ref('products/' + pid).update(productData).then(() => {
+        db.ref(SEC + '/products/' + pid).update(productData).then(() => {
             alert(currentEditID ? "Updated Successfully!" : "Added Successfully!");
             currentEditID = null;
             showTab('inventory');
         }).catch(err => alert("Error: " + err.message));
     }
-    </script>
+</script>
+
 </body>
 </html>
