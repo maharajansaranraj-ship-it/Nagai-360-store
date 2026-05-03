@@ -313,7 +313,7 @@
     const price = document.getElementById('offerPrice').value;
     const oPrice = document.getElementById('originalPrice').value;
     const time = document.getElementById('endTime').value;
-    const pid = document.getElementById('p-pid-offer').value; // 👈 Puthu Line
+    const pid = document.getElementById('p-pid-offer').value;
 
     const offImgs = [];
     for(let i=1; i<=6; i++) {
@@ -321,22 +321,28 @@
         if(v) offImgs.push(v);
     }
 
-    if(!name || !price || !pid) return alert("Fill Name, Price and Product ID!");
+    if(!name || !price || !pid) {
+        alert("❌ Name, Price, Product ID mandatory!");
+        return;
+    }
 
     const offerData = {
         name: name,
         price: price,
         originalPrice: oPrice,
         endTime: time,
-        pid: pid, // 👈 Idhu save aaganum
+        pid: pid,
         images: offImgs,
         timestamp: Date.now()
     };
 
-    db.ref('offers').set(offerData).then(() => {
-        alert("Offer Successfully Added! 🔥");
+    db.ref('offers').push(offerData).then(() => {
+        alert("🔥 Offer Added Successfully!");
+        
+        // Clear form
+        document.querySelectorAll('#add-offer-section input').forEach(i => i.value = "");
     });
-}
+        }
 
 
 
