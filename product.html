@@ -121,12 +121,28 @@
   
     // ✅ Main Logic: Fetching Data  
     if(productId) {  
-        db.ref('products/' + productId).on('value', (snap) => {  
-            let data = snap.val();  
-            if(data) { displayProduct(data); }   
-            else {  
-                db.ref('offers/' + productId).once('value', (oSnap) => {  
-                    if(oSnap.val()) displayProduct(oSnap.val());  
+        db.ref('products').once('value')
+.then(snapshot => {
+  let found = false;
+
+  snapshot.forEach(child => {
+    if (child.key == productId) {
+      displayProduct(child.val());
+      found = true;
+    }
+  });
+
+  if (!found) {
+    db.ref('offers').once('value')
+    .then(oSnap => {
+      oSnap.forEach(child => {
+        if (child.key == productId) {
+          displayProduct(child.val());
+          found = true;
+        }
+      });
+
+      if (!found) showError();
                     else {  
                         document.getElementById('product-content').classList.add('hidden');  
                         document.getElementById('error-content').classList.remove('hidden');  
