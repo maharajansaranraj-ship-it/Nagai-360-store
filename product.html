@@ -319,20 +319,34 @@ loadMoreGrid(data.category, productId); // <--- Intha variya mattum sethudunga!
         const data = snap.val();
         
         if(data) {
-            // ✅ Step 1: Ellaa ID-aiyum list-ah edukkavum
             const keys = Object.keys(data).reverse(); 
+            const currentName = productData ? productData.name.toLowerCase() : "";
 
             keys.forEach(id => {
                 const p = data[id];
+                const pName = p.name.toLowerCase();
+                const pCat = p.category ? p.category.toLowerCase() : "";
+                
+                // ✅ SMART FILTER:
+                // 1. Category match aaganum (OR)
+                // 2. Name-la "Saree" nu iruntha, adhu match aaganum
+                let isRelated = false;
+                
+                if (pCat !== "" && pCat === category.toLowerCase()) {
+                    isRelated = true;
+                } else if (currentName.includes("saree") && pName.includes("saree")) {
+                    isRelated = true;
+                } else if (currentName.includes("shirt") && pName.includes("shirt")) {
+                    isRelated = true;
+                }
 
-                // ✅ Step 2: Category matching check (Idhu dhaan main)
-                // lowercase() use panni check panna innum safety!
-                if(p.category && category && p.category.toLowerCase() === category.toLowerCase() && id !== currentPid) {
+                // Match aanaal mattum grid-la kaattu
+                if(isRelated && id !== currentPid) {
                     grid.innerHTML += `
                     <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
                         <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
                         <div class="px-2">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${p.category}</p>
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${p.category || 'Premium'}</p>
                             <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
                             <div class="flex justify-between items-center mt-2">
                                 <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
