@@ -312,30 +312,30 @@ loadMoreGrid(data.category, productId); // <--- Intha variya mattum sethudunga!
             }).then(() => console.log("Added to wishlist"));
         }
     }
-    function loadMoreGrid(category, currentPid) {
+     function loadMoreGrid(currentName, currentPid) {
     db.ref('products').once('value', snap => {
         const grid = document.getElementById('more-products-grid');
         grid.innerHTML = "";
         const data = snap.val();
         
-        if(data) {
+        if(data && currentName) {
             const keys = Object.keys(data).reverse(); 
-            // Ippo paakura product name-ah lowercase-ah eduthuko
-            const currentProductName = productData.name.toLowerCase();
+            const searchName = currentName.toLowerCase();
 
-            // Enna maari product-nu kandupidi (Saree, Shirt, Ring etc.)
+            // Enna maari product-nu kandupidi
             let type = "";
-            if(currentProductName.includes("saree")) type = "saree";
-            else if(currentProductName.includes("shirt")) type = "shirt";
-            else if(currentProductName.includes("ring")) type = "ring";
-            else if(currentProductName.includes("pant")) type = "pant";
-            // Innum vera types iruntha inga sethukalam
+            if(searchName.includes("saree")) type = "saree";
+            else if(searchName.includes("shirt")) type = "shirt";
+            else if(searchName.includes("ring")) type = "ring";
+            else if(searchName.includes("pant")) type = "pant";
+            else if(searchName.includes("bangle")) type = "bangle";
+            else if(searchName.includes("necklace")) type = "necklace";
 
             keys.forEach(id => {
                 const p = data[id];
                 const pName = p.name.toLowerCase();
 
-                // ✅ CONDITION: Name-la andha 'type' iruntha mattum grid-la podu
+                // ✅ Filter Condition: Type match aagaanum + Same product-ah iruka koodathu
                 if(type !== "" && pName.includes(type) && id !== currentPid) {
                     grid.innerHTML += `
                     <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
