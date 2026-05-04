@@ -55,19 +55,22 @@
         }
 
         offers.forEach(o => {
-            // ❌ Skip if no product ID or expired
-            if (!o.pid) return; 
+            // ✅ Fix: Use o.pid if it exists, otherwise use its own key (id)
+            const finalId = o.pid || o.id; 
+            if (!finalId) return; 
+
+            // ❌ Skip if expired
             if (o.endTime && (new Date(o.endTime).getTime() - now <= 0)) return;
 
             const img = (o.images && o.images[0]) ? o.images[0] : 'https://via.placeholder.com/150';
             const originalPriceDisplay = o.originalPrice ? `₹${o.originalPrice}` : '';
 
             list.innerHTML += `
-            <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${o.pid}'">
+            <div class="bg-white p-4 rounded-[2.5rem] shadow-xl active:scale-95 transition-all" onclick="location.href='product.html?id=${finalId}'">
                 <div class="relative mb-3">
                     <img src="${img}" class="w-full h-40 object-cover rounded-[1.8rem]" onerror="this.src='https://via.placeholder.com/150'">
                     <div class="timer-box absolute bottom-2 left-2 bg-slate-900 text-white font-black px-3 py-1 rounded-lg text-[9px] shadow-lg" data-time="${o.endTime}">
-                        00h 00m 00s
+                        Calculating...
                     </div>
                 </div>
                 <h3 class="font-bold text-slate-800 text-[11px] truncate px-1">${o.name || 'Flash Deal'}</h3>
@@ -87,7 +90,7 @@
             const now = new Date().getTime();
             document.querySelectorAll('.timer-box').forEach(el => {
                 const endTime = el.getAttribute('data-time');
-                if (!endTime || endTime === "undefined") {
+                if (!endTime || endTime === "undefined" || endTime === "null") {
                     el.innerHTML = "LIMITED SALE";
                     return;
                 }
@@ -95,10 +98,11 @@
                 const dist = new Date(endTime).getTime() - now;
                 if (dist < 0) {
                     el.innerHTML = "EXPIRED";
+                    // Optional: el.parentElement.parentElement.remove(); // Automatically hide expired deals
                 } else {
-                    const h = Math.floor((dist % 86400000) / 3600000);
-                    const m = Math.floor((dist % 3600000) / 60000);
-                    const s = Math.floor((dist % 60000) / 1000);
+                    const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((dist % (1000 * 60)) / 1000);
                     el.innerHTML = `${h}h ${m}m ${s}s`;
                 }
             });
@@ -112,7 +116,9 @@
 
             if (data) {
                 Object.keys(data).reverse().forEach(id => {
-                    allOffers.push(data[id]);
+                    const item = data[id];
+                    item.id = id; // Keep the firebase key just in case
+                    allOffers.push(item);
                 });
             }
             
@@ -131,6 +137,7 @@
 
     loadOffers();
 </script>
+
 
 </body>
 </html>
