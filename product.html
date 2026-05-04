@@ -124,7 +124,7 @@
     let startX = 0;
     let isInWishlist = false;
 
-        if(productId) {
+    if(productId) {
         // ✅ PRODUCT DATA FETCH
         db.ref('products/' + productId).on('value', (snapshot) => {
             const data = snapshot.val();
@@ -136,9 +136,9 @@
                 document.getElementById('product-price').innerText = "₹" + data.price;
                 document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
 
-                // ✅ CORRECT CALLS HERE:
+                // ✅ LOAD RELATED AND GRID
                 loadRelatedProducts(data.category, productId);
-                loadMoreGrid(data.name, productId); // Pass data.name instead of data.category
+                loadMoreGrid(data.name, productId); 
 
                 const footer = document.getElementById('footer-buttons');
                 const badge = document.getElementById('sold-out-badge');
@@ -154,7 +154,7 @@
                     slider.classList.remove('sold-out-overlay');
                 }
 
-                // SIZES
+                // SIZES logic
                 const sizeCont = document.getElementById('size-container');
                 sizeCont.innerHTML = "";
                 if(data.sizes && data.sizes.length > 0) {
@@ -168,7 +168,7 @@
                     selectedSize = "Free Size";
                 }
 
-                // COLORS
+                // COLORS logic
                 const colorCont = document.getElementById('color-container');
                 colorCont.innerHTML = "";
                 if(data.colors && data.colors.length > 0) {
@@ -182,7 +182,7 @@
                     selectedColor = "Default";
                 }
 
-                // SLIDER
+                // SLIDER logic
                 const imageSlider = document.getElementById('imageSlider');
                 const dotsCont = document.getElementById('sliderDots');
                 imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
@@ -201,12 +201,8 @@
                 document.getElementById('error-content').classList.remove('hidden');
             }
         });
-        // ... rest of your script
-    }
 
-        
-
-        // ✅ CHECK WISHLIST STATUS ON LOAD
+        // ✅ WISHLIST logic (Inside if productId)
         if(userPhone) {
             db.ref('users/' + userPhone + '/wishlist/' + productId).on('value', snap => {
                 const heart = document.getElementById('heart-icon');
@@ -298,69 +294,61 @@
         window.location.href = 'checkout.html';
     }
 
-    // ✅ FIXED TOGGLE WISHLIST (Database connectivity)
     function toggleWishlist() {
         if(!userPhone) return alert("Please Login to save wishlist!");
         if(!productData) return;
-
         const ref = db.ref('users/' + userPhone + '/wishlist/' + productId);
-        
         if(isInWishlist) {
-            ref.remove().then(() => console.log("Removed from wishlist"));
+            ref.remove();
         } else {
             ref.set({
                 pid: productId,
                 name: productData.name,
                 image: productData.images[0],
                 price: productData.price
-            }).then(() => console.log("Added to wishlist"));
-        }
-    }
-     function loadMoreGrid(currentName, currentPid) {
-    db.ref('products').once('value', snap => {
-        const grid = document.getElementById('more-products-grid');
-        grid.innerHTML = "";
-        const data = snap.val();
-        
-        if(data && currentName) {
-            const keys = Object.keys(data).reverse(); 
-            const searchName = currentName.toLowerCase();
-
-            // Enna maari product-nu kandupidi
-            let type = "";
-            if(searchName.includes("saree")) type = "saree";
-            else if(searchName.includes("shirt")) type = "shirt";
-            else if(searchName.includes("ring")) type = "ring";
-            else if(searchName.includes("pant")) type = "pant";
-            else if(searchName.includes("bangle")) type = "bangle";
-            else if(searchName.includes("necklace")) type = "necklace";
-
-            keys.forEach(id => {
-                const p = data[id];
-                const pName = p.name.toLowerCase();
-
-                // ✅ Filter Condition: Type match aagaanum + Same product-ah iruka koodathu
-                if(type !== "" && pName.includes(type) && id !== currentPid) {
-                    grid.innerHTML += `
-                    <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
-                        <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
-                        <div class="px-2">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
-                            <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                            <div class="flex justify-between items-center mt-2">
-                                <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
-                                <div class="w-8 h-8 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xs">＋</div>
-                            </div>
-                        </div>
-                    </div>`;
-                }
             });
         }
-    });
-}
+    }
 
+    function loadMoreGrid(currentName, currentPid) {
+        db.ref('products').once('value', snap => {
+            const grid = document.getElementById('more-products-grid');
+            grid.innerHTML = "";
+            const data = snap.val();
+            if(data && currentName) {
+                const keys = Object.keys(data).reverse(); 
+                const searchName = currentName.toLowerCase();
+                let type = "";
+                if(searchName.includes("saree")) type = "saree";
+                else if(searchName.includes("shirt")) type = "shirt";
+                else if(searchName.includes("ring")) type = "ring";
+                else if(searchName.includes("pant")) type = "pant";
+                else if(searchName.includes("bangle")) type = "bangle";
+                else if(searchName.includes("necklace")) type = "necklace";
 
+                keys.forEach(id => {
+                    const p = data[id];
+                    const pName = p.name.toLowerCase();
+                    if(type !== "" && pName.includes(type) && id !== currentPid) {
+                        grid.innerHTML += `
+                        <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
+                            <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
+                            <div class="px-2">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
+                                <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                                <div class="flex justify-between items-center mt-2">
+                                    <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
+                                    <div class="w-8 h-8 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xs">＋</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                });
+            }
+        });
+    }
 </script>
+
 
                         
 </body>
