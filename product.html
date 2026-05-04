@@ -109,211 +109,181 @@
             Buy Now
         </button>
     </div>
-<script>
-    // ✅ Step 1: Encrypted Firebase Config
-    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
+    <script>
+    // ✅ Encrypted Firebase Config
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};
+    
+    const firebaseConfig = {
+        apiKey: _0x3b18('0x1'),
+        authDomain: _0x3b18('0x3'),
+        projectId: "ff-id-store-dab0f",
+        storageBucket: "ff-id-store-dab0f.appspot.com",
+        messagingSenderId: "655049193530",
+        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03",
+        databaseURL: _0x3b18('0x5')
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    // Get URL Params
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     const userPhone = localStorage.getItem('user_phone');
-    
-    let selectedSize = ""; 
-    let selectedColor = ""; 
-    let productData = null;
-    let currentIdx = 0;
-    let startX = 0;
-    let isInWishlist = false;
 
-    // ✅ Main Logic: Fetching Data
-    if(productId) {
+    let productData = null;
+    let selectedSize = "";
+    let selectedColor = "";
+    let currentIdx = 0;
+
+    // Check if ID exists, then fetch
+    if (productId) {
+        console.log("Fetching Product:", productId);
         db.ref('products/' + productId).on('value', (snap) => {
-            let data = snap.val();
-            if(data) { displayProduct(data); } 
-            else {
+            const data = snap.val();
+            if (data) {
+                displayProduct(data);
+            } else {
+                // Try fetching from offers if not in products
                 db.ref('offers/' + productId).once('value', (oSnap) => {
-                    if(oSnap.val()) displayProduct(oSnap.val());
-                    else {
-                        document.getElementById('product-content').classList.add('hidden');
-                        document.getElementById('error-content').classList.remove('hidden');
-                    }
+                    if (oSnap.val()) displayProduct(oSnap.val());
+                    else showNotFound();
                 });
             }
+        }, (error) => {
+            console.error("Database Error:", error);
+            showNotFound();
         });
-
-        if(userPhone) {
-            db.ref('users/' + userPhone + '/wishlist/' + productId).on('value', snap => {
-                const heart = document.getElementById('heart-icon');
-                if(snap.exists()) {
-                    isInWishlist = true;
-                    heart.classList.add('text-red-500');
-                    heart.setAttribute('fill', 'currentColor');
-                } else {
-                    isInWishlist = false;
-                    heart.classList.remove('text-red-500');
-                    heart.setAttribute('fill', 'none');
-                }
-            });
-        }
+    } else {
+        showNotFound();
     }
 
     function displayProduct(data) {
-        if(!data) return;
         productData = data;
+        console.log("Product Data Loaded:", data.name);
+        
+        // Remove hidden classes to show content
         document.getElementById('product-content').classList.remove('hidden');
+        document.getElementById('footer-buttons').classList.remove('hidden');
         document.getElementById('error-content').classList.add('hidden');
+
+        // Text Content
         document.getElementById('product-name').innerText = data.name;
         document.getElementById('product-price').innerText = "₹" + data.price;
-        document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
+        document.getElementById('product-desc').innerText = data.desc || "Nagai 360 Premium Collection.";
 
-        loadRelatedProducts(data.category, productId);
-        loadMoreGrid(data.name, productId); 
-
-        const footer = document.getElementById('footer-buttons');
-        const badge = document.getElementById('sold-out-badge');
-        const slider = document.getElementById('slider-main');
-
+        // Sold Out Check
         if(data.isSoldOut) {
-            footer.classList.add('hidden');
-            badge.classList.remove('hidden');
-            slider.classList.add('sold-out-overlay');
-        } else {
-            footer.classList.remove('hidden');
-            badge.classList.add('hidden');
-            slider.classList.remove('sold-out-overlay');
+            document.getElementById('footer-buttons').classList.add('hidden');
+            document.getElementById('sold-out-badge').classList.remove('hidden');
+            document.getElementById('slider-main').classList.add('sold-out-overlay');
         }
 
-        const sizeCont = document.getElementById('size-container');
-        sizeCont.innerHTML = "";
-        if(data.sizes && data.sizes.length > 0) {
-            data.sizes.forEach((s, idx) => {
-                const activeClass = idx === 0 ? 'active-size' : '';
-                if(idx === 0) selectedSize = s;
-                sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
+        // Image Slider
+        const slider = document.getElementById('imageSlider');
+        const dots = document.getElementById('sliderDots');
+        slider.innerHTML = ""; dots.innerHTML = "";
+        
+        if (data.images && data.images.length > 0) {
+            data.images.forEach((img, i) => {
+                slider.innerHTML += `<img src="${img}" class="slider-item">`;
+                dots.innerHTML += `<div class="h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}"></div>`;
             });
-        } else {
-            sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size</p>";
-            selectedSize = "Free Size";
+            setupSlider(data.images.length);
         }
 
-        const colorCont = document.getElementById('color-container');
-        colorCont.innerHTML = "";
-        if(data.colors && data.colors.length > 0) {
-            data.colors.forEach((c, idx) => {
-                const activeClass = idx === 0 ? 'active-color' : '';
-                if(idx === 0) selectedColor = c;
-                colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
+        // Sizes & Colors
+        renderOptions('size-container', data.sizes, 'size-btn', (val) => selectedSize = val);
+        renderOptions('color-container', data.colors, 'color-btn', (val) => selectedColor = val);
+
+        // Load Grids
+        loadRelated(data.category, productId);
+        loadMore(data.name, productId);
+    }
+
+    function renderOptions(containerId, list, btnClass, callback) {
+        const cont = document.getElementById(containerId);
+        cont.innerHTML = "";
+        if (list && list.length > 0) {
+            list.forEach((item, i) => {
+                const btn = document.createElement('button');
+                btn.className = `${btnClass} min-w-[3.5rem] px-4 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${i === 0 ? 'active-size active-color' : ''}`;
+                btn.innerText = item;
+                if(i === 0) callback(item);
+                btn.onclick = function() {
+                    document.querySelectorAll('.' + btnClass).forEach(b => b.classList.remove('active-size', 'active-color'));
+                    this.classList.add(btnClass === 'size-btn' ? 'active-size' : 'active-color');
+                    callback(item);
+                };
+                cont.appendChild(btn);
             });
         } else {
-            colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
-            selectedColor = "Default";
-        }
-
-        const imageSlider = document.getElementById('imageSlider');
-        const dotsCont = document.getElementById('sliderDots');
-        imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
-        if(data.images && data.images.length > 0) {
-            data.images.forEach((imgUrl, index) => {
-                imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
-                const dot = document.createElement('div');
-                dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-                dotsCont.appendChild(dot);
-            });
-            setupTouchSlider(data.images.length);
+            cont.innerHTML = "<p class='text-xs text-slate-400'>Standard</p>";
+            callback("Standard");
         }
     }
 
-    function loadRelatedProducts(category, currentPid) {
-        if(!category) return;
-        db.ref('products').orderByChild('category').equalTo(category).limitToFirst(10).once('value', (snapshot) => {
-            const relatedList = document.getElementById('related-products-list');
-            relatedList.innerHTML = "";
-            const data = snapshot.val();
-            if(data) {
-                Object.keys(data).forEach(id => {
-                    if(id !== currentPid) {
-                        const p = data[id];
-                        relatedList.innerHTML += `<div onclick="location.href='product.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all"><div class="relative h-44 w-full bg-slate-100 rounded-[2rem] overflow-hidden mb-2 shadow-sm"><img src="${p.images[0]}" class="w-full h-full object-cover"></div><h4 class="text-[10px] font-bold text-slate-800 truncate px-1">${p.name}</h4><p class="text-[10px] font-black text-orange-500 px-1">₹${p.price}</p></div>`;
-                    }
-                });
-            }
+    function showNotFound() {
+        document.getElementById('product-content').classList.add('hidden');
+        document.getElementById('error-content').classList.remove('hidden');
+    }
+
+    // Related & More (Simplified)
+    function loadRelated(cat, id) {
+        db.ref('products').orderByChild('category').equalTo(cat).limitToFirst(6).once('value', s => {
+            const list = document.getElementById('related-products-list');
+            list.innerHTML = "";
+            s.forEach(child => {
+                if(child.key !== id) {
+                    const p = child.val();
+                    list.innerHTML += `<div onclick="location.href='product.html?id=${child.key}'" class="min-w-[150px]"><img src="${p.images[0]}" class="h-44 w-full object-cover rounded-[2rem] shadow-sm"><h4 class="text-[10px] font-bold mt-2 truncate">${p.name}</h4><p class="text-orange-500 font-black text-[10px]">₹${p.price}</p></div>`;
+                }
+            });
         });
     }
 
-    function loadMoreGrid(currentName, currentPid) {
-        db.ref('products').once('value', snap => {
+    function loadMore(name, id) {
+        db.ref('products').limitToLast(10).once('value', s => {
             const grid = document.getElementById('more-products-grid');
             grid.innerHTML = "";
-            const data = snap.val();
-            if(data && currentName) {
-                const keys = Object.keys(data).reverse(); 
-                const searchName = currentName.toLowerCase();
-                let type = "";
-                if(searchName.includes("saree")) type = "saree";
-                else if(searchName.includes("shirt")) type = "shirt";
-                else if(searchName.includes("ring")) type = "ring";
-                else if(searchName.includes("pant")) type = "pant";
-
-                keys.forEach(id => {
-                    const p = data[id];
-                    if(type !== "" && p.name.toLowerCase().includes(type) && id !== currentPid) {
-                        grid.innerHTML += `<div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm"><img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3"><div class="px-2"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p><h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3><p class="text-orange-500 font-black text-sm mt-2">₹${p.price}</p></div></div>`;
-                    }
-                });
-            }
+            s.forEach(child => {
+                if(child.key !== id) {
+                    const p = child.val();
+                    grid.innerHTML += `<div onclick="location.href='product.html?id=${child.key}'" class="bg-white p-3 border border-slate-100 rounded-[2rem]"><img src="${p.images[0]}" class="h-40 w-full object-cover rounded-[1.5rem] mb-2"><h3 class="font-bold text-xs truncate">${p.name}</h3><p class="text-orange-500 font-black">₹${p.price}</p></div>`;
+                }
+            });
         });
     }
 
-    function setupTouchSlider(imgCount) {
-        const slider = document.getElementById('imageSlider');
+    function setupSlider(count) {
+        const s = document.getElementById('imageSlider');
         const dots = document.getElementById('sliderDots').children;
-        slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive: true});
-        slider.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            const diff = startX - endX;
-            if (Math.abs(diff) > 40) { 
-                if (diff > 0 && currentIdx < imgCount - 1) currentIdx++; 
-                else if (diff < 0 && currentIdx > 0) currentIdx--; 
-                slider.style.transform = `translateX(-${currentIdx * 100}%)`;
-                for (let i = 0; i < dots.length; i++) {
-                    dots[i].className = `h-1.5 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-                }
+        let startX = 0;
+        s.ontouchstart = e => startX = e.touches[0].clientX;
+        s.ontouchend = e => {
+            let diff = startX - e.changedTouches[0].clientX;
+            if(Math.abs(diff) > 50) {
+                if(diff > 0 && currentIdx < count-1) currentIdx++;
+                else if(diff < 0 && currentIdx > 0) currentIdx--;
+                s.style.transform = `translateX(-${currentIdx * 100}%)`;
+                Array.from(dots).forEach((d, i) => d.className = `h-1.5 rounded-full transition-all ${i === currentIdx ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`);
             }
-        }, {passive: true});
-    }
-
-    function selectSize(btn) {
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active-size'));
-        btn.classList.add('active-size');
-        selectedSize = btn.innerText.trim();
-    }
-
-    function selectColor(btn) {
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active-color'));
-        btn.classList.add('active-color');
-        selectedColor = btn.innerText.trim();
+        };
     }
 
     function addToCart() {
-        if(!userPhone) return alert("Please Login!");
-        db.ref('users/' + userPhone + '/cart/' + productId).set({
-            pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, color: selectedColor, qty: 1
-        }).then(() => alert("Added to bag! 🛍️"));
+        if(!userPhone) return alert("Please Login First!");
+        db.ref('users/'+userPhone+'/cart/'+productId).set({...productData, size: selectedSize, color: selectedColor, qty: 1})
+        .then(() => alert("Added to Bag! 🛍️"));
     }
 
     function buyNow() {
-        localStorage.setItem('checkout_item', JSON.stringify({
-            pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, color: selectedColor
-        }));
+        localStorage.setItem('checkout_item', JSON.stringify({...productData, size: selectedSize, color: selectedColor}));
         window.location.href = 'checkout.html';
-    }
-
-    function toggleWishlist() {
-        if(!userPhone) return alert("Login to save!");
-        const ref = db.ref('users/' + userPhone + '/wishlist/' + productId);
-        if(isInWishlist) ref.remove();
-        else ref.set({ pid: productId, name: productData.name, image: productData.images[0], price: productData.price });
     }
 </script>
 
