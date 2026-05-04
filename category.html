@@ -17,12 +17,23 @@
 </head>
 <body class="bg-slate-50 pb-10">
 
-    <header class="p-5 flex items-center gap-4 bg-white sticky top-0 z-50 shadow-sm">
-        <button onclick="history.back()" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <h1 id="category-title" class="text-lg font-bold text-slate-800 capitalize">Loading...</h1>
-    </header>
+    <div class="bg-white sticky top-0 z-50 shadow-sm">
+        <header class="p-5 flex items-center gap-4">
+            <button onclick="history.back()" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <h1 id="category-title" class="text-lg font-bold text-slate-800 capitalize">Category</h1>
+        </header>
+
+        <div class="px-5 pb-4">
+            <div onclick="location.href='search.html'" class="flex items-center gap-3 bg-slate-100 p-4 rounded-[1.5rem] border border-slate-200 active:scale-[0.98] transition-all cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span class="text-slate-400 text-sm font-medium">Search for more products...</span>
+            </div>
+        </div>
+    </div>
 
     <div class="px-5 mt-6">
         <div id="category-grid" class="grid grid-cols-2 gap-4">
@@ -47,54 +58,48 @@
         if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Get Params
         const urlParams = new URLSearchParams(window.location.search);
         const catName = urlParams.get('cat'); 
 
         if(catName) {
-            document.getElementById('category-title').innerText = catName;
+            document.getElementById('category-title').innerText = catName + " Collection";
             loadCategoryItems(catName);
-        } else {
-            document.getElementById('loading-msg').innerText = "No category selected.";
         }
 
         function loadCategoryItems(cat) {
-    const grid = document.getElementById('category-grid');
-    grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400 animate-pulse'>Searching for " + cat + "...</p>";
+            const grid = document.getElementById('category-grid');
+            
+            db.ref('products').once('value', (snap) => {
+                grid.innerHTML = "";
+                const data = snap.val();
+                let found = false;
 
-    // Query starting...
-    db.ref('products').once('value', (snap) => {
-        grid.innerHTML = "";
-        const allProducts = snap.val();
-        let found = false;
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const p = data[id];
+                        const productName = p.name ? p.name.toLowerCase() : "";
+                        const searchKey = cat.toLowerCase();
 
-        if (allProducts) {
-            Object.keys(allProducts).forEach(id => {
-                const p = allProducts[id];
-                
-                // Indha line thaan logic: Database-la irukura category-ai check pannuthu
-                // Case sensitive prachinai illama iruka .toLowerCase() use panrom
-                if (p.category && p.category.toLowerCase() === cat.toLowerCase()) {
-                    found = true;
-                    grid.innerHTML += `
-                        <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-slate-100">
-                            <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[2rem] mb-3">
-                            <div class="px-2 pb-1">
-                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
-                                <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                                <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
-                            </div>
-                        </div>`;
+                        if (productName.includes(searchKey)) {
+                            found = true;
+                            grid.innerHTML += `
+                                <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-slate-100 active:scale-95 transition-all">
+                                    <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[2rem] mb-3">
+                                    <div class="px-2 pb-1">
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360 Premium</p>
+                                        <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                                        <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
+                                    </div>
+                                </div>`;
+                        }
+                    });
+                }
+
+                if(!found) {
+                    grid.innerHTML = "<div class='col-span-2 text-center py-20 text-slate-400'>No " + cat + " found in our collection.</div>";
                 }
             });
         }
-
-        if (!found) {
-            grid.innerHTML = "<div class='col-span-2 text-center py-20'><p class='text-slate-400'>No items found in " + cat + ".<br><span class='text-[10px]'>Check if 'category' field exists in Firebase.</span></p></div>";
-        }
-    });
-}
-
     </script>
 </body>
 </html>
