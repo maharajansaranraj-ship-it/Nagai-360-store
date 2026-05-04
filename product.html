@@ -347,6 +347,74 @@
             }
         });
     }
+      function displayProduct(data) {
+        if(!data) return;
+        productData = data;
+        document.getElementById('product-content').classList.remove('hidden');
+        document.getElementById('error-content').classList.add('hidden');
+        document.getElementById('product-name').innerText = data.name;
+        document.getElementById('product-price').innerText = "₹" + data.price;
+        document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
+
+        loadRelatedProducts(data.category, productId);
+        loadMoreGrid(data.name, productId); 
+
+        const footer = document.getElementById('footer-buttons');
+        const badge = document.getElementById('sold-out-badge');
+        const slider = document.getElementById('slider-main');
+
+        if(data.isSoldOut) {
+            footer.classList.add('hidden');
+            badge.classList.remove('hidden');
+            slider.classList.add('sold-out-overlay');
+        } else {
+            footer.classList.remove('hidden');
+            badge.classList.add('hidden');
+            slider.classList.remove('sold-out-overlay');
+        }
+
+        // SIZES & COLORS
+        const sizeCont = document.getElementById('size-container');
+        sizeCont.innerHTML = "";
+        if(data.sizes && data.sizes.length > 0) {
+            data.sizes.forEach((s, idx) => {
+                const activeClass = idx === 0 ? 'active-size' : '';
+                if(idx === 0) selectedSize = s;
+                sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
+            });
+        } else {
+            sizeCont.innerHTML = "<p class='text-xs text-slate-400'>Free Size</p>";
+            selectedSize = "Free Size";
+        }
+
+        const colorCont = document.getElementById('color-container');
+        colorCont.innerHTML = "";
+        if(data.colors && data.colors.length > 0) {
+            data.colors.forEach((c, idx) => {
+                const activeClass = idx === 0 ? 'active-color' : '';
+                if(idx === 0) selectedColor = c;
+                colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
+            });
+        } else {
+            colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
+            selectedColor = "Default";
+        }
+
+        // SLIDER
+        const imageSlider = document.getElementById('imageSlider');
+        const dotsCont = document.getElementById('sliderDots');
+        imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
+        if(data.images && data.images.length > 0) {
+            data.images.forEach((imgUrl, index) => {
+                imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
+                const dot = document.createElement('div');
+                dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+                dotsCont.appendChild(dot);
+            });
+            setupTouchSlider(data.images.length);
+        }
+    }
+  
 </script>
 
 
