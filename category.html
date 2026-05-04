@@ -1,82 +1,95 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 | Category</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body class="bg-slate-50 pb-10">
 
     <header class="p-5 flex items-center gap-4 bg-white sticky top-0 z-50 shadow-sm">
-        <button onclick="history.back()" class="p-2 bg-slate-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        <button onclick="history.back()" class="p-2 bg-slate-100 rounded-full active:scale-90 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <h1 id="category-title" class="text-lg font-bold text-slate-800 capitalize">Category</h1>
+        <h1 id="category-title" class="text-lg font-bold text-slate-800 capitalize">Loading...</h1>
     </header>
 
     <div class="px-5 mt-6">
         <div id="category-grid" class="grid grid-cols-2 gap-4">
-            <p id="loading-msg" class="col-span-2 text-center py-10 text-slate-400 animate-pulse">Searching for items...</p>
+            <p id="loading-msg" class="col-span-2 text-center py-20 text-slate-400 animate-pulse font-medium">Searching for items...</p>
         </div>
     </div>
 
     <script>
-        // Use your same Firebase Config here
-        const firebaseConfig = { /* ... paste your config ... */ };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // ✅ Your Nagai 360 Encrypted Config
+        var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};
+        
+        const firebaseConfig={
+            [_0x3b18('0x1')]:_0x3b18('0x2'),
+            [_0x3b18('0x3')]:_0x3b18('0x4'),
+            'projectId':'ff-id-store-dab0f',
+            'storageBucket':'ff-id-store-dab0f.firebasestorage.app',
+            'messagingSenderId':'655049193530',
+            'appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',
+            [_0x3b18('0x5')]:_0x3b18('0x0')
+        };
+
+        if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Get Params
         const urlParams = new URLSearchParams(window.location.search);
-        const catName = urlParams.get('cat'); // e.g., 'saree'
-        
+        const catName = urlParams.get('cat'); 
+
         if(catName) {
-            document.getElementById('category-title').innerText = catName + " Collection";
+            document.getElementById('category-title').innerText = catName;
             loadCategoryItems(catName);
+        } else {
+            document.getElementById('loading-msg').innerText = "No category selected.";
         }
 
         function loadCategoryItems(cat) {
-    const grid = document.getElementById('category-grid');
-    console.log("Filtering for category:", cat); // Check browser console
+            const grid = document.getElementById('category-grid');
+            
+            // Querying from "products" folder
+            db.ref('products').orderByChild('category').equalTo(cat).once('value', (snap) => {
+                grid.innerHTML = "";
+                const data = snap.val();
 
-    // Query start
-    db.ref('products').orderByChild('category').equalTo(cat).once('value', (snap) => {
-        grid.innerHTML = "";
-        const data = snap.val();
-        
-        console.log("Data received:", data); // Check if data is coming
-
-        if(data) {
-            Object.keys(data).forEach(id => {
-                const p = data[id];
-                grid.innerHTML += `
-                    <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100">
-                        <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[1.5rem] mb-3">
-                        <div class="px-1">
-                            <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                            <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
-                        </div>
-                    </div>`;
+                if (data) {
+                    Object.keys(data).forEach(id => {
+                        const p = data[id];
+                        grid.innerHTML += `
+                            <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-slate-100 active:scale-95 transition-all">
+                                <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[2rem] mb-3">
+                                <div class="px-2 pb-1">
+                                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
+                                    <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                                    <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    // Try with Capitalized version if lowercase fails
+                    let capCat = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    if(cat !== capCat) {
+                        loadCategoryItems(capCat);
+                    } else {
+                        grid.innerHTML = "<div class='col-span-2 text-center py-20'><p class='text-slate-400'>No items found in " + cat + "</p></div>";
+                    }
+                }
             });
-        } else {
-            // If No match, try with first letter Capital (Saree instead of saree)
-            let capCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-            if(cat !== capCat) {
-                console.log("Trying with Capitalized category:", capCat);
-                loadCategoryItems(capCat); 
-            } else {
-                grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400'>No items found. Check Database Category name.</p>";
-            }
         }
-    }, (error) => {
-        console.error("Firebase Error:", error);
-        grid.innerHTML = "<p class='col-span-2 text-center text-red-500'>Error loading data!</p>";
-    });
-}
-
     </script>
 </body>
 </html>
-
