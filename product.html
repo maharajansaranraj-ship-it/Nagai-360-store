@@ -141,21 +141,33 @@ let isInWishlist = false;
    🔥 FETCH PRODUCT
 ========================= */
 if (productId) {
-  db.ref('products/' + productId).once('value')
-    .then(snap => {
-      if (snap.exists()) displayProduct(snap.val());
-      else {
-        return db.ref('offers/' + productId).once('value')
+  db.ref('products').once('value')
+    .then(snapshot => {
+      let found = false;
+
+      snapshot.forEach(child => {
+        if (child.key == productId) {
+          displayProduct(child.val());
+          found = true;
+        }
+      });
+
+      if (!found) {
+        db.ref('offers').once('value')
           .then(oSnap => {
-            if (oSnap.exists()) displayProduct(oSnap.val());
-            else showError();
+            oSnap.forEach(child => {
+              if (child.key == productId) {
+                displayProduct(child.val());
+                found = true;
+              }
+            });
+
+            if (!found) showError();
           });
       }
     })
-    .catch(err => {
-      console.error(err);
-      showError();
-    });
+    .catch(() => showError());
+}
 
   /* ✅ Wishlist check */
   if (userPhone) {
