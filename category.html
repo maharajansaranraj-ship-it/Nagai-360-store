@@ -59,37 +59,42 @@
         }
 
         function loadCategoryItems(cat) {
-            const grid = document.getElementById('category-grid');
-            
-            // Querying from "products" folder
-            db.ref('products').orderByChild('category').equalTo(cat).once('value', (snap) => {
-                grid.innerHTML = "";
-                const data = snap.val();
+    const grid = document.getElementById('category-grid');
+    grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400 animate-pulse'>Searching for " + cat + "...</p>";
 
-                if (data) {
-                    Object.keys(data).forEach(id => {
-                        const p = data[id];
-                        grid.innerHTML += `
-                            <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-slate-100 active:scale-95 transition-all">
-                                <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[2rem] mb-3">
-                                <div class="px-2 pb-1">
-                                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
-                                    <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                                    <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
-                                </div>
-                            </div>`;
-                    });
-                } else {
-                    // Try with Capitalized version if lowercase fails
-                    let capCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-                    if(cat !== capCat) {
-                        loadCategoryItems(capCat);
-                    } else {
-                        grid.innerHTML = "<div class='col-span-2 text-center py-20'><p class='text-slate-400'>No items found in " + cat + "</p></div>";
-                    }
+    // Query starting...
+    db.ref('products').once('value', (snap) => {
+        grid.innerHTML = "";
+        const allProducts = snap.val();
+        let found = false;
+
+        if (allProducts) {
+            Object.keys(allProducts).forEach(id => {
+                const p = allProducts[id];
+                
+                // Indha line thaan logic: Database-la irukura category-ai check pannuthu
+                // Case sensitive prachinai illama iruka .toLowerCase() use panrom
+                if (p.category && p.category.toLowerCase() === cat.toLowerCase()) {
+                    found = true;
+                    grid.innerHTML += `
+                        <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-slate-100">
+                            <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[2rem] mb-3">
+                            <div class="px-2 pb-1">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
+                                <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                                <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
+                            </div>
+                        </div>`;
                 }
             });
         }
+
+        if (!found) {
+            grid.innerHTML = "<div class='col-span-2 text-center py-20'><p class='text-slate-400'>No items found in " + cat + ".<br><span class='text-[10px]'>Check if 'category' field exists in Firebase.</span></p></div>";
+        }
+    });
+}
+
     </script>
 </body>
 </html>
