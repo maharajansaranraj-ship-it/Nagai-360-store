@@ -124,7 +124,7 @@
     let startX = 0;
     let isInWishlist = false;
 
-    if(productId) {
+        if(productId) {
         // ✅ PRODUCT DATA FETCH
         db.ref('products/' + productId).on('value', (snapshot) => {
             const data = snapshot.val();
@@ -136,9 +136,9 @@
                 document.getElementById('product-price').innerText = "₹" + data.price;
                 document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
 
-loadRelatedProducts(data.category, productId);
-loadMoreGrid(data.category, productId); // <--- Intha variya mattum sethudunga!
-
+                // ✅ CORRECT CALLS HERE:
+                loadRelatedProducts(data.category, productId);
+                loadMoreGrid(data.name, productId); // Pass data.name instead of data.category
 
                 const footer = document.getElementById('footer-buttons');
                 const badge = document.getElementById('sold-out-badge');
@@ -201,6 +201,10 @@ loadMoreGrid(data.category, productId); // <--- Intha variya mattum sethudunga!
                 document.getElementById('error-content').classList.remove('hidden');
             }
         });
+        // ... rest of your script
+    }
+
+        
 
         // ✅ CHECK WISHLIST STATUS ON LOAD
         if(userPhone) {
