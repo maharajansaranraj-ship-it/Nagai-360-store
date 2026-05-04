@@ -147,9 +147,13 @@
     
 
     function clearForm() {
-        document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
-        document.getElementById('p-category').value = "Rings";
-    }
+    // Input fields-ai clear panna
+    document.querySelectorAll('#add-section input, #add-section textarea').forEach(i => i.value = "");
+    document.getElementById('p-category').value = ""; // Category reset
+    document.getElementById('submit-btn').innerText = "Publish"; // Button text reset
+    currentEditID = null; // Mukkiyamaana step: Edit ID-ai reset panna
+}
+
 
     // 👥 USERS
     db.ref('users').on('value', snap => {
