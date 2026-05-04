@@ -120,52 +120,55 @@
     let isInWishlist = false;  
   
     // ✅ Main Logic: Fetching Data  
-    if(productId) {  
-        db.ref('products').once('value')
-.then(snapshot => {
-  let found = false;
+    if (productId) {
+  db.ref('products').once('value')
+    .then(snapshot => {
+      let found = false;
 
-  snapshot.forEach(child => {
-    if (child.key == productId) {
-      displayProduct(child.val());
-      found = true;
-    }
-  });
-
-  if (!found) {
-    db.ref('offers').once('value')
-    .then(oSnap => {
-      oSnap.forEach(child => {
+      snapshot.forEach(child => {
         if (child.key == productId) {
           displayProduct(child.val());
           found = true;
         }
       });
 
-      if (!found) showError();
-                    else {  
-                        document.getElementById('product-content').classList.add('hidden');  
-                        document.getElementById('error-content').classList.remove('hidden');  
-                    }  
-                });  
-            }  
-        });  
-  
-        if(userPhone) {  
-            db.ref('users/' + userPhone + '/wishlist/' + productId).on('value', snap => {  
-                const heart = document.getElementById('heart-icon');  
-                if(snap.exists()) {  
-                    isInWishlist = true;  
-                    heart.classList.add('text-red-500');  
-                    heart.setAttribute('fill', 'currentColor');  
-                } else {  
-                    isInWishlist = false;  
-                    heart.classList.remove('text-red-500');  
-                    heart.setAttribute('fill', 'none');  
-                }  
-            });  
-        }  
-    }  
+      if (!found) {
+        db.ref('offers').once('value')
+          .then(oSnap => {
+            oSnap.forEach(child => {
+              if (child.key == productId) {
+                displayProduct(child.val());
+                found = true;
+              }
+            });
+
+            if (!found) {
+              showError();
+            }
+          })
+          .catch(() => showError());
+      }
+    })
+    .catch(() => showError());
+
+  // wishlist
+  if (userPhone) {
+    db.ref('users/' + userPhone + '/wishlist/' + productId)
+      .on('value', snap => {
+        const heart = document.getElementById('heart-icon');
+
+        if (snap.exists()) {
+          isInWishlist = true;
+          heart.classList.add('text-red-500');
+          heart.setAttribute('fill', 'currentColor');
+        } else {
+          isInWishlist = false;
+          heart.classList.remove('text-red-500');
+          heart.setAttribute('fill', 'none');
+        }
+      });
+  }
+    }
   
     function displayProduct(data) {  
         if(!data) return;  
