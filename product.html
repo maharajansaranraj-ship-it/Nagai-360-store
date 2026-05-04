@@ -111,7 +111,7 @@
     </div>
 <script>
     // ✅ Step 1: Encrypted Firebase Config
-    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
@@ -123,88 +123,23 @@
     let currentIdx = 0;
     let startX = 0;
     let isInWishlist = false;
-         if(productId) {
+
+    // ✅ Main Logic: Fetching Data
+    if(productId) {
         db.ref('products/' + productId).on('value', (snap) => {
             let data = snap.val();
             if(data) { displayProduct(data); } 
             else {
                 db.ref('offers/' + productId).once('value', (oSnap) => {
                     if(oSnap.val()) displayProduct(oSnap.val());
-                    else document.getElementById('error-content').classList.remove('hidden');
-
-
-                document.getElementById('error-content').classList.add('hidden');
-                document.getElementById('product-name').innerText = data.name;
-                document.getElementById('product-price').innerText = "₹" + data.price;
-                document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
-
-                // ✅ LOAD RELATED AND GRID
-                loadRelatedProducts(data.category, productId);
-                loadMoreGrid(data.name, productId); 
-
-                const footer = document.getElementById('footer-buttons');
-                const badge = document.getElementById('sold-out-badge');
-                const slider = document.getElementById('slider-main');
-
-                if(data.isSoldOut) {
-                    footer.classList.add('hidden');
-                    badge.classList.remove('hidden');
-                    slider.classList.add('sold-out-overlay');
-                } else {
-                    footer.classList.remove('hidden');
-                    badge.classList.add('hidden');
-                    slider.classList.remove('sold-out-overlay');
-                }
-
-                // SIZES logic
-                const sizeCont = document.getElementById('size-container');
-                sizeCont.innerHTML = "";
-                if(data.sizes && data.sizes.length > 0) {
-                    data.sizes.forEach((s, idx) => {
-                        const activeClass = idx === 0 ? 'active-size' : '';
-                        if(idx === 0) selectedSize = s;
-                        sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
-                    });
-                } else {
-                    sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size</p>";
-                    selectedSize = "Free Size";
-                }
-
-                // COLORS logic
-                const colorCont = document.getElementById('color-container');
-                colorCont.innerHTML = "";
-                if(data.colors && data.colors.length > 0) {
-                    data.colors.forEach((c, idx) => {
-                        const activeClass = idx === 0 ? 'active-color' : '';
-                        if(idx === 0) selectedColor = c;
-                        colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
-                    });
-                } else {
-                    colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
-                    selectedColor = "Default";
-                }
-
-                // SLIDER logic
-                const imageSlider = document.getElementById('imageSlider');
-                const dotsCont = document.getElementById('sliderDots');
-                imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
-                if(data.images && data.images.length > 0) {
-                    data.images.forEach((imgUrl, index) => {
-                        imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
-                        const dot = document.createElement('div');
-                        dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-                        dotsCont.appendChild(dot);
-                    });
-                    setupTouchSlider(data.images.length);
-                }
-            } else {
-                document.getElementById('product-content').classList.add('hidden');
-                document.getElementById('footer-buttons').classList.add('hidden');
-                document.getElementById('error-content').classList.remove('hidden');
+                    else {
+                        document.getElementById('product-content').classList.add('hidden');
+                        document.getElementById('error-content').classList.remove('hidden');
+                    }
+                });
             }
         });
 
-        // ✅ WISHLIST logic (Inside if productId)
         if(userPhone) {
             db.ref('users/' + userPhone + '/wishlist/' + productId).on('value', snap => {
                 const heart = document.getElementById('heart-icon');
@@ -221,6 +156,72 @@
         }
     }
 
+    function displayProduct(data) {
+        if(!data) return;
+        productData = data;
+        document.getElementById('product-content').classList.remove('hidden');
+        document.getElementById('error-content').classList.add('hidden');
+        document.getElementById('product-name').innerText = data.name;
+        document.getElementById('product-price').innerText = "₹" + data.price;
+        document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
+
+        loadRelatedProducts(data.category, productId);
+        loadMoreGrid(data.name, productId); 
+
+        const footer = document.getElementById('footer-buttons');
+        const badge = document.getElementById('sold-out-badge');
+        const slider = document.getElementById('slider-main');
+
+        if(data.isSoldOut) {
+            footer.classList.add('hidden');
+            badge.classList.remove('hidden');
+            slider.classList.add('sold-out-overlay');
+        } else {
+            footer.classList.remove('hidden');
+            badge.classList.add('hidden');
+            slider.classList.remove('sold-out-overlay');
+        }
+
+        const sizeCont = document.getElementById('size-container');
+        sizeCont.innerHTML = "";
+        if(data.sizes && data.sizes.length > 0) {
+            data.sizes.forEach((s, idx) => {
+                const activeClass = idx === 0 ? 'active-size' : '';
+                if(idx === 0) selectedSize = s;
+                sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
+            });
+        } else {
+            sizeCont.innerHTML = "<p class='text-xs text-slate-400'>One Size</p>";
+            selectedSize = "Free Size";
+        }
+
+        const colorCont = document.getElementById('color-container');
+        colorCont.innerHTML = "";
+        if(data.colors && data.colors.length > 0) {
+            data.colors.forEach((c, idx) => {
+                const activeClass = idx === 0 ? 'active-color' : '';
+                if(idx === 0) selectedColor = c;
+                colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
+            });
+        } else {
+            colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
+            selectedColor = "Default";
+        }
+
+        const imageSlider = document.getElementById('imageSlider');
+        const dotsCont = document.getElementById('sliderDots');
+        imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
+        if(data.images && data.images.length > 0) {
+            data.images.forEach((imgUrl, index) => {
+                imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
+                const dot = document.createElement('div');
+                dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+                dotsCont.appendChild(dot);
+            });
+            setupTouchSlider(data.images.length);
+        }
+    }
+
     function loadRelatedProducts(category, currentPid) {
         if(!category) return;
         db.ref('products').orderByChild('category').equalTo(category).limitToFirst(10).once('value', (snapshot) => {
@@ -231,20 +232,34 @@
                 Object.keys(data).forEach(id => {
                     if(id !== currentPid) {
                         const p = data[id];
-                        relatedList.innerHTML += `
-                            <div onclick="location.href='product.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all">
-                                <div class="relative h-44 w-full bg-slate-100 rounded-[2rem] overflow-hidden mb-2 shadow-sm">
-                                    <img src="${p.images[0]}" class="w-full h-full object-cover">
-                                    ${p.isSoldOut ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center text-[8px] font-black uppercase text-red-500">Sold</div>' : ''}
-                                </div>
-                                <h4 class="text-[10px] font-bold text-slate-800 truncate px-1">${p.name}</h4>
-                                <p class="text-[10px] font-black text-orange-500 px-1">₹${p.price}</p>
-                            </div>`;
+                        relatedList.innerHTML += `<div onclick="location.href='product.html?id=${id}'" class="min-w-[150px] max-w-[150px] active:scale-95 transition-all"><div class="relative h-44 w-full bg-slate-100 rounded-[2rem] overflow-hidden mb-2 shadow-sm"><img src="${p.images[0]}" class="w-full h-full object-cover"></div><h4 class="text-[10px] font-bold text-slate-800 truncate px-1">${p.name}</h4><p class="text-[10px] font-black text-orange-500 px-1">₹${p.price}</p></div>`;
                     }
                 });
             }
-            if(relatedList.innerHTML === "") document.getElementById('related-section').classList.add('hidden');
-            else document.getElementById('related-section').classList.remove('hidden');
+        });
+    }
+
+    function loadMoreGrid(currentName, currentPid) {
+        db.ref('products').once('value', snap => {
+            const grid = document.getElementById('more-products-grid');
+            grid.innerHTML = "";
+            const data = snap.val();
+            if(data && currentName) {
+                const keys = Object.keys(data).reverse(); 
+                const searchName = currentName.toLowerCase();
+                let type = "";
+                if(searchName.includes("saree")) type = "saree";
+                else if(searchName.includes("shirt")) type = "shirt";
+                else if(searchName.includes("ring")) type = "ring";
+                else if(searchName.includes("pant")) type = "pant";
+
+                keys.forEach(id => {
+                    const p = data[id];
+                    if(type !== "" && p.name.toLowerCase().includes(type) && id !== currentPid) {
+                        grid.innerHTML += `<div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm"><img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3"><div class="px-2"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p><h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3><p class="text-orange-500 font-black text-sm mt-2">₹${p.price}</p></div></div>`;
+                    }
+                });
+            }
         });
     }
 
@@ -280,145 +295,27 @@
 
     function addToCart() {
         if(!userPhone) return alert("Please Login!");
-        if(!productData) return;
         db.ref('users/' + userPhone + '/cart/' + productId).set({
             pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, selectedColor: selectedColor, qty: 1
+            img: productData.images[0], size: selectedSize, color: selectedColor, qty: 1
         }).then(() => alert("Added to bag! 🛍️"));
     }
 
     function buyNow() {
-        if(!productData) return;
         localStorage.setItem('checkout_item', JSON.stringify({
             pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, selectedColor: selectedColor
+            img: productData.images[0], size: selectedSize, color: selectedColor
         }));
         window.location.href = 'checkout.html';
     }
 
     function toggleWishlist() {
-        if(!userPhone) return alert("Please Login to save wishlist!");
-        if(!productData) return;
+        if(!userPhone) return alert("Login to save!");
         const ref = db.ref('users/' + userPhone + '/wishlist/' + productId);
-        if(isInWishlist) {
-            ref.remove();
-        } else {
-            ref.set({
-                pid: productId,
-                name: productData.name,
-                image: productData.images[0],
-                price: productData.price
-            });
-        }
+        if(isInWishlist) ref.remove();
+        else ref.set({ pid: productId, name: productData.name, image: productData.images[0], price: productData.price });
     }
-
-    function loadMoreGrid(currentName, currentPid) {
-        db.ref('products').once('value', snap => {
-            const grid = document.getElementById('more-products-grid');
-            grid.innerHTML = "";
-            const data = snap.val();
-            if(data && currentName) {
-                const keys = Object.keys(data).reverse(); 
-                const searchName = currentName.toLowerCase();
-                let type = "";
-                if(searchName.includes("saree")) type = "saree";
-                else if(searchName.includes("shirt")) type = "shirt";
-                else if(searchName.includes("ring")) type = "ring";
-                else if(searchName.includes("pant")) type = "pant";
-                else if(searchName.includes("bangle")) type = "bangle";
-                else if(searchName.includes("necklace")) type = "necklace";
-
-                keys.forEach(id => {
-                    const p = data[id];
-                    const pName = p.name.toLowerCase();
-                    if(type !== "" && pName.includes(type) && id !== currentPid) {
-                        grid.innerHTML += `
-                        <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
-                            <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
-                            <div class="px-2">
-                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nagai 360</p>
-                                <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
-                                    <div class="w-8 h-8 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xs">＋</div>
-                                </div>
-                            </div>
-                        </div>`;
-                    }
-                });
-            }
-        });
-    }
-      function displayProduct(data) {
-        if(!data) return;
-        productData = data;
-        document.getElementById('product-content').classList.remove('hidden');
-        document.getElementById('error-content').classList.add('hidden');
-        document.getElementById('product-name').innerText = data.name;
-        document.getElementById('product-price').innerText = "₹" + data.price;
-        document.getElementById('product-desc').innerText = data.desc || "Premium quality collection from Nagai 360.";
-
-        loadRelatedProducts(data.category, productId);
-        loadMoreGrid(data.name, productId); 
-
-        const footer = document.getElementById('footer-buttons');
-        const badge = document.getElementById('sold-out-badge');
-        const slider = document.getElementById('slider-main');
-
-        if(data.isSoldOut) {
-            footer.classList.add('hidden');
-            badge.classList.remove('hidden');
-            slider.classList.add('sold-out-overlay');
-        } else {
-            footer.classList.remove('hidden');
-            badge.classList.add('hidden');
-            slider.classList.remove('sold-out-overlay');
-        }
-
-        // SIZES & COLORS
-        const sizeCont = document.getElementById('size-container');
-        sizeCont.innerHTML = "";
-        if(data.sizes && data.sizes.length > 0) {
-            data.sizes.forEach((s, idx) => {
-                const activeClass = idx === 0 ? 'active-size' : '';
-                if(idx === 0) selectedSize = s;
-                sizeCont.innerHTML += `<button onclick="selectSize(this)" class="size-btn min-w-[3.5rem] h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${s}</button>`;
-            });
-        } else {
-            sizeCont.innerHTML = "<p class='text-xs text-slate-400'>Free Size</p>";
-            selectedSize = "Free Size";
-        }
-
-        const colorCont = document.getElementById('color-container');
-        colorCont.innerHTML = "";
-        if(data.colors && data.colors.length > 0) {
-            data.colors.forEach((c, idx) => {
-                const activeClass = idx === 0 ? 'active-color' : '';
-                if(idx === 0) selectedColor = c;
-                colorCont.innerHTML += `<button onclick="selectColor(this)" class="color-btn px-6 h-14 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-600 transition-all ${activeClass}">${c}</button>`;
-            });
-        } else {
-            colorCont.innerHTML = "<p class='text-xs text-slate-400'>Default Color</p>";
-            selectedColor = "Default";
-        }
-
-        // SLIDER
-        const imageSlider = document.getElementById('imageSlider');
-        const dotsCont = document.getElementById('sliderDots');
-        imageSlider.innerHTML = ""; dotsCont.innerHTML = "";
-        if(data.images && data.images.length > 0) {
-            data.images.forEach((imgUrl, index) => {
-                imageSlider.innerHTML += `<img src="${imgUrl}" class="slider-item">`;
-                const dot = document.createElement('div');
-                dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
-                dotsCont.appendChild(dot);
-            });
-            setupTouchSlider(data.images.length);
-        }
-    }
-  
 </script>
-
 
                         
 </body>
