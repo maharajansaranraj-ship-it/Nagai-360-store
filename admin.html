@@ -93,12 +93,15 @@
         <input type="number" id="p-price" placeholder="Price (₹)">
         
         <select id="p-category">
-            <option value="Rings">Rings</option>
-            <option value="Chains">Chains</option>
-            <option value="Watches">Watches</option>
-            <option value="Bracelets">Bracelets</option>
-            <option value="Combo">Combo Pack</option>
-        </select>
+    <option value="">Select Category</option>
+    <option value="saree">Saree</option>
+    <option value="shirt">Shirt</option>
+    <option value="pants">Pants</option>
+    <option value="shoe">Shoe</option>
+    <option value="tops">Tops</option>
+    <option value="watch">Watch</option>
+</select>
+
 
         <input type="text" id="p-sizes" placeholder="Sizes (e.g. S, M, L)">
         <input type="text" id="p-colors" placeholder="Colors (e.g. Gold, Silver)">
@@ -294,7 +297,13 @@ db.ref('orders').on('value', snap => {
     }
 
     function uploadProduct() {
-    const name = document.getElementById('p-name').value;
+    // uploadProduct function-kulla category value edukira idathula ithai podunga
+const productData = {
+    // ... mattha values
+    category: document.getElementById('p-category').value.toLowerCase(), // Inga .toLowerCase() sethukonga
+    // ... mattha values
+};
+
     const price = document.getElementById('p-price').value;
     
     // Intha puthu values-ah fetch panrom
