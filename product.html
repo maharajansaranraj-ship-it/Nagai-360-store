@@ -319,10 +319,15 @@ loadMoreGrid(data.category, productId); // <--- Intha variya mattum sethudunga!
         const data = snap.val();
         
         if(data) {
-            Object.keys(data).reverse().forEach(id => {
+            // ✅ Step 1: Ellaa ID-aiyum list-ah edukkavum
+            const keys = Object.keys(data).reverse(); 
+
+            keys.forEach(id => {
                 const p = data[id];
-                // Same category items mattum filter pannu
-                if(p.category === category && id !== currentPid) {
+
+                // ✅ Step 2: Category matching check (Idhu dhaan main)
+                // lowercase() use panni check panna innum safety!
+                if(p.category && category && p.category.toLowerCase() === category.toLowerCase() && id !== currentPid) {
                     grid.innerHTML += `
                     <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2.5rem] p-3 border border-slate-100 shadow-sm">
                         <img src="${p.images[0]}" class="w-full h-40 object-cover rounded-[2rem] mb-3">
