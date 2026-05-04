@@ -72,25 +72,67 @@
     </div>
 </div>
 
-
-
-    <div class="px-5 mt-8">
-    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4">Categories</h3>
-    <div class="flex gap-6 overflow-x-auto no-scrollbar pb-2">
-        <div onclick="location.href='category.html?cat=saree'" class="flex flex-col items-center gap-2 min-w-[70px]">
-            <div class="w-16 h-16 rounded-full bg-orange-100 p-1 border-2 border-orange-500">
-                <img src="saree_icon.jpg" class="w-full h-full object-cover rounded-full">
+<div class="px-5 mt-8">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Shop By Category</h3>
+        <span class="text-[10px] text-orange-500 font-bold uppercase">View All</span>
+    </div>
+    
+    <div class="flex gap-5 overflow-x-auto no-scrollbar pb-4">
+        
+        <div onclick="location.href='category.html?cat=saree'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-orange-50 p-1 border border-orange-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/3534/3534312.png" class="w-full h-full object-contain p-2">
             </div>
-            <span class="text-[10px] font-bold text-slate-700 uppercase">Saree</span>
+            <span class="text-[10px] font-bold text-slate-600">SAREE</span>
         </div>
-        <div onclick="location.href='category.html?cat=shirt'" class="flex flex-col items-center gap-2 min-w-[70px]">
-            <div class="w-16 h-16 rounded-full bg-slate-100 p-1">
-                <img src="shirt_icon.jpg" class="w-full h-full object-cover rounded-full">
+
+        <div onclick="location.href='category.html?cat=shirt'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-blue-50 p-1 border border-blue-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/2503/2503380.png" class="w-full h-full object-contain p-2">
             </div>
-            <span class="text-[10px] font-bold text-slate-700 uppercase">Shirt</span>
+            <span class="text-[10px] font-bold text-slate-600">SHIRT</span>
         </div>
+
+        <div onclick="location.href='category.html?cat=pants'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-slate-100 p-1 border border-slate-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/2122/2122484.png" class="w-full h-full object-contain p-2">
+            </div>
+            <span class="text-[10px] font-bold text-slate-600">PANTS</span>
         </div>
+
+        <div onclick="location.href='category.html?cat=shoe'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-amber-50 p-1 border border-amber-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/2742/2742689.png" class="w-full h-full object-contain p-2">
+            </div>
+            <span class="text-[10px] font-bold text-slate-600">SHOE</span>
+        </div>
+
+        <div onclick="location.href='category.html?cat=tops'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-pink-50 p-1 border border-pink-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/10542/10542469.png" class="w-full h-full object-contain p-2">
+            </div>
+            <span class="text-[10px] font-bold text-slate-600">TOPS</span>
+        </div>
+
+        <div onclick="location.href='category.html?cat=watch'" class="flex flex-col items-center gap-2 min-w-[75px]">
+            <div class="w-16 h-16 rounded-full bg-cyan-50 p-1 border border-cyan-200 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/610/610120.png" class="w-full h-full object-contain p-2">
+            </div>
+            <span class="text-[10px] font-bold text-slate-600">WATCH</span>
+        </div>
+
+    </div>
 </div>
+
+<style>
+    /* Scrollbar hidden ah irukka */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+
+    
 
 
     <main class="masonry" id="main-product-grid"></main>
