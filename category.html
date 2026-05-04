@@ -41,81 +41,93 @@
     </div>
 
     <script>
-        // ✅ Direct Config for Nagai 360
-        const firebaseConfig = {
-            apiKey: "AIzaSyCAiLX0GQnN127N1SxCj861qMxAO0svNUQ",
-            authDomain: "ff-id-store-dab0f.firebaseapp.com",
-            databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
-            projectId: "ff-id-store-dab0f",
-            storageBucket: "ff-id-store-dab0f.firebasestorage.app",
-            messagingSenderId: "655049193530",
-            appId: "1:655049193530:web:978aaf75e10dd26bb8dd03"
-        };
+    // ✅ 1. Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAiLX0GQnN127N1SxCj861qMxAO0svNUQ",
+        authDomain: "ff-id-store-dab0f.firebaseapp.com",
+        databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
+        projectId: "ff-id-store-dab0f",
+        storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+        messagingSenderId: "655049193530",
+        appId: "1:655049193530:web:978aaf75e10dd26bb8dd03"
+    };
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const catName = urlParams.get('cat'); 
+    // ✅ 2. Get Category Name from URL (?cat=saree)
+    const urlParams = new URLSearchParams(window.location.search);
+    const catName = urlParams.get('cat'); 
 
-        if(catName) {
-            document.getElementById('category-title').innerText = catName + " Collection";
-            loadCategoryItems(catName);
-        } else {
-            document.getElementById('loading-msg').innerText = "Please select a category from Home.";
-        }
+    if(catName) {
+        document.getElementById('category-title').innerText = catName + " Collection";
+        loadCategoryItems(catName);
+    } else {
+        document.getElementById('loading-msg').innerText = "Please select a category from Home.";
+    }
 
-        function loadCategoryItems(cat) {
-            const grid = document.getElementById('category-grid');
-            console.log("Starting search for:", cat);
+    // ✅ 3. Load and Filter Items
+    function loadCategoryItems(cat) {
+        const grid = document.getElementById('category-grid');
+        const searchKey = cat.toLowerCase(); // URL-la irunthu vara value (ex: saree)
 
-            // Fetching ALL products and filtering locally
-            db.ref('products').once('value', (snap) => {
-                const data = snap.val();
-                console.log("Raw data from Firebase:", data);
+        // Realtime Listener - Database-la change aana udane update aagum
+        db.ref('products').on('value', (snap) => {
+            const data = snap.val();
+            grid.innerHTML = ""; // Loader-ah clear panna
+            let found = false;
 
-                grid.innerHTML = ""; // Clear loader
-                let found = false;
+            if(data) {
+                // Products-ah reverse-la kaata (Newest first)
+                Object.keys(data).reverse().forEach(id => {
+                    const p = data[id];
+                    
+                    // Admin panel-la neenga select panna 'category' field-ah edukkirom
+                    const productCategory = (p.category || "").toLowerCase();
 
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const p = data[id];
-                        const productName = p.name ? p.name.toLowerCase() : "";
-                        const searchKey = cat.toLowerCase();
-
-                        // Logic: Does the name contain the category word?
-                        if (productName.includes(searchKey)) {
-                            found = true;
-                            // Check for image, fallback to placeholder if missing
-                            const imgUrl = (p.images && p.images[0]) ? p.images[0] : 'https://via.placeholder.com/150';
-                            
-                            grid.innerHTML += `
-                                <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100 active:scale-95 transition-all">
-                                    <div class="w-full h-44 overflow-hidden rounded-[1.5rem] mb-3 bg-slate-100">
-                                        <img src="${imgUrl}" class="w-full h-full object-cover">
+                    // Logic: Database category-um URL category-um match aahanum
+                    if (productCategory === searchKey) {
+                        found = true;
+                        const imgUrl = (p.images && p.images[0]) ? p.images[0] : 'https://via.placeholder.com/150';
+                        const isOut = p.isSoldOut === true;
+                        
+                        grid.innerHTML += `
+                            <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100 active:scale-95 transition-all relative">
+                                <div class="w-full h-44 overflow-hidden rounded-[1.5rem] mb-3 bg-slate-50 relative">
+                                    <img src="${imgUrl}" class="w-full h-full object-cover ${isOut ? 'grayscale opacity-50' : ''}">
+                                    ${isOut ? '<div class="absolute inset-0 flex items-center justify-center"><span class="bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-lg shadow-lg">SOLD OUT</span></div>' : ''}
+                                </div>
+                                <div class="px-2 pb-1">
+                                    <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Nagai 360</p>
+                                    <h3 class="font-bold text-slate-800 text-xs truncate mt-1">${p.name}</h3>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-orange-500 font-black text-sm">₹${p.price}</p>
+                                        <div class="w-6 h-6 bg-slate-50 rounded-full flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
+                                        </div>
                                     </div>
-                                    <div class="px-2 pb-1">
-                                        <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Nagai 360</p>
-                                        <h3 class="font-bold text-slate-800 text-xs truncate mt-1">${p.name}</h3>
-                                        <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
-                                    </div>
-                                </div>`;
-                        }
-                    });
-                }
+                                </div>
+                            </div>`;
+                    }
+                });
+            }
 
-                if(!found) {
-                    grid.innerHTML = `
-                        <div class='col-span-2 text-center py-20'>
-                            <p class='text-slate-400'>No products found for "${cat}".</p>
-                            <p class='text-[10px] text-slate-300 mt-2'>Check if product name has "${cat}" in it.</p>
-                        </div>`;
-                }
-            }, (error) => {
-                console.error("Firebase Error:", error);
-                grid.innerHTML = "<p class='col-span-2 text-center text-red-400'>Connection Error! Check Internet.</p>";
-            });
-        }
-    </script>
+            // Product ethuvum illana intha message varum
+            if(!found) {
+                grid.innerHTML = `
+                    <div class='col-span-2 text-center py-24'>
+                        <div class='text-5xl mb-4 opacity-20'>🛍️</div>
+                        <p class='text-slate-400 font-black text-sm uppercase tracking-widest'>No ${cat} Found</p>
+                        <p class='text-[10px] text-slate-300 mt-2 uppercase'>Check back later for new arrivals!</p>
+                        <button onclick="location.href='home.html'" class="mt-6 px-6 py-2 bg-slate-900 text-white text-[10px] font-black rounded-full uppercase tracking-widest">Go Shopping</button>
+                    </div>`;
+            }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            grid.innerHTML = "<p class='col-span-2 text-center text-red-400 py-20 font-bold'>Connection Error!</p>";
+        });
+    }
+</script>
+
 </body>
 </html>
