@@ -123,14 +123,16 @@
     let currentIdx = 0;
     let startX = 0;
     let isInWishlist = false;
+         if(productId) {
+        db.ref('products/' + productId).on('value', (snap) => {
+            let data = snap.val();
+            if(data) { displayProduct(data); } 
+            else {
+                db.ref('offers/' + productId).once('value', (oSnap) => {
+                    if(oSnap.val()) displayProduct(oSnap.val());
+                    else document.getElementById('error-content').classList.remove('hidden');
 
-    if(productId) {
-        // ✅ PRODUCT DATA FETCH
-        db.ref('products/' + productId).on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                productData = data;
-                document.getElementById('product-content').classList.remove('hidden');
+
                 document.getElementById('error-content').classList.add('hidden');
                 document.getElementById('product-name').innerText = data.name;
                 document.getElementById('product-price').innerText = "₹" + data.price;
