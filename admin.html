@@ -181,7 +181,7 @@
         }
     }
 
-// 📦 ORDERS SECTION (Idhai mattum replace pannunga)
+// 📦 ORDERS SECTION (Updated for Old & New Orders)
 db.ref('orders').on('value', snap => {
     const live = document.getElementById('admin-orders-list');
     const done = document.getElementById('admin-delivered-list');
@@ -192,8 +192,11 @@ db.ref('orders').on('value', snap => {
         Object.keys(data).reverse().forEach(id => {
             const o = data[id];
             
-            // ✅ CHANGE 1: 'location.href' sethurukaen, card-ai click panna product page-ku pogum
-            const card = `<div onclick="location.href='product.html?id=${o.pid}'" class="bg-white p-4 rounded-[1.5rem] border border-slate-100 mb-3 shadow-sm active:scale-[0.98] transition-all cursor-pointer">
+            // ✅ Inga thaan logic: Puthu orders-la 'pid' irukkum, pazhaya orders-la 'productID' irukkum.
+            // Rendu perula yaaru irundhalum antha ID-ai eduthu redirect pannu nu solrom.
+            const targetID = o.pid || o.productID || "";
+            
+            const card = `<div onclick="location.href='product.html?id=${targetID}'" class="bg-white p-4 rounded-[1.5rem] border border-slate-100 mb-3 shadow-sm active:scale-[0.98] transition-all cursor-pointer">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-[9px] font-black text-slate-400">#${o.orderID}</span>
                     <span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-[8px] font-black uppercase">${o.status || 'Ordered'}</span>
@@ -222,6 +225,7 @@ db.ref('orders').on('value', snap => {
         });
     }
 });
+
 
     
 
