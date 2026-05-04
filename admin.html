@@ -296,17 +296,10 @@ db.ref('orders').on('value', snap => {
         });
     }
 
-    function uploadProduct() {
-    // uploadProduct function-kulla category value edukira idathula ithai podunga
-const productData = {
-    // ... mattha values
-    category: document.getElementById('p-category').value.toLowerCase(), // Inga .toLowerCase() sethukonga
-    // ... mattha values
-};
-
-    const price = document.getElementById('p-price').value;
-    
-    // Intha puthu values-ah fetch panrom
+     function uploadProduct() {
+    const name = document.getElementById('p-name').value.trim();
+    const price = document.getElementById('p-price').value.trim();
+    const category = document.getElementById('p-category').value.toLowerCase(); // Home page sync-kaga lowerCase
     const desc = document.getElementById('p-desc').value;
     const sizes = document.getElementById('p-sizes').value.split(',').map(s => s.trim());
     const colors = document.getElementById('p-colors').value.split(',').map(c => c.trim());
@@ -317,26 +310,36 @@ const productData = {
         if(v) imgs.push(v);
     }
     
-    if(!name || !price || imgs.length === 0) return alert("Fill Name, Price and at least 1 Image!");
+    // ✅ Validation Check
+    if(!name || !price || !category || imgs.length === 0) {
+        return alert("Please fill Name, Price, Category and at least 1 Image!");
+    }
 
     const pid = currentEditID || "P" + Date.now();
+    
     const productData = {
         pid: pid,
         name: name,
         price: price,
-        category: document.getElementById('p-category').value,
-        desc: desc,        // Ippo save aagum
-        sizes: sizes,      // Ippo save aagum
-        colors: colors,    // Ippo save aagum
+        category: category, // Inga thaan namma select panna category save aaguthu
+        desc: desc,
+        sizes: sizes,
+        colors: colors,
         images: imgs,
         isSoldOut: false
     };
 
     db.ref('products/' + pid).update(productData).then(() => {
-        alert("Success! ✅");
-        showTab('inventory');
+        alert("Product Published Successfully! ✅");
+        currentEditID = null; // Reset edit ID
+        clearForm(); // Form-ah clear panna
+        showTab('inventory'); // Inventory-ku kootitu poga
+    }).catch(err => {
+        alert("Error: " + err.message);
     });
 }
+
+    
 
     function addOffer() {
     const name = document.getElementById('offerName').value.trim();
