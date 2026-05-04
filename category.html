@@ -38,30 +38,44 @@
         }
 
         function loadCategoryItems(cat) {
-            const grid = document.getElementById('category-grid');
-            
-            // Filtering logic: Firebase query
-            db.ref('products').orderByChild('category').equalTo(cat).once('value', (snap) => {
-                grid.innerHTML = "";
-                const data = snap.val();
-                
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const p = data[id];
-                        grid.innerHTML += `
-                            <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100">
-                                <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[1.5rem] mb-3">
-                                <div class="px-1">
-                                    <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
-                                    <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
-                                </div>
-                            </div>`;
-                    });
-                } else {
-                    grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400'>No items found in this category.</p>";
-                }
+    const grid = document.getElementById('category-grid');
+    console.log("Filtering for category:", cat); // Check browser console
+
+    // Query start
+    db.ref('products').orderByChild('category').equalTo(cat).once('value', (snap) => {
+        grid.innerHTML = "";
+        const data = snap.val();
+        
+        console.log("Data received:", data); // Check if data is coming
+
+        if(data) {
+            Object.keys(data).forEach(id => {
+                const p = data[id];
+                grid.innerHTML += `
+                    <div onclick="location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100">
+                        <img src="${p.images[0]}" class="w-full h-44 object-cover rounded-[1.5rem] mb-3">
+                        <div class="px-1">
+                            <h3 class="font-bold text-slate-800 text-xs truncate">${p.name}</h3>
+                            <p class="text-orange-500 font-black text-sm mt-1">₹${p.price}</p>
+                        </div>
+                    </div>`;
             });
+        } else {
+            // If No match, try with first letter Capital (Saree instead of saree)
+            let capCat = cat.charAt(0).toUpperCase() + cat.slice(1);
+            if(cat !== capCat) {
+                console.log("Trying with Capitalized category:", capCat);
+                loadCategoryItems(capCat); 
+            } else {
+                grid.innerHTML = "<p class='col-span-2 text-center py-20 text-slate-400'>No items found. Check Database Category name.</p>";
+            }
         }
+    }, (error) => {
+        console.error("Firebase Error:", error);
+        grid.innerHTML = "<p class='col-span-2 text-center text-red-500'>Error loading data!</p>";
+    });
+}
+
     </script>
 </body>
 </html>
