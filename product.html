@@ -167,9 +167,8 @@ if (productId) {
       }
     })
     .catch(() => showError());
-}
 
-  /* ✅ Wishlist check */
+  /* ✅ Wishlist check INSIDE same block */
   if (userPhone) {
     db.ref('users/' + userPhone + '/wishlist/' + productId)
       .once('value')
@@ -183,7 +182,6 @@ if (productId) {
       });
   }
 }
-
 /* =========================
    🔥 DISPLAY PRODUCT
 ========================= */
