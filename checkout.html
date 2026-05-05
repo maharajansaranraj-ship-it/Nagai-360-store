@@ -140,7 +140,6 @@
             showEmpty();
         }
     }
-
     function updateUI() {
         const listDiv = document.getElementById('items-list');
         if(!listDiv) return;
@@ -153,12 +152,18 @@
             const price = parseInt(item.price) || 0;
             subtotal += price;
             
+            // ✅ Inga thaan logic maathirukkaen
+            const displaySize = item.size || item.selectedSize || "Standard";
+            const displayColor = item.selectedColor || item.color || "Default";
+
             listDiv.innerHTML += `
                 <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
                     <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
                     <div class="flex-1">
                         <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Default'}</p>
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                            Size: ${displaySize} | Color: ${displayColor}
+                        </p>
                     </div>
                     <p class="text-xs font-black text-slate-800">₹${price}</p>
                 </div>`;
@@ -166,8 +171,13 @@
 
         document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
         document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
-        document.getElementById('bill-size').innerText = cartItems[0].size || "M";
+        
+        // Final bill section size display
+        const finalSize = cartItems[0].size || cartItems[0].selectedSize || "M";
+        document.getElementById('bill-size').innerText = finalSize;
     }
+
+    
 
     function showEmpty() {
         document.getElementById('items-list').innerHTML = "<p class='text-center text-xs text-red-500 font-bold py-5'>Cart is Empty! 🛍️</p>";
