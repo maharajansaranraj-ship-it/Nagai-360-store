@@ -1,43 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nagai 360 Login</title>
 
-    <!-- UI -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase (IMPORTANT) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
 </head>
 
 <body class="flex items-center justify-center min-h-screen bg-gray-100">
 
-<div class="bg-white p-8 rounded-xl shadow-lg w-[350px] text-center">
-
+<div id="loginCard" class="bg-white p-8 rounded-xl shadow-lg w-[350px] text-center">
     <h1 class="text-2xl font-bold mb-6">NAGAI 360</h1>
 
-    <input id="email" type="email" placeholder="Enter Email"
-        class="w-full p-3 border mb-4 rounded-lg">
+    <div id="inputForm">
+        <input id="email" type="email" placeholder="Enter Email"
+            class="w-full p-3 border mb-4 rounded-lg outline-none focus:border-black">
 
-    <input id="password" type="password" placeholder="Password"
-        class="w-full p-3 border mb-4 rounded-lg">
+        <input id="password" type="password" placeholder="Password"
+            class="w-full p-3 border mb-4 rounded-lg outline-none focus:border-black">
 
-    <button onclick="login()" 
-        class="w-full bg-black text-white py-3 rounded-lg">
-        Login / Sign Up
-    </button>
+        <button onclick="login()" id="loginBtn"
+            class="w-full bg-black text-white py-3 rounded-lg font-semibold active:scale-95 transition">
+            Login / Sign Up
+        </button>
+    </div>
 
-    <p id="msg" class="mt-4 text-sm text-gray-500"></p>
-
+    <p id="msg" class="mt-4 text-sm text-gray-600 font-medium"></p>
 </div>
 
 <script>
-
-// 🔥 Firebase Config (YOUR REAL CONFIG)
+// 🔥 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
   authDomain: "ff-id-store-dab0f.firebaseapp.com",
@@ -48,68 +45,88 @@ const firebaseConfig = {
   appId: "1:655049193530:web:9a3a0139fbbf6f98b8dd03"
 };
 
-// ✅ INIT
+// ✅ INITIALIZE
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.database();
 
+// 🟢 AUTO-LOGIN CHECK (User oru thadava login panna thirumba kekaathu)
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // User already login-la irukkaru, so direct-ah status check pannu
+        document.getElementById("inputForm").classList.add("hidden");
+        document.getElementById("msg").innerText = "Checking session...";
+        checkStatus(user.uid);
+    } else {
+        // User login-la illai, so login form-ah kaatu
+        document.getElementById("inputForm").classList.remove("hidden");
+        document.getElementById("msg").innerText = "Welcome back!";
+    }
+});
 
-// 🔥 LOGIN / SIGNUP
+// 🔥 LOGIN & SIGNUP LOGIC
 function login() {
-
     const email = document.getElementById("email").value.trim();
     const pass = document.getElementById("password").value;
 
     if(!email.includes("@")) return alert("Valid email podu");
     if(pass.length < 6) return alert("Password min 6 chars");
 
+    document.getElementById("msg").innerText = "Authenticating...";
+
     auth.signInWithEmailAndPassword(email, pass)
-
     .then((res) => {
-        checkStatus(res.user.uid);
+        // Success aana automatic-ah onAuthStateChanged trigger aagum
     })
-
-    .catch(() => {
-
-        auth.createUserWithEmailAndPassword(email, pass)
-        .then((res) => {
-
-            const uid = res.user.uid;
-
-            db.ref("users/" + uid).set({
-                email: email,
-                status: "pending"
+    .catch((err) => {
+        // User account illai na puthiya account create pannu
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+            auth.createUserWithEmailAndPassword(email, pass)
+            .then((res) => {
+                const uid = res.user.uid;
+                db.ref("users/" + uid).set({
+                    email: email,
+                    status: "pending",
+                    admin: false
+                });
+            })
+            .catch(e => {
+                document.getElementById("msg").innerText = e.message;
             });
-
-            checkStatus(uid);
-        })
-
-        .catch(err => alert(err.message));
+        } else {
+            alert("Error: " + err.message);
+            document.getElementById("msg").innerText = "";
+        }
     });
 }
 
-
 // 🔥 APPROVAL CHECK
 function checkStatus(uid) {
-
     db.ref("users/" + uid).on("value", (snap) => {
-
         const data = snap.val();
 
         if(!data) {
-            document.getElementById("msg").innerText = "Account removed";
+            document.getElementById("msg").innerText = "Account not found!";
             return;
         }
 
         if(data.status === "approved") {
-            localStorage.setItem("login", "true");
+            document.getElementById("msg").innerText = "Redirecting...";
             window.location.href = "home.html";
+        } else {
+            document.getElementById("inputForm").classList.add("hidden");
+            document.getElementById("msg").innerHTML = `
+                <span class="text-orange-500 block mb-2">Waiting for Admin Approval...</span>
+                <button onclick="logout()" class="text-blue-600 underline">Logout & Try another</button>
+            `;
         }
-        else {
-            document.getElementById("msg").innerText = "Waiting for admin approval...";
-        }
+    });
+}
 
+// 🔴 LOGOUT (Oru velai vera account login pannanum na)
+function logout() {
+    auth.signOut().then(() => {
+        location.reload();
     });
 }
 
