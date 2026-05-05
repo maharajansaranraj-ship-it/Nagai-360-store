@@ -190,35 +190,49 @@
     }
 
     function placeOrder(name, addr, pin, totalAmount) {
-        document.getElementById('loading-overlay').classList.remove('hidden');
-        const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
-        const firstItem = cartItems[0];
-        
-        const orderData = {
-            orderID: orderID, 
-            customerName: name, 
-            primaryPhone: userPhone || "Guest",
-            fullAddress: `${addr}, Pin: ${pin}`,
-            totalBill: totalAmount,
-            paymentMode: selectedMethod,
-            productImg: firstItem.img || firstItem.image,
-            productName: firstItem.name,
-            selectedSize: firstItem.size || firstItem.selectedSize || "M",
-            selectedColor: firstItem.selectedColor || firstItem.color || "Default",
-            status: "Order Placed",
-            orderDate: new Date().toLocaleString(),
-            timestamp: Date.now()
-        };
+    document.getElementById('loading-overlay').classList.remove('hidden');
+    const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
+    const firstItem = cartItems[0];
+    
+    const orderData = {
+        orderID: orderID, 
+        customerName: name, 
+        primaryPhone: userPhone || "Guest",
+        fullAddress: `${addr}, Pin: ${pin}`,
+        totalBill: totalAmount,
+        paymentMode: selectedMethod,
+        productImg: firstItem.img || firstItem.image,
+        productName: firstItem.name,
+        selectedSize: firstItem.size || firstItem.selectedSize || "M",
+        selectedColor: firstItem.selectedColor || firstItem.color || "Default",
+        status: "Order Placed",
+        orderDate: new Date().toLocaleString(),
+        timestamp: Date.now(),
+        productID: firstItem.pid || firstItem.productID || ""
+    };
 
-        db.ref('orders/' + orderID).set(orderData).then(() => {
-            if(userPhone) db.ref('users/' + userPhone + '/cart').remove();
-            localStorage.removeItem('checkout_item');
-            document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
-            setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
-        });
+    // ✅ FIX: Inga thaan neenga rendu idathulayum update pannanum
+    const updates = {};
+    // 1. Admin paakura pothu motha orders list-la irukanum
+    updates['orders/' + orderID] = orderData;
+    // 2. User paakura pothu avanga profile "My Orders"-la irukanum
+    if(userPhone && userPhone !== "Guest") {
+        updates['users/' + userPhone + '/myOrders/' + orderID] = orderData;
     }
 
-    window.onload = loadCheckoutData;
+    db.ref().update(updates).then(() => {
+        // Cart-ah clear pannuvom
+        if(userPhone) db.ref('users/' + userPhone + '/cart').remove();
+        localStorage.removeItem('checkout_item');
+        
+        document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
+        setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
+    }).catch(err => {
+        alert("Error: " + err.message);
+        document.getElementById('loading-overlay').classList.add('hidden');
+    });
+}
+
     </script>
 </body>
 </html>
