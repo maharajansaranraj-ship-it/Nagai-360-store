@@ -290,23 +290,39 @@
         selectedColor = btn.innerText.trim();
     }
 
-    function addToCart() {
+        function addToCart() {
         if(!userPhone) return alert("Please Login!");
         if(!productData) return;
+        
         db.ref('users/' + userPhone + '/cart/' + productId).set({
-            pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, selectedColor: selectedColor, qty: 1
+            pid: productId, 
+            name: productData.name, 
+            price: parseInt(productData.price), // ✅ Number-ah mathittaen
+            img: productData.images[0], 
+            selectedSize: selectedSize,         // ✅ Key name changed to selectedSize
+            selectedColor: selectedColor,       // ✅ Key name changed to selectedColor
+            qty: 1
         }).then(() => alert("Added to bag! 🛍️"));
     }
 
-    function buyNow() {
+
+        function buyNow() {
         if(!productData) return;
-        localStorage.setItem('checkout_item', JSON.stringify({
-            pid: productId, name: productData.name, price: productData.price,
-            img: productData.images[0], size: selectedSize, selectedColor: selectedColor
-        }));
+        
+        // ✅ LocalStorage-kku poga munnadi ella naming-aiyum Checkout logic-kku yetha maari mathi irukkaen
+        const checkoutData = {
+            pid: productId, 
+            name: productData.name, 
+            price: parseInt(productData.price), // ✅ Number fix
+            img: productData.images[0], 
+            selectedSize: selectedSize,         // ✅ selectedSize-nu mathunga
+            selectedColor: selectedColor        // ✅ selectedColor-nu mathunga
+        };
+        
+        localStorage.setItem('checkout_item', JSON.stringify(checkoutData));
         window.location.href = 'checkout.html';
     }
+
 
     function toggleWishlist() {
         if(!userPhone) return alert("Please Login to save wishlist!");
