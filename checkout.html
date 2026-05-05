@@ -104,29 +104,25 @@
         </button>
     </div>
 
-    
-    
-            <script>
-    // ✅ Step 1: Firebase Config (Unga Original Encrypted Config)
+    <script>
+    // ✅ Step 1: Firebase Config
     var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
     let selectedMethod = "UPI";
     let subtotal = 0;
     let cartItems = []; 
     const rechargeFee = 80;
-    const myUpiId = "yourname@okicici"; 
+    const myUpiId = "yourname@okicici"; // Change to your actual UPI ID
     const userPhone = localStorage.getItem('user_phone');
 
-    // ✅ FIXED: Data loading logic (Cart OR Direct Item)
+    // ✅ Data Load pannum pothu subtotal-ah update panna fix pannittaen
     function loadCheckoutData() {
         const directItem = localStorage.getItem('checkout_item');
         
         if (directItem) {
-            // "Buy Now" clicked
             cartItems = [JSON.parse(directItem)];
             updateUI();
         } else if (userPhone) {
-            // Fetch from Firebase Cart
             db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
                 const data = snap.val();
                 if (data) {
@@ -140,11 +136,12 @@
             showEmpty();
         }
     }
+
     function updateUI() {
         const listDiv = document.getElementById('items-list');
         if(!listDiv) return;
         listDiv.innerHTML = "";
-        subtotal = 0;
+        subtotal = 0; // Reset subtotal for calculation
 
         document.getElementById('product-preview-sec').classList.remove('hidden');
 
@@ -152,7 +149,6 @@
             const price = parseInt(item.price) || 0;
             subtotal += price;
             
-            // ✅ Inga thaan logic maathirukkaen
             const displaySize = item.size || item.selectedSize || "Standard";
             const displayColor = item.selectedColor || item.color || "Default";
 
@@ -169,15 +165,13 @@
                 </div>`;
         });
 
+        // ✅ Prices UI update
         document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
         document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
         
-        // Final bill section size display
         const finalSize = cartItems[0].size || cartItems[0].selectedSize || "M";
         document.getElementById('bill-size').innerText = finalSize;
     }
-
-    
 
     function showEmpty() {
         document.getElementById('items-list').innerHTML = "<p class='text-center text-xs text-red-500 font-bold py-5'>Cart is Empty! 🛍️</p>";
@@ -194,8 +188,8 @@
         const addr = document.getElementById('cust-address').value.trim();
         const pin = document.getElementById('cust-pincode').value.trim();
 
-        if(!name || !addr || !pin) return alert("Please fill shipping details! 🚚");
-        if(cartItems.length === 0) return alert("Cart is empty! 🛍️");
+        if(!name || !addr || !pin) return alert("Shipping details fill pannunga bro! 🚚");
+        if(cartItems.length === 0) return alert("Items list empty-ah irukku! 🛍️");
 
         const totalAmount = subtotal + rechargeFee;
 
@@ -213,15 +207,21 @@
         const orderID = "NG" + Math.floor(100000 + Math.random() * 900000);
         const firstItem = cartItems[0];
         
+        // ✅ Ellaa data-vaiyum Firebase-ku correct-ah map pannittaen
         const orderData = {
             orderID: orderID, 
             customerName: name, 
             primaryPhone: userPhone || "Guest",
             fullAddress: `${addr}, Pin: ${pin}`,
-            totalBill: totalAmount,
+            totalBill: totalAmount, // ✅ Correct price
             paymentMode: selectedMethod,
             productImg: firstItem.img || firstItem.image,
             productName: firstItem.name,
+            
+            // ✅ Fix: Size and Color data
+            selectedSize: firstItem.size || firstItem.selectedSize || "Standard",
+            selectedColor: firstItem.selectedColor || firstItem.color || "Default",
+            
             pid: firstItem.pid || firstItem.productID || "", 
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
@@ -229,18 +229,21 @@
         };
 
         db.ref('orders/' + orderID).set(orderData).then(() => {
-            // Clean up
-            db.ref('users/' + userPhone + '/cart').remove();
+            if(userPhone) db.ref('users/' + userPhone + '/cart').remove();
             localStorage.removeItem('checkout_item');
             document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
             setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
+        }).catch(err => {
+            alert("Error: " + err.message);
+            document.getElementById('loading-overlay').classList.add('hidden');
         });
     }
 
-    // Initialize on load
     window.onload = loadCheckoutData;
 </script>
 
+    
+            
 
 </body>
 </html>
