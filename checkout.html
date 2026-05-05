@@ -105,90 +105,73 @@
     </div>
 
     
-    <script>
-    // ✅ Step 1: Firebase Config
-    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
+    
+            <script>
+    // ✅ Step 1: Firebase Config (Unga Original Encrypted Config)
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
     let selectedMethod = "UPI";
     let subtotal = 0;
     let cartItems = []; 
     const rechargeFee = 80;
     const myUpiId = "yourname@okicici"; 
+    const userPhone = localStorage.getItem('user_phone');
 
-    if(userPhone) {
-        db.ref('users/' + userPhone).on('value', (snap) => {
-            const data = snap.val();
-            if(!data || data.status !== "approved") {
-                localStorage.clear();
-                window.location.href = 'index.html';
-                return;
-            }
-        });
+    // ✅ FIXED: Data loading logic (Cart OR Direct Item)
+    function loadCheckoutData() {
+        const directItem = localStorage.getItem('checkout_item');
+        
+        if (directItem) {
+            // "Buy Now" clicked
+            cartItems = [JSON.parse(directItem)];
+            updateUI();
+        } else if (userPhone) {
+            // Fetch from Firebase Cart
+            db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
+                const data = snap.val();
+                if (data) {
+                    cartItems = Object.values(data);
+                    updateUI();
+                } else {
+                    showEmpty();
+                }
+            });
+        } else {
+            showEmpty();
+        }
     }
 
     function updateUI() {
         const listDiv = document.getElementById('items-list');
+        if(!listDiv) return;
         listDiv.innerHTML = "";
         subtotal = 0;
-        let finalSize = "N/A";
 
-        if(cartItems.length > 0) {
-            const firstItem = cartItems[0];
-            const pId = firstItem.pid || firstItem.productID;
+        document.getElementById('product-preview-sec').classList.remove('hidden');
 
-            db.ref('products/' + pId).on('value', (snap) => {
-                const p = snap.val();
-                if (!p || p.isSoldOut) {
-                    document.querySelector('main').innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-24 text-center">
-                            <div class="text-6xl mb-4">🚫</div>
-                            <h2 class="text-xl font-bold text-slate-800">Item Unavailable</h2>
-                            <p class="text-slate-400 text-sm mt-2 px-10">This product just went out of stock.</p>
-                            <button onclick="location.href='home.html'" class="mt-8 bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-widest">Back to Home</button>
-                        </div>`;
-                    document.querySelector('.fixed.bottom-0').classList.add('hidden');
-                    return;
-                }
-            });
+        cartItems.forEach((item) => {
+            const price = parseInt(item.price) || 0;
+            subtotal += price;
+            
+            listDiv.innerHTML += `
+                <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                    <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Default'}</p>
+                    </div>
+                    <p class="text-xs font-black text-slate-800">₹${price}</p>
+                </div>`;
+        });
 
-            document.getElementById('product-preview-sec').classList.remove('hidden');
-            cartItems.forEach((item, index) => {
-                subtotal += parseInt(item.price);
-                const itemSize = item.size || item.selectedSize || 'M';
-                const itemColor = item.selectedColor || 'Default'; 
-
-                if(index === 0) finalSize = itemSize;
-
-                listDiv.innerHTML += `
-                    <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100">
-                        <img src="${item.img || item.image}" class="w-12 h-12 object-cover rounded-xl">
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
-                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Size: ${itemSize} | Color: ${itemColor}</p>
-                        </div>
-                        <p class="text-xs font-black text-slate-800">₹${item.price}</p>
-                    </div>`;
-            });
-
-            document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
-            document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
-            document.getElementById('bill-size').innerText = finalSize;
-        }
+        document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
+        document.getElementById('bill-payable').innerText = "₹" + (subtotal + rechargeFee);
+        document.getElementById('bill-size').innerText = cartItems[0].size || "M";
     }
 
-    db.ref('users/' + userPhone + '/cart').once('value', (snap) => {
-        const data = snap.val();
-        if(data) {
-            cartItems = Object.values(data);
-            updateUI();
-        } else {
-            const directItem = localStorage.getItem('checkout_item');
-            if(directItem) {
-                cartItems = [JSON.parse(directItem)];
-                updateUI();
-            }
-        }
-    });
+    function showEmpty() {
+        document.getElementById('items-list').innerHTML = "<p class='text-center text-xs text-red-500 font-bold py-5'>Cart is Empty! 🛍️</p>";
+    }
 
     function selectPayment(method, el) {
         selectedMethod = method;
@@ -197,31 +180,22 @@
     }
 
     function handlePlaceOrder() {
-        const name = document.getElementById('cust-name').value;
-        const addr = document.getElementById('cust-address').value;
-        const pin = document.getElementById('cust-pincode').value;
+        const name = document.getElementById('cust-name').value.trim();
+        const addr = document.getElementById('cust-address').value.trim();
+        const pin = document.getElementById('cust-pincode').value.trim();
 
-        if(!name || !addr || !pin) return alert("Please fill shipping details!");
-        if(cartItems.length === 0) return alert("Cart is empty!");
+        if(!name || !addr || !pin) return alert("Please fill shipping details! 🚚");
+        if(cartItems.length === 0) return alert("Cart is empty! 🛍️");
 
         const totalAmount = subtotal + rechargeFee;
-        const pId = cartItems[0].pid || cartItems[0].productID;
 
-        db.ref('products/' + pId + '/isSoldOut').once('value', (snap) => {
-            if(snap.val() === true) {
-                alert("Sorry! This product just sold out.");
-                window.location.href = 'home.html';
-                return;
-            }
-
-            if(selectedMethod === "UPI") {
-                const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
-                window.location.href = upiUrl;
-                setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
-            } else {
-                placeOrder(name, addr, pin, totalAmount);
-            }
-        });
+        if(selectedMethod === "UPI") {
+            const upiUrl = `upi://pay?pa=${myUpiId}&pn=Nagai360&am=${totalAmount}&cu=INR`;
+            window.location.href = upiUrl;
+            setTimeout(() => { placeOrder(name, addr, pin, totalAmount); }, 4000);
+        } else {
+            placeOrder(name, addr, pin, totalAmount);
+        }
     }
 
     function placeOrder(name, addr, pin, totalAmount) {
@@ -232,38 +206,31 @@
         const orderData = {
             orderID: orderID, 
             customerName: name, 
-            primaryPhone: userPhone,
+            primaryPhone: userPhone || "Guest",
             fullAddress: `${addr}, Pin: ${pin}`,
             totalBill: totalAmount,
             paymentMode: selectedMethod,
             productImg: firstItem.img || firstItem.image,
             productName: firstItem.name,
-            
-            // ✅ Fix: PID save pandrom (Admin click panna product open aagum)
             pid: firstItem.pid || firstItem.productID || "", 
-            
-            size: firstItem.size || firstItem.selectedSize || "N/A",
-            selectedColor: firstItem.selectedColor || firstItem.color || "Default",
             status: "Order Placed",
             orderDate: new Date().toLocaleString(),
             timestamp: Date.now()
         };
 
-        const updates = {};
-        updates['/orders/' + orderID] = orderData;
-        updates['/users/' + userPhone + '/myOrders/' + orderID] = orderData;
-
-        db.ref().update(updates).then(() => {
+        db.ref('orders/' + orderID).set(orderData).then(() => {
+            // Clean up
             db.ref('users/' + userPhone + '/cart').remove();
             localStorage.removeItem('checkout_item');
             document.getElementById('loader-text').innerText = "Order Successful! 🛍️";
             setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
-        }).catch((err) => {
-            alert("Error: " + err.message);
-            document.getElementById('loading-overlay').classList.add('hidden');
         });
     }
+
+    // Initialize on load
+    window.onload = loadCheckoutData;
 </script>
+
 
 </body>
 </html>
