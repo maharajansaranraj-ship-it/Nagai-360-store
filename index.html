@@ -1,115 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 | Secure Login</title>
+    <title>Nagai 360 Login</title>
+
+    <!-- UI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
+
+    <!-- Firebase (IMPORTANT) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-    <style>
-        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
-        .input-focus:focus { border-color: #f97316; ring: 2px; ring-color: #fdba74; outline: none; }
-    </style>
 </head>
 
-<body class="flex items-center justify-center min-h-screen p-6">
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
 
-    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-8 border-orange-500 text-center">
-        
-        <div class="mb-6">
-            <h1 class="text-3xl font-black text-slate-800 tracking-tighter">NAGAI 360</h1>
-            <p class="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-bold mt-1">Premium Identity</p>
-        </div>
+<div class="bg-white p-8 rounded-xl shadow-lg w-[350px] text-center">
 
-        <div class="space-y-4">
-            <input type="email" id="emailInput" placeholder="Email Address"
-                class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl input-focus transition-all text-sm font-medium">
+    <h1 class="text-2xl font-bold mb-6">NAGAI 360</h1>
 
-            <input type="password" id="loginPassword" placeholder="Password"
-                class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl input-focus transition-all text-sm font-medium">
+    <input id="email" type="email" placeholder="Enter Email"
+        class="w-full p-3 border mb-4 rounded-lg">
 
-            <button onclick="handleAuth()" id="authBtn"
-                class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 shadow-lg">
-                Access Account
-            </button>
-        </div>
+    <input id="password" type="password" placeholder="Password"
+        class="w-full p-3 border mb-4 rounded-lg">
 
-        <div id="status-box" class="mt-8 hidden">
-            <div class="flex flex-col items-center gap-3">
-                <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                <p id="msg" class="text-xs font-bold text-orange-600 uppercase tracking-widest italic"></p>
-            </div>
-        </div>
+    <button onclick="login()" 
+        class="w-full bg-black text-white py-3 rounded-lg">
+        Login / Sign Up
+    </button>
 
-        <p class="mt-8 text-[10px] text-slate-400 font-medium">By continuing, you agree to Nagai 360 Terms</p>
-    </div>
+    <p id="msg" class="mt-4 text-sm text-gray-500"></p>
+
+</div>
 
 <script>
-    // ✅ Encrypted Firebase Config (Unga details apply pannittaen)
-    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
 
-    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
+// 🔥 Firebase Config (YOUR REAL CONFIG)
+const firebaseConfig = {
+  apiKey: "AIzaSyCAilX0GQnN127N1SxCJ861qMxAO0svNUQ",
+  authDomain: "ff-id-store-dab0f.firebaseapp.com",
+  databaseURL: "https://ff-id-store-dab0f-default-rtdb.firebaseio.com",
+  projectId: "ff-id-store-dab0f",
+  storageBucket: "ff-id-store-dab0f.firebasestorage.app",
+  messagingSenderId: "655049193530",
+  appId: "1:655049193530:web:9a3a0139fbbf6f98b8dd03"
+};
 
-    // 🔥 HANDLE AUTH (LOGIN/SIGNUP)
-    function handleAuth() {
-        const email = document.getElementById('emailInput').value.trim();
-        const pass = document.getElementById('loginPassword').value;
+// ✅ INIT
+firebase.initializeApp(firebaseConfig);
 
-        if(!email.includes("@")) return alert("Valid Email address podu bro! 📧");
-        if(pass.length < 6) return alert("Password min 6 characters venum! 🔐");
+const auth = firebase.auth();
+const db = firebase.database();
 
-        document.getElementById("status-box").classList.remove("hidden");
-        document.getElementById("msg").innerText = "Checking Credentials...";
 
-        auth.signInWithEmailAndPassword(email, pass)
-        .then((user) => {
-            checkStatus(user.user.uid);
-        })
-        .catch(() => {
-            // New User Registration
-            auth.createUserWithEmailAndPassword(email, pass)
-            .then((user) => {
-                const uid = user.user.uid;
-                db.ref("users/" + uid).set({
-                    email: email,
-                    status: "pending",
-                    joinedAt: new Date().toISOString()
-                });
-                checkStatus(uid);
-            })
-            .catch(err => {
-                alert(err.message);
-                document.getElementById("status-box").classList.add("hidden");
+// 🔥 LOGIN / SIGNUP
+function login() {
+
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+
+    if(!email.includes("@")) return alert("Valid email podu");
+    if(pass.length < 6) return alert("Password min 6 chars");
+
+    auth.signInWithEmailAndPassword(email, pass)
+
+    .then((res) => {
+        checkStatus(res.user.uid);
+    })
+
+    .catch(() => {
+
+        auth.createUserWithEmailAndPassword(email, pass)
+        .then((res) => {
+
+            const uid = res.user.uid;
+
+            db.ref("users/" + uid).set({
+                email: email,
+                status: "pending"
             });
-        });
-    }
 
-    // 🔥 CHECK STATUS FROM DATABASE
-    function checkStatus(uid) {
-        db.ref("users/" + uid).on("value", (snap) => {
-            const data = snap.val();
-            if(!data) {
-                document.getElementById("msg").innerText = "Account Access Revoked";
-                return;
-            }
+            checkStatus(uid);
+        })
 
-            if(data.status === "approved") {
-                localStorage.setItem("user_uid", uid);
-                localStorage.setItem("isLoggedIn", "true");
-                window.location.href = "home.html";
-            } else {
-                document.getElementById("msg").innerText = "Waiting for Admin Approval...";
-            }
-        });
-    }
+        .catch(err => alert(err.message));
+    });
+}
+
+
+// 🔥 APPROVAL CHECK
+function checkStatus(uid) {
+
+    db.ref("users/" + uid).on("value", (snap) => {
+
+        const data = snap.val();
+
+        if(!data) {
+            document.getElementById("msg").innerText = "Account removed";
+            return;
+        }
+
+        if(data.status === "approved") {
+            localStorage.setItem("login", "true");
+            window.location.href = "home.html";
+        }
+        else {
+            document.getElementById("msg").innerText = "Waiting for admin approval...";
+        }
+
+    });
+}
+
 </script>
 
 </body>
