@@ -43,104 +43,98 @@
         </div>
     </main>
 
-    <script>
-    // ✅ Step 1: Encrypted Firebase Config (Hacker-ala read panna mudiyaathu)
-var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
+    
+<script>
+    // ✅ Step 1: Encrypted Firebase Config
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
+    if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
 
-
-    // ✅ 2. REAL-TIME ACCOUNT & SAFETY CHECK
+    // ✅ Step 2: REAL-TIME DATA FETCHING
     if(userPhone) {
+        // A. Security Check
         db.ref('users/' + userPhone).on('value', (snap) => {
-            const data = snap.val();
-            
-            // Security check: User status status logic
-            if(!data || data.status !== "approved") {
+            const userData = snap.val();
+            if(!userData || userData.status !== "approved") {
                 localStorage.clear();
                 window.location.href = 'index.html';
                 return;
             }
+        });
 
-            // Fetch Orders if user is valid
-            loadOrders(data.myOrders);
+        // B. Direct Orders Fetch (Fix: Loading myOrders path directly)
+        db.ref('users/' + userPhone + '/myOrders').on('value', (snap) => {
+            const orders = snap.val();
+            loadOrders(orders);
         });
     }
 
-        function loadOrders(orders) {
+    function loadOrders(orders) {
         const container = document.getElementById('orders-container');
+        if(!container) return;
         container.innerHTML = ""; 
 
-        if(orders) {
-            const orderKeys = Object.keys(orders).reverse();
+        if(!orders || Object.keys(orders).length === 0) {
+            container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet! 🛍️</p></div>`;
+            return;
+        }
+
+        const orderKeys = Object.keys(orders).reverse();
+        
+        orderKeys.forEach(id => {
+            const order = orders[id];
+            const statusClass = getStatusStyle(order.status);
+            const pId = order.productID || order.pid || "";
             
-            orderKeys.forEach(id => {
-                const order = orders[id];
-                const statusClass = getStatusStyle(order.status);
-                const pId = order.productID || order.pid || "";
-                
-                // Cancellation logic (Fixed: Shipped status-laum hide aagum)
-                const orderTime = order.timestamp || 0; 
-                const currentTime = Date.now();
-                const oneDayMs = 24 * 60 * 60 * 1000;
-                
-                // Intha line thaan logic change:
-                const canCancel = (currentTime - orderTime < oneDayMs) && 
-                                  (order.status !== 'Cancelled' && 
-                                   order.status !== 'Delivered' && 
-                                   order.status !== 'Shipped');
+            // Cancellation logic (1 day window)
+            const orderTime = order.timestamp || 0; 
+            const currentTime = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            const canCancel = (currentTime - orderTime < oneDayMs) && 
+                              (order.status !== 'Cancelled' && 
+                               order.status !== 'Delivered' && 
+                               order.status !== 'Shipped');
 
-                container.innerHTML += `
-                    <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
-                         class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer">
-                        
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
-                                <h3 class="font-black text-slate-800">#${order.orderID}</h3>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+            container.innerHTML += `
+                <div onclick="if('${pId}' !== ''){ window.location.href='product.html?id=${pId}'; }" 
+                     class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm order-card cursor-pointer mb-6">
+                    
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Order ID</p>
+                            <h3 class="font-black text-slate-800">#${order.orderID || id}</h3>
                         </div>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">${order.status || 'Processing'}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 py-4 border-y border-slate-50">
+                        <img src="${order.productImg || 'https://via.placeholder.com/150'}" class="w-16 h-16 object-cover rounded-2xl shadow-inner bg-slate-50">
                         
-                        <div class="flex items-center gap-4 py-4 border-y border-slate-50">
-                            <img src="${order.productImg}" class="w-16 h-16 object-cover rounded-2xl shadow-inner bg-slate-50">
-                            
-                            <div class="flex-1">
-    <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
-    <div class="flex gap-2 mt-1">
-        <p class="text-[9px] text-slate-400 font-bold uppercase">
-            Size: ${order.selectedSize || order.size || 'N/A'}
-        </p>
-        <p class="text-[9px] text-blue-400 font-bold uppercase">
-            Color: ${order.selectedColor || order.color || 'N/A'}
-        </p>
-    </div>
-</div>
-
-                            <div class="text-right">
-                                <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Product Name'}</p>
+                            <div class="flex gap-2 mt-1">
+                                <p class="text-[9px] text-slate-400 font-bold uppercase">Size: ${order.selectedSize || order.size || 'N/A'}</p>
+                                <p class="text-[9px] text-blue-400 font-bold uppercase">Color: ${order.selectedColor || order.color || 'N/A'}</p>
                             </div>
                         </div>
-
-                        <div class="mt-4 flex justify-between items-center">
-                            <p class="text-[9px] text-slate-400 font-bold uppercase">${order.orderDate || ''}</p>
-                            
-                            ${canCancel ? `
-                                <button onclick="event.stopPropagation(); cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                    Cancel Order
-                                </button>
-                            ` : ''}
-
-                            ${order.status === 'Cancelled' ? `
-                                <p class="text-[9px] text-red-400 font-bold uppercase italic">Cancelled</p>
-                            ` : ''}
+                        <div class="text-right">
+                            <p class="text-sm font-black text-slate-800">₹${order.totalBill || 0}</p>
                         </div>
                     </div>
-                `;
-            });
-        } else {
-            container.innerHTML = `<div class="text-center py-20"><p class="text-slate-300 font-bold text-sm">No orders found yet!</p></div>`;
-        }
-    }
 
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">${order.orderDate || ''}</p>
+                        
+                        ${canCancel ? `
+                            <button onclick="event.stopPropagation(); cancelMyOrder('${id}')" class="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                Cancel Order
+                            </button>
+                        ` : ''}
+
+                        ${order.status === 'Cancelled' ? `<p class="text-[9px] text-red-400 font-bold uppercase italic">Cancelled</p>` : ''}
+                    </div>
+                </div>`;
+        });
+    }
 
     function cancelMyOrder(orderKey) {
         if(confirm("Are you sure you want to cancel this order?")) {
@@ -164,5 +158,6 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
         }
     }
 </script>
+
 </body>
 </html>
