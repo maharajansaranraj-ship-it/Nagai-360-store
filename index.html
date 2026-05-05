@@ -1,115 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagai 360 Login</title>
-    <link rel="icon" type="image/png" href="nagai.jpg">
+    <title>Nagai 360 | Secure Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <style>
-        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .input-focus:focus { border-color: #f97316; ring: 2px; ring-color: #fdba74; outline: none; }
     </style>
 </head>
+
 <body class="flex items-center justify-center min-h-screen p-6">
-    <div id="auth-container" class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-4 border-orange-500 text-center">
-        <div class="flex flex-col items-center mb-10">
-            <div class="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden mb-4 bg-white ring-4 ring-orange-50">
-                <img src="nagai.jpg" alt="Nagai 360" class="w-full h-full object-contain">
-            </div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">NAGAI <span class="text-orange-500">360</span></h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Premium Reselling</p>
+
+    <div class="glass-card w-full max-w-[400px] rounded-[3rem] shadow-2xl p-10 border-t-8 border-orange-500 text-center">
+        
+        <div class="mb-6">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tighter">NAGAI 360</h1>
+            <p class="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-bold mt-1">Premium Identity</p>
         </div>
-        <div class="space-y-5">
-            <div class="text-left">
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Mobile Number</label>
-                <div class="relative flex items-center">
-                    <span class="absolute left-4 text-slate-400 font-bold border-r pr-3">+91</span>
-                    <input type="tel" id="phoneNumber" maxlength="10" placeholder="9876543210" class="w-full pl-16 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-                </div>
-            </div>
-            <div class="text-left">
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Password</label>
-                <div class="relative flex items-center">
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold">
-                </div>
-            </div>
-            <button id="loginBtn" onclick="handleAuth()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-5 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs mt-4">Login / Sign Up</button>
-            <p id="msg" class="text-[10px] font-bold text-slate-400 mt-2">Enter your number and password to continue.</p>
+
+        <div class="space-y-4">
+            <input type="email" id="emailInput" placeholder="Email Address"
+                class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl input-focus transition-all text-sm font-medium">
+
+            <input type="password" id="loginPassword" placeholder="Password"
+                class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl input-focus transition-all text-sm font-medium">
+
+            <button onclick="handleAuth()" id="authBtn"
+                class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 shadow-lg">
+                Access Account
+            </button>
         </div>
+
+        <div id="status-box" class="mt-8 hidden">
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                <p id="msg" class="text-xs font-bold text-orange-600 uppercase tracking-widest italic"></p>
+            </div>
+        </div>
+
+        <p class="mt-8 text-[10px] text-slate-400 font-medium">By continuing, you agree to Nagai 360 Terms</p>
     </div>
 
-    <script>
-        // ✅ Firebase Config
-        var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};if(!firebase['apps']['length']){firebase['initializeApp'](firebaseConfig);}const db=firebase['database']();
+<script>
+    // ✅ Encrypted Firebase Config (Unga details apply pannittaen)
+    var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
 
-        window.onload = function() {
-            const phoneMemory = localStorage.getItem('user_phone');
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if(isLoggedIn === 'true') {
-                window.location.href = 'home.html';
-            } else if(phoneMemory) {
-                startApprovalListener(phoneMemory);
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    // 🔥 HANDLE AUTH (LOGIN/SIGNUP)
+    function handleAuth() {
+        const email = document.getElementById('emailInput').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+
+        if(!email.includes("@")) return alert("Valid Email address podu bro! 📧");
+        if(pass.length < 6) return alert("Password min 6 characters venum! 🔐");
+
+        document.getElementById("status-box").classList.remove("hidden");
+        document.getElementById("msg").innerText = "Checking Credentials...";
+
+        auth.signInWithEmailAndPassword(email, pass)
+        .then((user) => {
+            checkStatus(user.user.uid);
+        })
+        .catch(() => {
+            // New User Registration
+            auth.createUserWithEmailAndPassword(email, pass)
+            .then((user) => {
+                const uid = user.user.uid;
+                db.ref("users/" + uid).set({
+                    email: email,
+                    status: "pending",
+                    joinedAt: new Date().toISOString()
+                });
+                checkStatus(uid);
+            })
+            .catch(err => {
+                alert(err.message);
+                document.getElementById("status-box").classList.add("hidden");
+            });
+        });
+    }
+
+    // 🔥 CHECK STATUS FROM DATABASE
+    function checkStatus(uid) {
+        db.ref("users/" + uid).on("value", (snap) => {
+            const data = snap.val();
+            if(!data) {
+                document.getElementById("msg").innerText = "Account Access Revoked";
+                return;
             }
-        }
 
-        function handleAuth() {
-            const phone = document.getElementById('phoneNumber').value.trim();
-            const pass = document.getElementById('loginPassword').value;
-            const btn = document.getElementById('loginBtn');
-            const msg = document.getElementById('msg');
-            if(phone === "9999999999" && pass === "admin123") return window.location.href = "admin.html";
-            if(!/^[0-9]{10}$/.test(phone)) return alert("10 digit number podu bro");
-            if(pass.length < 6) return alert("Password 6 characters venum");
-            const safePass = btoa(pass);
-            db.ref('users/' + phone).once('value', (snap) => {
-                const userData = snap.val();
-                if(!userData) {
-                    db.ref('users/' + phone).set({ phone, password: safePass, status: "pending" })
-                    .then(() => startApprovalListener(phone));
-                } else if(userData.password !== safePass) {
-                    alert("Wrong Password!");
-                } else {
-                    startApprovalListener(phone);
-                }
-            });
-        }
+            if(data.status === "approved") {
+                localStorage.setItem("user_uid", uid);
+                localStorage.setItem("isLoggedIn", "true");
+                window.location.href = "home.html";
+            } else {
+                document.getElementById("msg").innerText = "Waiting for Admin Approval...";
+            }
+        });
+    }
+</script>
 
-        function startApprovalListener(phone) {
-            localStorage.setItem('user_phone', phone);
-            const msg = document.getElementById('msg');
-            const btn = document.getElementById('loginBtn');
-            db.ref('users/' + phone).on('value', (snap) => {
-                const userData = snap.val();
-                
-                // User admin-la delete aagi iruntha intha condition execute aagum
-                if(!userData) {
-                    msg.innerHTML = `❌ Account removed by admin. <br> <button onclick="reLogin()" class="mt-2 text-blue-500 underline font-black">CLICK HERE TO RE-LOGIN</button>`;
-                    msg.style.color = "red";
-                    btn.innerText = "RE-LOGIN";
-                    btn.disabled = false;
-                    btn.onclick = reLogin;
-                    return;
-                }
-
-                if(userData.status === "approved") {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    window.location.href = 'home.html';
-                } else {
-                    msg.innerHTML = `⏳ Waiting for Admin Approval... <br> <button onclick="reLogin()" class="mt-2 text-slate-400 underline text-[8px]">Cancel & Re-login</button>`;
-                    msg.style.color = "orange";
-                    btn.innerText = "PENDING...";
-                    btn.disabled = true;
-                }
-            });
-        }
-
-        function reLogin() {
-            localStorage.clear();
-            window.location.reload();
-        }
-    </script>
 </body>
 </html>
