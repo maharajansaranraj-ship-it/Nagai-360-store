@@ -104,12 +104,17 @@ var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4
                             <img src="${order.productImg}" class="w-16 h-16 object-cover rounded-2xl shadow-inner bg-slate-50">
                             
                             <div class="flex-1">
-                                <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
-                                <div class="flex gap-2 mt-1">
-                                    <p class="text-[9px] text-slate-400 font-bold uppercase">Size: ${order.size || 'N/A'}</p>
-                                    <p class="text-[9px] text-blue-400 font-bold uppercase">Color: ${order.selectedColor || 'N/A'}</p>
-                                </div>
-                            </div>
+    <p class="text-xs font-bold text-slate-600 truncate max-w-[150px]">${order.productName || 'Nagai Product'}</p>
+    <div class="flex gap-2 mt-1">
+        <p class="text-[9px] text-slate-400 font-bold uppercase">
+            Size: ${order.selectedSize || order.size || 'N/A'}
+        </p>
+        <p class="text-[9px] text-blue-400 font-bold uppercase">
+            Color: ${order.selectedColor || order.color || 'N/A'}
+        </p>
+    </div>
+</div>
+
                             <div class="text-right">
                                 <p class="text-sm font-black text-slate-800">₹${order.totalBill}</p>
                             </div>
