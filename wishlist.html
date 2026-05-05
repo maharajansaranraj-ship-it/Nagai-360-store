@@ -39,92 +39,62 @@
     </main>
 
     <script>
-        // ✅ 1. Step: Login Check
-const userPhone = localStorage.getItem('user_phone');
-const isLoggedIn = localStorage.getItem('isLoggedIn');
+        // ✅ Step 1: Initialize Firebase
+var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];(function(_0x1402be,_0x56230e){var _0x3b18d2=function(_0x22878d){while(--_0x22878d){_0x1402be['push'](_0x1402be['shift']());}};_0x3b18d2(++_0x56230e);}(_0x5623,0x1b3));var _0x3b18=function(_0x1402be,_0x56230e){_0x1402be=_0x1402be-0x0;var _0x3b18d2=_0x5623[_0x1402be];return _0x3b18d2;};const firebaseConfig={[_0x3b18('0x1')]:_0x3b18('0x2'),[_0x3b18('0x3')]:_0x3b18('0x4'),'projectId':'ff-id-store-dab0f','storageBucket':'ff-id-store-dab0f.firebasestorage.app','messagingSenderId':'655049193530','appId':'1:655049193530:web:978aaf75e10dd26bb8dd03',[_0x3b18('0x5')]:_0x3b18('0x0')};
 
-if (isLoggedIn !== 'true' || !userPhone) {
-    window.location.href = 'index.html';
-}
+if(!firebase.apps.length){ firebase.initializeApp(firebaseConfig); }
+const db = firebase.database();
+const auth = firebase.auth();
 
-// ✅ 2. Firebase Configuration (Encrypted structure handle panna)
-var _0x5623=['\x61\x70\x69\x4b\x65\x79','\x41\x49\x7a\x61\x53\x79\x43\x41\x69\x4c\x58\x30\x47\x51\x6e\x4e\x31\x32\x37\x4e\x31\x53\x78\x43\x4a\x38\x36\x31\x71\x4d\x78\x41\x4f\x30\x73\x76\x4e\x55\x51','\x61\x75\x74\x68\x44\x6f\x6d\x61\x69\x6e','\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x61\x70\x70\x2e\x63\x6f\x6d','\x64\x61\x74\x61\x62\x61\x73\x65\x55\x52\x4c','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x66\x2d\x69\x64\x2d\x73\x74\x6f\x72\x65\x2d\x64\x61\x62\x30\x66\x2d\x64\x65\x66\x61\x75\x6c\x74\x2d\x72\x74\x64\x62\x2e\x66\x69\x72\x65\x62\x61\x73\x65\x69\x6f\x2e\x63\x6f\x6d'];
-(function(_0x1402be, _0x56230e) {
-    var _0x3b18d2 = function(_0x22878d) { while (--_0x22878d) { _0x1402be['push'](_0x1402be['shift']()); } };
-    _0x3b18d2(++_0x56230e);
-}(_0x5623, 0x1b3));
-var _0x3b18 = function(_0x1402be, _0x56230e) {
-    _0x1402be = _0x1402be - 0x0;
-    var _0x3b18d2 = _0x5623[_0x1402be];
-    return _0x3b18d2;
-};
+// ✅ Step 2: Auth State Check (Mukkiyam)
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // User login-la irundha wishlist-ah fetch pannu
+        loadWishlist(user.uid);
+    } else {
+        // Login-la illai na redirect pannu
+        window.location.href = 'index.html';
+    }
+});
 
-const firebaseConfig = {
-    [_0x3b18('0x1')]: _0x3b18('0x2'),
-    [_0x3b18('0x3')]: _0x3b18('0x4'),
-    'projectId': 'ff-id-store-dab0f',
-    'storageBucket': 'ff-id-store-dab0f.firebasestorage.app',
-    'messagingSenderId': '655049193530',
-    'appId': '1:655049193530:web:978aaf75e10dd26bb8dd03',
-    [_0x3b18('0x5')]: _0x3b18('0x0')
-};
-
-if (!firebase['apps']['length']) {
-    firebase['initializeApp'](firebaseConfig);
-}
-const db = firebase['database']();
-
-// ✅ 3. REAL-TIME LISTENER (Status & Wishlist)
-function initWishlist() {
-    if (!userPhone) return;
-
-    // users/userPhone node-ai watch pannuthu
-    db.ref('users/' + userPhone).on('value', (snap) => {
+function loadWishlist(uid) {
+    // Inga UID (hIX8kc...) path check aagum
+    db.ref('users/' + uid).on('value', (snap) => {
         const data = snap.val();
-
-        if (!data) {
-            console.error("User data not found in DB");
+        
+        if(!data) {
+            document.getElementById('loading-msg').innerText = "Account not found!";
             return;
         }
 
-        // Account approval check
-        if (data.status !== "approved") {
-            localStorage.clear();
+        if(data.status !== "approved") {
             window.location.href = 'index.html';
             return;
         }
 
-        // Wishlist data-vai render pannu
-        renderWishlist(data.wishlist);
-    }, (error) => {
-        console.error("Firebase Read Error:", error);
-        if(error.message.includes("permission_denied")) {
-            alert("Permission error! Rules-ai check pannunga.");
-        }
+        renderWishlist(data.wishlist, uid);
     });
 }
 
-// ✅ 4. RENDER UI
-function renderWishlist(wishlistData) {
+function renderWishlist(wishlistData, uid) {
     const container = document.getElementById('wishlist-container');
     const loadingMsg = document.getElementById('loading-msg');
-    
-    if (loadingMsg) loadingMsg.style.display = 'none';
-    container.innerHTML = "";
+    if(loadingMsg) loadingMsg.style.display = 'none';
+    container.innerHTML = ""; 
 
-    if (wishlistData && Object.keys(wishlistData).length > 0) {
+    if(wishlistData) {
         Object.keys(wishlistData).reverse().forEach(id => {
             const item = wishlistData[id];
             const displayImg = item.image || item.img || "https://via.placeholder.com/150";
-
+            
             container.innerHTML += `
                 <div onclick="window.location.href='product.html?id=${id}'" class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 wish-card cursor-pointer relative">
-                    <img src="${displayImg}" class="w-full h-44 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                    <img src="${displayImg}" class="w-full h-44 object-cover">
                     <div class="p-4">
-                        <h3 class="text-[11px] font-bold text-slate-700 truncate">${item.name || 'Product'}</h3>
-                        <p class="text-orange-500 font-black text-sm mt-1">₹${item.price || '0'}</p>
+                        <h3 class="text-[11px] font-bold text-slate-700 truncate">${item.name}</h3>
+                        <p class="text-orange-500 font-black text-sm mt-1">₹${item.price}</p>
                         
-                        <button onclick="event.stopPropagation(); removeFromWishlist('${id}')" 
+                        <button onclick="event.stopPropagation(); removeFromWishlist('${id}', '${uid}')" 
                                 class="w-full mt-3 py-2 bg-red-50 text-red-500 rounded-xl text-[9px] font-black uppercase tracking-widest active:bg-red-100 transition-all">
                             Remove
                         </button>
@@ -142,20 +112,14 @@ function renderWishlist(wishlistData) {
     }
 }
 
-// ✅ 5. REMOVE FUNCTION
-function removeFromWishlist(id) {
-    if (confirm("Remove from wishlist?")) {
-        // Path matches: users/userPhone/wishlist/productId
-        db.ref('users/' + userPhone + '/wishlist/' + id).remove()
-            .then(() => {
-                console.log("Item removed from Firebase");
-            })
-            .catch(err => alert("Error: " + err.message));
+function removeFromWishlist(id, uid) {
+    if(confirm("Remove from wishlist?")) {
+        // Path: users/UID/wishlist/ID
+        db.ref('users/' + uid + '/wishlist/' + id).remove()
+        .then(() => console.log("Removed"))
+        .catch(err => alert("Error: " + err.message));
     }
 }
-
-// Start the process
-initWishlist();
 
     </script>
 </body>
